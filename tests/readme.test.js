@@ -16,6 +16,9 @@ test('README has the install lines and the contributor-mode template', () => {
   assert.ok(readme.includes('claude plugin marketplace add TONiiV/okay-skills'));
   assert.ok(readme.includes('/plugin install okay-skills --marketplace TONiiV/okay-skills'));
   assert.ok(readme.includes('npm run package'));
+  assert.ok(readme.includes('claude.ai > Customize > Skills > Add > Upload skill'), 'claude.ai upload path is current');
+  assert.ok(readme.includes('several zips in one upload'), 'README says zips can be uploaded together');
+  assert.ok(!readme.includes('Settings > Capabilities'), 'README drops the old claude.ai upload path');
   assert.ok(readme.includes('python ~/.claude/skills/jev/scripts/jev.py router off'));
   assert.ok(readme.includes('Bash(gh pr merge:*)') && readme.includes('Bash(glab mr merge:*)'));
   assert.ok(readme.includes('## Contributor repos'), 'template uses the heading shared/contributor-mode.md reads');

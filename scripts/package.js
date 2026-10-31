@@ -1,5 +1,5 @@
 // Writes dist/<skill>.zip for every skills/okay-*, with the skill folder as the zip root.
-// Upload each zip to claude.ai (Settings > Capabilities > Skills). `npm run package` runs the build first. Needs Node 20.15+ (zlib.crc32).
+// Upload the zips to claude.ai (Customize > Skills > Add > Upload skill; several zips per upload). `npm run package` runs the build first. Needs Node 20.15+ (zlib.crc32).
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
