@@ -128,7 +128,7 @@ Show it with the planned agents and tiers and ask once: "Start these tickets and
 
 ### Ticket loop
 
-Per ticket, in its own worktree (the repo's convention, else `git worktree add .claude/worktrees/<branch> -b <branch> origin/$b`; branch name per [shared/tracker.md](shared/tracker.md)):
+Per ticket, in its own worktree (the repo's convention, else `git worktree add .claude/worktrees/<branch> -b <branch> $(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin/main)`; branch name per [shared/tracker.md](shared/tracker.md)):
 
 1. **Implement.** A fresh agent, sonnet high (opus high when cross-module), runs okay-tdd at the seams the spec agreed, runs the full suite once at the end, commits per [shared/git.md](shared/git.md), pushes, and opens the PR with the body from [shared/git.md](shared/git.md).
 2. **Review round.** Call okay-review with the PR, the contract links (request, spec, ticket), the lane and the round number. It does one round and returns the verdict. Never pass it the implementer's summary.
