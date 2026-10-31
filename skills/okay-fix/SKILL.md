@@ -1,6 +1,7 @@
 ---
 name: okay-fix
-description: "L1 lane of the okay-* pack: small fixes and bug fixes. Reproduces the bug, fixes it at the root cause with a regression test, checks the L1 threshold (escalates if exceeded), gets one fresh-agent review of the diff, commits one line, and opens a PR that auto-merges on APPROVED + green CI. Use for /okay-fix <bug>, or when the user reports something broken, throwing, or wrong that looks small (a few lines, at most 2 files). Not for new features, architecture, UI design, or performance work."
+description: "L1 lane of the okay-* pack: small fixes and bug fixes. Reproduces the bug, fixes it at the root cause with a regression test, checks the L1 threshold (escalates if exceeded), gets one fresh-agent review of the diff, commits one line, and opens a PR that auto-merges on APPROVED + green CI when the merge allow rule is set (otherwise stops at APPROVED and hands the merge to the user). Use for /okay-fix <bug>, or when the user reports something broken, throwing, or wrong that looks small (a few lines, at most 2 files). Not for new features, architecture, UI design, or performance work."
+license: MIT
 ---
 
 # okay-fix
@@ -97,14 +98,14 @@ Then:
 ## 7. Commit + PR
 
 1. Commit with one line, no body, no trailer: the repo's style, else `fix: <subject>`.
-2. Push the branch (the L1 merge policy covers the push), then open the PR with the body from [shared/git.md](shared/git.md). Evidence holds the repro command with its red-then-green output; Cause names the hypothesis that held.
+2. Push the branch: with the merge allow rule the L1 merge policy covers the push; without it, ask the user before pushing. Then open the PR with the body from [shared/git.md](shared/git.md). Evidence holds the repro command with its red-then-green output; Cause names the hypothesis that held.
 3. Post the reviewer's findings as a PR comment with their `[R1-<n>]` tags, then the approval as a separate comment starting with `APPROVED`.
 
 No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: open an MR with the Problem / Cause / Fix / Evidence description and skip step 8.
 
 ## 8. Merge
 
-Follow the L1 merge policy in [shared/git.md](shared/git.md): auto-merge on `APPROVED` + green CI. Never merge without the `APPROVED` comment.
+Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Never merge without the `APPROVED` comment.
 
 ## 9. Deliver
 

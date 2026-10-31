@@ -51,6 +51,10 @@ for (const name of okaySkills) {
       for (const k of Object.keys(fm)) assert.ok(ALLOWED_KEYS.includes(k), `key "${k}" is not allowed`);
     });
 
+    it('declares license: MIT', () => {
+      assert.equal(fm.license, 'MIT');
+    });
+
     it('name equals folder name', () => {
       assert.equal(fm.name, name);
     });

@@ -13,14 +13,28 @@ Every dev request gets exactly one lane. A compound request is split into sub-ta
 
 ## L1 threshold
 
-A change is L1 only when ALL of these hold, measured on the full diff against the base branch (test files and untracked files included):
+A change is L1 only when ALL of these hold, measured on the full diff against the base branch, untracked files included. Test files do not count toward the file or line budget; count only non-test files:
 
 1. At most 2 files changed.
 2. Fewer than 50 changed lines (added + removed).
 3. No public interface change (exported signature, CLI flag, HTTP route, config key, schema) and no data-structure change (persisted shape, wire format, type of a shared field).
 4. Nothing touching auth, payment, or data deletion.
 
-Measure with `git add -N . && git diff --numstat <base>`.
+Measure with `git add -N . && git diff --numstat <base>`, then drop test files (the repo's test-file convention, e.g. `*.test.*`, `*.spec.*`, `test_*.py`, `*_test.go`, `test/`, `tests/`, `__tests__/`) from the count.
+
+## Prototype first
+
+New product, L3 and L4 never start from an assumed spec. L1 and L2 (already planned) are unchanged; UI work already runs three variants in okay-design.
+
+1. Grill briefly, only to name the decisions the samples must answer and the signals the user will judge them by.
+2. Build 1-3 runnable samples. Pick the count by how open the question is and state the reason.
+3. The user tries them.
+4. Collect structured feedback: worked / did not / surprised me.
+5. Only then grill the remaining gaps, write the spec, cut tickets, implement.
+
+- Samples are throwaway: variants behind one switcher where possible, runnable with one command or URL, kept on a `prototype/<name>` branch and linked from the spec.
+- L4 samples are spikes that exercise the risky assumption; measure it when it is a performance or scale question.
+- The spec may inline decision-rich snippets from the chosen sample (state machine, schema, type shape).
 
 ## Escalation
 

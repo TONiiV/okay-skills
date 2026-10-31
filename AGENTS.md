@@ -2,6 +2,8 @@
 
 How to work in `okay-skills`: a Claude Code plugin (and marketplace) holding the `okay-*` development skill pack.
 
+Tracker: github
+
 ## Layout
 
 | Path | Holds |
@@ -15,7 +17,7 @@ How to work in `okay-skills`: a Claude Code plugin (and marketplace) holding the
 
 Every okay-* skill folder holds:
 
-- `SKILL.md`: frontmatter keys only from `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`. `name` equals the folder name. `description` at most 1024 chars.
+- `SKILL.md`: frontmatter keys only from `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`. `name` equals the folder name. `license: MIT` is required. `description` at most 1024 chars.
 - `evals.json`: an array of `{id, kind, description, prompt, expectations}` with `kind` one of `positive`, `negative`, `behavioural`; at least 3 positive, 2 negative, 1 behavioural.
 - `NOTICE.md` (optional): credits for borrowed material. Attribution goes here, per skill.
 - `shared/`: generated. Never edit it by hand.
