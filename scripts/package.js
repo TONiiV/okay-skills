@@ -1,5 +1,5 @@
 // Writes dist/<skill>.zip for every skills/okay-*, with the skill folder as the zip root.
-// Upload each zip to claude.ai (Settings > Capabilities > Skills). Run `npm run build` first.
+// Upload each zip to claude.ai (Settings > Capabilities > Skills). `npm run package` runs the build first. Needs Node 20.15+ (zlib.crc32).
 const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
@@ -7,16 +7,6 @@ const zlib = require('node:zlib');
 const root = path.join(__dirname, '..');
 const skillsDir = path.join(root, 'skills');
 const dist = path.join(root, 'dist');
-
-const crcTable = Array.from({ length: 256 }, (_, n) => {
-  for (let k = 0; k < 8; k++) n = n & 1 ? 0xedb88320 ^ (n >>> 1) : n >>> 1;
-  return n >>> 0;
-});
-function crc32(buf) {
-  let c = 0xffffffff;
-  for (const b of buf) c = crcTable[(c ^ b) & 0xff] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-}
 
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
@@ -32,7 +22,7 @@ function zip(entries) {
   for (const { name, data } of entries) {
     const nameBuf = Buffer.from(name, 'utf8');
     const body = zlib.deflateRawSync(data);
-    const crc = crc32(data);
+    const crc = zlib.crc32(data);
     const local = Buffer.alloc(30);
     local.writeUInt32LE(0x04034b50, 0);
     local.writeUInt16LE(20, 4);

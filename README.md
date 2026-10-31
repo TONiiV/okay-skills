@@ -105,8 +105,7 @@ A promotion reaches this public repo only as a PR you approve, with project deta
 Cloud sessions do not load plugins or `~/.claude/`; uploading the skills to your account is the only cloud path. Frontmatter is already limited to the six keys claude.ai accepts.
 
 ```bash
-npm ci
-npm run package   # writes dist/<skill>.zip for every okay-* skill (dist/ is gitignored)
+npm run package   # builds, then writes dist/<skill>.zip for every okay-* skill (dist/ is gitignored); needs Node 20.15+
 ```
 
 Then, for each zip in `dist/`: claude.ai > Settings > Capabilities > Skills > Upload skill. Upload all fourteen: `okay-dev` calls the others by name. Each zip has the skill folder as its root (`okay-fix/SKILL.md`).

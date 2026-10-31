@@ -18,6 +18,7 @@ function readZip(buf) {
   for (let i = 0; i < count; i++) {
     assert.strictEqual(buf.readUInt32LE(p), 0x02014b50);
     const method = buf.readUInt16LE(p + 10);
+    const crc = buf.readUInt32LE(p + 16);
     const size = buf.readUInt32LE(p + 20);
     const nameLen = buf.readUInt16LE(p + 28);
     const extraLen = buf.readUInt16LE(p + 30) + buf.readUInt16LE(p + 32);
@@ -26,6 +27,7 @@ function readZip(buf) {
     const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
     const raw = buf.subarray(start, start + size);
     files[name] = method === 8 ? zlib.inflateRawSync(raw) : raw;
+    assert.strictEqual(zlib.crc32(files[name]), crc, `${name} CRC matches`);
     p += 46 + nameLen + extraLen;
   }
   return files;
