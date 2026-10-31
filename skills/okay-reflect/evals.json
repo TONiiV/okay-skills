@@ -1,0 +1,150 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-reflect invocation after a delivered task",
+    "prompt": "/okay-reflect",
+    "expectations": ["okay-reflect runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request for a retro on the task just finished",
+    "prompt": "PR 已经开了，复盘一下这次任务",
+    "expectations": ["okay-reflect runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Stop hook reason asking for reflection",
+    "prompt": "An okay-* task was delivered but not reflected on (/repo/.git/okay-reflect-pending):\n2026-10-31T10:00:00Z\tokay-fix\tfix slugify double dash\nRun the okay-reflect skill now. Transcript: /home/u/.claude/projects/repo/abc.jsonl.",
+    "expectations": ["okay-reflect runs"]
+  },
+  {
+    "id": "pos-3",
+    "kind": "positive",
+    "description": "User accepts the session-start offer to reflect on queued tasks",
+    "prompt": "Yes, reflect on the 2 unreflected okay tasks from yesterday",
+    "expectations": ["okay-reflect runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Reviewing a diff belongs to okay-review",
+    "prompt": "Review the diff on PR #42 against the spec and post findings",
+    "expectations": ["okay-reflect does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "A bug report belongs to okay-fix",
+    "prompt": "The CSV export always drops the last row. Can you fix it?",
+    "expectations": ["okay-reflect does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "General question about git internals is not a reflection",
+    "prompt": "What is the difference between git rev-parse --git-dir and --show-toplevel?",
+    "expectations": ["okay-reflect does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Clean session ends in no change and clears the marker",
+    "prompt": "/okay-reflect (the session ran okay-fix: the repro went red then green as planned, review APPROVED on the first try, no other command failed and the user corrected nothing)",
+    "expectations": [
+      "Reports the outcome as no change",
+      "Does not create or comment on any issue in TONiiV/okay-lessons",
+      "Deletes the okay-reflect-pending marker in the repo's git dir"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "Three read-only reviewers on the right models, then an opus synthesizer",
+    "prompt": "/okay-reflect (the session ran okay-fix; the user corrected the agent: \"you pushed without asking, the merge rule is not set\")",
+    "expectations": [
+      "Spawns judgment (opus), tooling (sonnet) and contrarian (opus) reviewers in parallel, each told it may not edit, commit, or post",
+      "No reviewer prompt contains the main agent's own account of what went wrong",
+      "Runs one opus synthesizer over the three outputs",
+      "The candidate quotes the user's correction as its evidence and is attributed to an okay-fix section"
+    ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "Evidence and attribution gates drop findings",
+    "prompt": "/okay-reflect (a reviewer says okay-fix 'could be clearer about naming' without quoting any event, and another blames okay-perf, which never ran this session)",
+    "expectations": [
+      "Drops the naming finding for missing evidence",
+      "Drops the okay-perf finding because okay-perf did not run",
+      "Files no issue for either"
+    ]
+  },
+  {
+    "id": "beh-3",
+    "kind": "behavioural",
+    "description": "Environment failures are not skill defects",
+    "prompt": "/okay-reflect (gh failed with HTTP 502 twice during the PR step, then succeeded on retry; nothing else went wrong)",
+    "expectations": [
+      "Classifies the gh failure as environment",
+      "Files no candidate issue",
+      "Reports no change"
+    ]
+  },
+  {
+    "id": "beh-4",
+    "kind": "behavioural",
+    "description": "Enforceable lessons become mechanism candidates",
+    "prompt": "/okay-reflect (okay-fix's commit had a Co-Authored-By trailer and the user corrected it; okay-fix says no trailers)",
+    "expectations": [
+      "Proposes a mechanism (for example a commit-msg check or a test) instead of more prose",
+      "The candidate's fix kind is mechanism, not prose"
+    ]
+  },
+  {
+    "id": "beh-5",
+    "kind": "behavioural",
+    "description": "First occurrence files a candidate only; the second promotes with diff plus regression prompt",
+    "prompt": "/okay-reflect (okay-fix skipped grepping callers and the user had to point out a second broken call site; an open lesson:candidate issue for the same okay-fix section exists from a different session)",
+    "expectations": [
+      "Lists open lesson:candidate issues with the skill:okay-fix label before filing",
+      "Adds the new occurrence as a comment on the existing issue instead of opening a duplicate",
+      "Shows the user an exact unified diff of okay-fix plus one new behavioural entry for skills/okay-fix/evals.json",
+      "The diff and the regression prompt contain no repo, company, person, host, or path names from the session",
+      "Waits for approval and opens no PR before the user approves"
+    ]
+  },
+  {
+    "id": "beh-6",
+    "kind": "behavioural",
+    "description": "User rejects a promotion; no change is recorded",
+    "prompt": "No, don't change okay-fix for that one.",
+    "expectations": [
+      "Opens no PR in okay-skills",
+      "Labels the lesson issue lesson:rejected and closes it with the user's reason"
+    ]
+  },
+  {
+    "id": "beh-7",
+    "kind": "behavioural",
+    "description": "Contributor mode keeps lessons local",
+    "prompt": "/okay-reflect (the repo matches a pattern under ## Contributor repos in ~/.claude/okay.local.md; okay-fix ran and the user corrected the MR description sections)",
+    "expectations": [
+      "Writes the lesson to local memory only",
+      "Makes no gh call to TONiiV/okay-lessons and opens no PR",
+      "Still clears the marker when done"
+    ]
+  },
+  {
+    "id": "beh-8",
+    "kind": "behavioural",
+    "description": "Queued tasks from earlier sessions are handled and removed",
+    "prompt": "Reflect on the queued okay tasks",
+    "expectations": [
+      "Reads the queue file under ~/.okay (or OKAY_HOME) and uses each entry's transcript_path",
+      "Removes only the handled entries from the queue by session id"
+    ]
+  }
+]

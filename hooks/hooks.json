@@ -1,0 +1,14 @@
+{
+  "description": "okay-reflect reminders: block once at Stop while a delivered task is unreflected, queue it at SessionEnd, report the queue at SessionStart.",
+  "hooks": {
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/reflect.js\"", "timeout": 10 }] }
+    ],
+    "SessionEnd": [
+      { "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/reflect.js\"", "timeout": 10 }] }
+    ],
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/reflect.js\"", "timeout": 10 }] }
+    ]
+  }
+}
