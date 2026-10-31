@@ -48,13 +48,13 @@ For any software development request without a slash command (build, fix, change
 
 ### `~/.claude/okay.local.md`
 
-Machine-local, never committed. Each bullet under `## Contributor repos` is a pattern (`*` matches anything), checked against the origin URL and the repo's top-level path. A match turns on contributor mode: no issues, no repo docs, specs and tickets kept local and untracked, MR description output, nothing sent to Jev, no merge. No file means contributor mode is off. The rules are in [`shared/contributor-mode.md`](shared/contributor-mode.md).
+Machine-local, never committed. Each bullet under `## Contributor repos` is a pattern (`*` matches anything), checked against the origin URL and the repo's top-level path. A match turns on contributor mode: no issues, no repo docs, specs and tickets kept local and untracked, MR description output, nothing sent to Jev or Codex, no merge. No file means contributor mode is off. Write patterns that match both remote forms (HTTPS `https://host/team/repo` and SSH `git@host:team/repo.git`), and a local path if you use one. The rules are in [`shared/contributor-mode.md`](shared/contributor-mode.md).
 
 ```markdown
 # okay local settings
 
 ## Contributor repos
-- *gitlab.example.com/some-team/*
+- *gitlab.example.com*some-team/*
 - */work/company-repo
 ```
 
