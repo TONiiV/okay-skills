@@ -97,7 +97,7 @@ Keep screenshots under `.scratch/design/<slug>/{before,after,variants}/`. If `.s
    - The user's request and the project's design system (see Precedence) win: the seed fills only the axes they leave open. Mark the others `user` or `project`.
    - Two seeds with the same layout: draw again for the later variant, so structures still differ.
    - Record the seed in the direction brief, at the top of the variant's entry file (`style-seed: <n>`) and in the step 5 reply. `node style-seed.js <n>` reproduces the picks.
-   - No shell (for example claude.ai without code execution): say so, choose a seed yourself and derive the picks by hand from the tables in [style-seed.js](style-seed.js), using the rule in its header.
+   - No shell (for example claude.ai without code execution): say so, choose a 9-digit seed yourself and derive the picks by hand from the tables in [style-seed.js](style-seed.js), using the rule in its header. Record it as `<seed> (manual)`. `node style-seed.js` does NOT reproduce a manual seed; re-run the header rule by hand instead.
 2. **Write three direction briefs**, built on the seeds' picks. The three must differ in structure, not just in colour. Choose at least two of these axes and make every variant take a different position on them:
    - layout archetype (single narrative column, split panes, dense dashboard grid, sidebar plus canvas, card wall, list-first)
    - information hierarchy and the primary affordance (what the eye lands on and what the first click is)

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Style seed: one random number decides a variant's palette, type, layout and other style axes,
 // so variants start from different places instead of the same template. No dependencies.
-// Usage: node style-seed.js [seed] [--json]
+// Usage: node style-seed.js [seed] [--json]   (seed: 1 to 9 digits)
 // No seed: draws one from crypto. Same seed + same version of this file = same picks.
 //
 // No shell (for example claude.ai without code execution): choose a 9-digit seed yourself and
-// derive the picks by hand: hue = seed mod 360; then n = floor(seed / 360) and, for each table
-// below in order, index = n mod table length, n = floor(n / table length). Record it as
-// "seed: <n> (manual)", because the script's mapping differs and will not reproduce it.
+// derive the picks by hand: hue = seed mod 360; then q = floor(seed / 360) and, for each table
+// below in order, index = q mod table length, q = floor(q / table length). Record it as
+// "seed: <seed> (manual)". The script maps seeds differently, so only this rule reproduces it.
 
 const AXES = {
   palette: [
@@ -93,7 +93,7 @@ function pick(seed) {
 if (require.main === module) {
   const args = process.argv.slice(2);
   const arg = args.find((a) => a !== '--json');
-  if (arg !== undefined && !/^\d{1,15}$/.test(arg)) { console.error('usage: node style-seed.js [seed] [--json]  (seed: a whole number)'); process.exit(2); }
+  if (arg !== undefined && !/^\d{1,9}$/.test(arg)) { console.error('usage: node style-seed.js [seed] [--json]  (seed: 1 to 9 digits)'); process.exit(2); }
   const seed = arg === undefined ? require('node:crypto').randomInt(1, 1e9) : Number(arg);
   const p = pick(seed);
   if (args.includes('--json')) console.log(JSON.stringify(p));
