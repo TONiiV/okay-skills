@@ -1,0 +1,15 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "okay-skills",
+  "description": "okay-* development skill pack.",
+  "owner": {
+    "name": "TONiiV"
+  },
+  "plugins": [
+    {
+      "name": "okay-skills",
+      "description": "okay-* development skill pack: lane routing, independent review, one PR per task, post-task reflection.",
+      "source": "./"
+    }
+  ]
+}
