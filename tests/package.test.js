@@ -44,7 +44,19 @@ test('npm run package writes one zip per okay-* skill, skill folder as root', ()
     const skillMd = files[`${name}/SKILL.md`];
     assert.ok(skillMd, `${name}.zip lists ${name}/SKILL.md`);
     assert.deepStrictEqual(skillMd, fs.readFileSync(path.join(root, 'skills', name, 'SKILL.md')));
-    for (const entry of Object.keys(files)) assert.ok(entry.startsWith(`${name}/`), `${entry} is under ${name}/`);
+    const names = Object.keys(files);
+    assert.deepStrictEqual(names, [...names].sort(), `${name}.zip entries are sorted`);
+    for (const entry of names) assert.ok(entry.startsWith(`${name}/`), `${entry} is under ${name}/`);
     assert.ok(files[`${name}/shared/lanes.md`], `${name}.zip carries its shared/ copy`);
   }
+});
+
+test('npm run package gives identical bytes on repeated runs', () => {
+  const run = () => {
+    assert.strictEqual(spawnSync(process.execPath, [path.join(root, 'scripts', 'package.js')]).status, 0);
+    return skills.map((n) => fs.readFileSync(path.join(root, 'dist', `${n}.zip`)));
+  };
+  const a = run();
+  const b = run();
+  a.forEach((buf, i) => assert.ok(buf.equals(b[i]), `${skills[i]}.zip is byte-stable`));
 });
