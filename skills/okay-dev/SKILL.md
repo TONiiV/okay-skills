@@ -34,7 +34,7 @@ Create it first. Steps that do not apply stay as `skip: <reason>`.
 
 1. Contributor mode per [shared/contributor-mode.md](shared/contributor-mode.md). On: the rules there override every step below (see Contributor mode).
 2. Pick the tracker per [shared/tracker.md](shared/tracker.md).
-3. Note the base branch without the remote prefix: `git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||'`, else `main`.
+3. Note the base branch per [shared/git.md](shared/git.md).
 
 ## 2. Split
 
@@ -50,7 +50,7 @@ A single-outcome prompt is one sub-task: `skip: single task`.
 
 Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), plus one extra route:
 
-- **New product** (no existing codebase, or a separate new app or service): it has no row in the lanes table. Run it through the L3 flow below, which is prototype-first.
+- **New product** has its own row in [shared/lanes.md](shared/lanes.md): run it through the L3 flow below, which is prototype-first.
 - An issue, spec or ticket link (or an identifier such as `#12`, `TON-12`) is L2, unless the ticket itself is unplanned (no acceptance criteria): then L3.
 - A bug or small change with an estimate inside the L1 threshold is L1. Unsure whether it fits: L1, and let the escalation catch it.
 
@@ -124,11 +124,11 @@ Write it as three task items before any implementation. An item that does not ap
 - **Independent workstreams:** tickets with disjoint files run in parallel; shared writes serialize.
 - **Shared mutable state:** files, tables, config or generated output more than one ticket writes. Split the target where you can; serialize only for a real invariant.
 
-Show it with the planned agents and tiers and ask once: "Start these tickets and push their branches and PRs?" Pushing L2+ needs this OK ([shared/git.md](shared/git.md)).
+Show it with the planned agents and tiers and ask once: "Start these tickets and push their branches and PRs?" This one OK covers the pushes and PRs of the batch ([shared/git.md](shared/git.md)).
 
 ### Ticket loop
 
-Per ticket, in its own worktree (the repo's convention, else `git worktree add .claude/worktrees/<branch> -b <branch> origin/<base>`; branch name per [shared/tracker.md](shared/tracker.md)):
+Per ticket, in its own worktree (the repo's convention, else `git worktree add .claude/worktrees/<branch> -b <branch> origin/$b`; branch name per [shared/tracker.md](shared/tracker.md)):
 
 1. **Implement.** A fresh agent, sonnet high (opus high when cross-module), runs okay-tdd at the seams the spec agreed, runs the full suite once at the end, commits per [shared/git.md](shared/git.md), pushes, and opens the PR with the body from [shared/git.md](shared/git.md).
 2. **Review round.** Call okay-review with the PR, the contract links (request, spec, ticket), the lane and the round number. It does one round and returns the verdict. Never pass it the implementer's summary.

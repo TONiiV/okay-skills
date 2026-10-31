@@ -44,7 +44,7 @@ function queueEntries() {
     return fs.readFileSync(queuePath(), 'utf8').split(/\r?\n/).filter(Boolean).flatMap((l) => {
       try {
         const e = JSON.parse(l);
-        return e && typeof e === 'object' ? [e] : []; // a malformed line is skipped, the rest still count
+        return e && typeof e.repo === 'string' && typeof e.marker === 'string' ? [e] : []; // a line that is not a queue entry ({}, [], 42) is skipped, the rest still count
       } catch {
         return [];
       }

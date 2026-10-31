@@ -110,7 +110,7 @@ Apply the verdict rule in [method.md](method.md), same harness, same platform, s
 | Result | Action |
 |---|---|
 | Faster: significant, gap above run-to-run spread, tests green | Keep. Commit this attempt alone. |
-| No measurable difference (neutral) | Revert. The code does not pay for itself. |
+| No measurable difference (neutral) | Revert ([method.md](method.md) verdict rule 5). |
 | Slower | Revert. |
 | Faster but a test is red | Revert. |
 | Inconclusive (limiter unnamed, a side untuned, errors or work not checked) | Do not ship. Fix the measurement or revert. |

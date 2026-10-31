@@ -136,3 +136,47 @@ for (const name of okaySkills) {
     });
   });
 }
+
+describe('okay-design shoot.js', () => {
+  const { spawn } = require('node:child_process');
+  const http = require('node:http');
+  const net = require('node:net');
+  const os = require('node:os');
+  const SHOOT = path.join(SKILLS, 'okay-design', 'shoot.js');
+
+  // Async on purpose: the in-process test server must keep answering while shoot.js runs.
+  const shoot = (url, out) => new Promise((resolve) => {
+    const p = spawn(process.execPath, [SHOOT, url, out, '--widths', '320'], { timeout: 60000 });
+    let stderr = '';
+    p.stderr.on('data', (d) => { stderr += d; });
+    p.on('close', (status) => resolve({ status, stderr }));
+  });
+  const noBrowser = (r) => r.status === 2 && /no Chrome/.test(r.stderr);
+  const outDir = () => path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'okay-shoot-test-')), 'out');
+
+  it('exits non-zero and saves no screenshot when the URL is unreachable', (t) => {
+    const srv = net.createServer().listen(0, '127.0.0.1');
+    return new Promise((res) => srv.on('listening', res)).then(() => {
+      const { port } = srv.address();
+      return new Promise((r) => srv.close(r)).then(async () => {
+        const out = outDir();
+        const r = await shoot(`http://127.0.0.1:${port}/`, out);
+        if (noBrowser(r)) return t.skip('no browser installed');
+        assert.equal(r.status, 1, r.stderr);
+        assert.match(r.stderr, /cannot load/);
+        assert.ok(!fs.existsSync(out) || fs.readdirSync(out).length === 0, 'no screenshot saved');
+      });
+    });
+  });
+
+  it('saves a screenshot for a reachable page', async (t) => {
+    const srv = http.createServer((q, s) => s.end('<!doctype html><title>ok</title><p>hi')).listen(0, '127.0.0.1');
+    await new Promise((res) => srv.on('listening', res));
+    const out = outDir();
+    const r = await shoot(`http://127.0.0.1:${srv.address().port}/`, out);
+    srv.close();
+    if (noBrowser(r)) return t.skip('no browser installed');
+    assert.equal(r.status, 0, r.stderr);
+    assert.ok(fs.existsSync(path.join(out, 'shot-320.png')));
+  });
+});

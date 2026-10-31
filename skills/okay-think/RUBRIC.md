@@ -27,7 +27,7 @@ Do not pick a winner for the user. Your ranking decides only what gets spiked.
 
 ## Rules
 
-- Judge: Codex through the codex plugin (`codex:rescue`, read-only), else a fresh opus agent. State which ran.
+- Judge: Codex through the codex plugin (`codex:rescue`, read-only), else a fresh opus agent (always the opus agent in contributor mode). State which ran.
 - The orchestrator reruns every cited command and drops a score it cannot reproduce.
 - Two candidates the judge calls the same shape: the design step failed; rerun it with a distinct lens.
 - Treat the output as advice. The user's trial feedback overrides the ranking.

@@ -131,6 +131,21 @@ describe('SessionStart', () => {
     assert.match(out.hookSpecificOutput.additionalContext, /^1 okay-\* task\(s\)/);
   });
 
+  it('ignores parseable lines that are not queue entries', () => {
+    fs.mkdirSync(okayHome, { recursive: true });
+    fs.writeFileSync(queueFile(), [
+      JSON.stringify({ repo: '/a', marker: MARKER_LINE.trim(), session_id: 's1' }),
+      '{}',
+      '[]',
+      'null',
+      '{"repo": "/b"}',
+    ].join('\n') + '\n');
+    const out = JSON.parse(run({ hook_event_name: 'SessionStart', cwd: tmp(), source: 'startup' }));
+    assert.match(out.hookSpecificOutput.additionalContext, /^1 okay-\* task\(s\)/);
+    fs.writeFileSync(queueFile(), '{}\n[]\n');
+    assert.equal(run({ hook_event_name: 'SessionStart', cwd: tmp(), source: 'startup' }), '');
+  });
+
   it('is silent when the queue holds only malformed lines', () => {
     fs.mkdirSync(okayHome, { recursive: true });
     fs.writeFileSync(queueFile(), 'bad\n');

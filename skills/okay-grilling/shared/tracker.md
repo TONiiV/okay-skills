@@ -29,7 +29,7 @@ If the Linear connector is missing in this session (ToolSearch finds no `save_is
 |---|---|---|---|
 | github.com | `gh` | `gh issue create`, `gh issue comment` | `gh pr create`, `gh pr comment`, `gh pr merge` |
 | GitLab host | `glab` | `glab issue create`, `glab issue note` | `glab mr create`, `glab mr note`, `glab mr merge` |
-| No remote | local files | `.scratch/<feature>/issues/<NN>-<slug>.md` | None: commit on a branch, deliver next steps |
+| No remote | local files | spec: `.scratch/<feature>/spec.md`; tickets: `.scratch/<feature>/issues/<NN>-<slug>.md` | None: commit on a branch, deliver next steps |
 
 - The same table serves `Tracker: github`, `gitlab`, and `local`. With no remote, use local files.
 - Unknown host: ask the user once which CLI to use.

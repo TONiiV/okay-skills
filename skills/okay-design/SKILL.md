@@ -50,7 +50,7 @@ When rules disagree, the first one wins: the user's request, then the project's 
 
 ## 1. Mode and tooling check
 
-1. Contributor mode on? Apply [shared/contributor-mode.md](shared/contributor-mode.md) for the rest of the task. Pick the tracker from [shared/tracker.md](shared/tracker.md). Note the base branch (`git rev-parse --abbrev-ref origin/HEAD`, else `main`).
+1. Contributor mode on? Apply [shared/contributor-mode.md](shared/contributor-mode.md) for the rest of the task. Pick the tracker from [shared/tracker.md](shared/tracker.md). Note the base branch (per [shared/git.md](shared/git.md)).
 2. Find how the UI runs: the dev command and URL, the framework, the styling system, the component library, the test and lint commands. A static page runs from a local file server; say which. Nothing runnable: the task becomes "build a runnable page first", and you say so in the intake.
 3. **Check, do not assume, which design skills are installed.** A skill counts as installed when it is in this session's skill list, or its `SKILL.md` exists in `~/.claude/skills/<name>/`, `<repo>/.claude/skills/<name>/`, or under `~/.claude/plugins/`. In claude.ai or a cloud session only the session's skill list counts. Check these names:
 

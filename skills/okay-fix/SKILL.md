@@ -38,7 +38,7 @@ Create this task list first. A step you skip stays on it as `skip: <reason>`.
 
 - Contributor mode on? Apply [shared/contributor-mode.md](shared/contributor-mode.md) for the rest of the task.
 - Pick the tracker from [shared/tracker.md](shared/tracker.md).
-- Note the base branch (`git rev-parse --abbrev-ref origin/HEAD`, else `main`) and branch off it: `fix/<slug>`.
+- Note the base branch (per [shared/git.md](shared/git.md)) and branch off it: `fix/<slug>`.
 
 ## 2. Reproduce
 
