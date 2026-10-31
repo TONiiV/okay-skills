@@ -1,0 +1,77 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-perf invocation with a goal",
+    "prompt": "/okay-perf make the CSV export at least 30% faster at p50",
+    "expectations": ["okay-perf runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese report that a build got slower after a change",
+    "prompt": "升级依赖之后 CI 里的构建好像慢了一截，帮我确认是不是真的回归了，是的话再回滚",
+    "expectations": ["okay-perf runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "User claims a speed-up and wants it verified",
+    "prompt": "I replaced the JSON parser with a streaming one and it feels 2x faster. Can you benchmark it properly and tell me if it is real?",
+    "expectations": ["okay-perf runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "A crash is okay-fix, not perf",
+    "prompt": "formatPrice(0) throws a TypeError, please fix it",
+    "expectations": ["okay-perf does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "UI redesign is okay-design",
+    "prompt": "Redesign the settings page with three layout options and show me screenshots",
+    "expectations": ["okay-perf does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "Reviewing a PR is okay-review",
+    "prompt": "/okay-review 42",
+    "expectations": ["okay-perf does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Claimed speed-up on a Linux box: claim, spec, layout-varied interleaved baseline, causal profile, verdict, report",
+    "prompt": "/okay-perf the /search endpoint p95 latency is too high; I think switching the hash function in the index would fix it. Linux box, Python service with pytest tests.",
+    "expectations": [
+      "Writes the claim with a number and names the metric as latency with begin and end points, before changing code",
+      "Fills the platform spec by running commands (CPU, RAM, OS, versions, flags, dataset, background load)",
+      "Uses an existing harness (pyperf or hyperfine) rather than a hand-rolled timer",
+      "Takes at least 10 runs per side in fresh processes with varied environment size, A and B interleaved",
+      "Uses Coz or the manual slow-down experiment to check that the hash function is on the critical path before changing it",
+      "Makes one change per attempt and logs every attempt, including reverted ones, in the ledger",
+      "Chooses Welch t-test when times are near-normal and rank-sum otherwise, and states p against 0.05 and the gap against the baseline run-to-run spread",
+      "Reverts a result that is neutral or slower, or whose tests are red",
+      "Writes docs/perf/<date>-<topic>.md with verdict first, platform spec, before/after table (median, p95, range, n, test, p) and the attempt ledger",
+      "Hands the diff plus the benchmark checklist to a fresh okay-review reviewer without its own conclusions",
+      "PR body follows Problem / Cause / Change / Evidence / Not touched / Risks, 300 words or fewer, cites the report"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "Suspected 3% regression measured with 5 same-layout runs: no blind rollback",
+    "prompt": "/okay-perf commit 3f2a1c made our benchmark 3% slower on my Mac, roll it back. (Measured with 5 back-to-back runs of one binary.)",
+    "expectations": [
+      "Does not roll back on the 5-run single-layout measurement",
+      "Measures the suspect commit against its parent with fresh processes, varied environment size, interleaved A/B, at least 10 runs each",
+      "Uses the manual slow-down experiment for causal checks because Coz needs Linux",
+      "Applies the same verdict rule as for an optimization: rolls back only on a significant slowdown (p < 0.05) above the run-to-run spread",
+      "When the result is not significant, reports no measurable difference and leaves the commit in place",
+      "Notes that layout alone can explain a few percent"
+    ]
+  }
+]
