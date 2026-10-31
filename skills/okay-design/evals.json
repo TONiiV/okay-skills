@@ -91,5 +91,18 @@
       "Ends with an MR description whose sections are Problem, Cause, Fix and Evidence",
       "Never merges"
     ]
+  },
+  {
+    "id": "beh-3",
+    "kind": "behavioural",
+    "description": "Style seeds drive the variants, and a named style fixes only its own axes",
+    "prompt": "/okay-design a landing page for a small ceramics studio. Keep it warm and earthy; everything else is up to you.",
+    "expectations": [
+      "Runs style-seed.js once per variant before writing the direction briefs, and each variant gets a different seed",
+      "Keeps the palette warm and earthy as the user asked, marks that axis as user, and takes the other axes from each seed",
+      "Draws a new seed for a later variant when two seeds give the same layout",
+      "Records each seed in its direction brief and at the top of its variant entry file, and names each seed when showing the variants",
+      "Any variant that breaks a seed pick names the pick and gives an accessibility or contrast reason"
+    ]
   }
 ]
