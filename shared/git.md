@@ -10,7 +10,7 @@
 
 - Title: `type: subject`, at most 70 characters.
 - Body: English, at most 300 words, sections in this order: Problem / Cause / Change / Evidence / Not touched / Risks.
-- Last line links the issue when one exists: `Closes #<n>` (GitHub) or `Fixes TON-<n>` (Linear).
+- Last line links the issue when one exists: `Closes #<n>` (GitHub) or `Fixes TON-<n>` (Linear; the Linear GitHub integration closes the issue on merge).
 - No AI attribution anywhere: commits, PR bodies, comments, code.
 - Contributor mode uses its own MR description (see [contributor-mode.md](contributor-mode.md)).
 

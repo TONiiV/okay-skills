@@ -14,12 +14,11 @@ Take the first that applies:
 
 - Workspace `toniiiic`, team key `TON`. The plan has no Initiatives: do not use them.
 - The Linear connector is an MCP server whose tool names carry a per-install prefix. Refer to tools by suffix and load them with ToolSearch first: `save_issue`, `save_project`, `save_status_update`, `get_issue`, `list_issues`, `list_projects`.
-- One Linear Project per product/repo.
+- One Linear Project per product/repo. If `AGENTS.md` names none, find one named after the repo with `list_projects`; if none exists, ask before calling `save_project`.
 - A spec is a parent issue in that project, labelled `spec`.
 - Tickets are sub-issues of the spec. Blocking edges are native `blocks` relations. Each ready ticket carries the `ready-for-agent` label.
 - After each delivery wave, post a project status update (`save_status_update`): health, what shipped, what is next.
 - Branch names carry the identifier: `ton-<n>-short-slug`, e.g. `ton-12-shared-rules`.
-- PR bodies end with `Fixes TON-<n>` (the Linear GitHub integration closes the issue on merge).
 
 ## GitHub fallback
 
@@ -34,4 +33,3 @@ If the Linear connector is missing in this session (ToolSearch finds no `save_is
 - The same table serves `Tracker: github`, `gitlab`, and `local`. With no remote, use local files.
 - Unknown host: ask the user once which CLI to use.
 - A local issue file holds a title line, the body, and its blocking edges as text (`Blocked by: 01, 03`).
-- GitHub PR bodies end with `Closes #<n>`.

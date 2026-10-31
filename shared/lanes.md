@@ -20,7 +20,7 @@ A change is L1 only when ALL of these hold, measured on the full diff against th
 3. No public interface change (exported signature, CLI flag, HTTP route, config key, schema) and no data-structure change (persisted shape, wire format, type of a shared field).
 4. Nothing touching auth, payment, or data deletion.
 
-Measure with `git add -N . && git diff --numstat <base>`, then drop test files (`*.test.*`, `*.spec.*`, `test/`, `tests/`, `__tests__/`) from the count.
+Measure with `git add -N . && git diff --numstat <base>`, then drop test files (the repo's test-file convention, e.g. `*.test.*`, `*.spec.*`, `test_*.py`, `*_test.go`, `test/`, `tests/`, `__tests__/`) from the count.
 
 ## Escalation
 
