@@ -23,11 +23,11 @@ Task list: mode check, then the steps of the chosen mode, then `reflect`. A skip
 
 1. Contributor mode on ([shared/contributor-mode.md](shared/contributor-mode.md))? Write nothing, to Linear, GitHub, or files. Reply in one line that okay-pm does not run in contributor mode, and stop.
 2. Pick the tracker per [shared/tracker.md](shared/tracker.md). For Linear, load the tools with ToolSearch by suffix: `list_issues`, `get_issue`, `save_issue`, `save_comment`, `save_status_update`, `get_status_updates`, `list_projects`, `list_issue_statuses`, `list_issue_labels`. No `save_issue` found: use the GitHub fallback below and say so in one line.
-3. Resolve the Linear project (`Tracker: linear TON/<Project>`, else `list_projects` by repo name; none found: ask before creating one).
-4. Read `list_issue_statuses` and `list_issue_labels` for team `TON` once. Never assume a state or label exists. A missing label from the table below: ask the user once before creating it.
+3. Linear only: resolve the Linear project (`Tracker: linear TON/<Project>`, else `list_projects` by repo name; none found: ask before creating one).
+4. Linear only: read `list_issue_statuses` and `list_issue_labels` for team `TON` once. Never assume a state or label exists. A missing label from the table below: ask the user once before creating it.
 5. Mode from the argument: `triage`, `plan`, `status`. None given: ask which, one line.
 
-Reads are free. Every write (state, label, comment, status update) is stated in one line before it happens, in the user's language. Never write to a different project than the one resolved in step 3.
+Reads are free. Every write (state, label, comment, status update) is stated in one line before it happens, in the user's language. On Linear, never write to a different project than the one resolved in step 3.
 
 ## Roles in Linear
 

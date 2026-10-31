@@ -1,6 +1,6 @@
 # Notice
 
-okay-to-tickets is a fork of the `to-tickets` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-to-tickets`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-to-tickets is a fork of the `to-tickets` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-to-tickets`, `license: MIT` added to the frontmatter, description rewritten, tracker steps pointed at `shared/tracker.md` instead of `/setup-matt-pocock-skills` (Linear sub-issues with `blocks` relations, GitHub or GitLab issues, or one local file per ticket), tickets kept local and untracked in contributor mode, vocabulary taken from `CONTEXT.md`.
 
 | Source | Used for |
 |---|---|

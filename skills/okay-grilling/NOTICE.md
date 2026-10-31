@@ -1,6 +1,6 @@
 # Notice
 
-okay-grilling is a fork of the `grilling` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-grilling`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-grilling is a fork of the `grilling` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-grilling`, `license: MIT` added to the frontmatter, description rewritten (one round asks every answerable question with a recommended answer; callable by other `okay-*` skills), heading renamed. The body is unchanged.
 
 | Source | Used for |
 |---|---|

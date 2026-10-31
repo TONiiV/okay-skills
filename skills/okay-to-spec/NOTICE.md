@@ -1,6 +1,6 @@
 # Notice
 
-okay-to-spec is a fork of the `to-spec` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-to-spec`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-to-spec is a fork of the `to-spec` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-to-spec`, `license: MIT` added to the frontmatter, description rewritten, publishing pointed at `shared/tracker.md` (Linear parent issue labelled `spec`, GitHub or GitLab issue, or a local file) instead of `/setup-matt-pocock-skills`, spec kept local and untracked in contributor mode, vocabulary taken from `CONTEXT.md`, and a step that reads the `okay-prototype` trial-feedback record and links its branch.
 
 | Source | Used for |
 |---|---|

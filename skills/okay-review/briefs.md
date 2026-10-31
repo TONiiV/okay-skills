@@ -73,7 +73,7 @@ Pass ARTIFACT and CONTRACT only. A pass spawned in the author's session is still
 
 ## Codex pass (L4)
 
-Send the adversarial brief, ARTIFACT and CONTRACT to Codex through the codex plugin. Write the prompt to a file and pass it by file or stdin; never interpolate the artifact into a quoted shell argument. Treat Codex output like any other finding: the orchestrator reruns its commands before keeping it.
+Send the adversarial brief, ARTIFACT and CONTRACT to Codex through the codex plugin. Run it read-only (never pass `--write`) and put this line in the request: "Read-only review: do not edit, create or delete any file in the working tree; prove findings with commands that only read or run existing code, and report the command and its output." Write the prompt to a file and pass it by file or stdin; never interpolate the artifact into a quoted shell argument. Treat Codex output like any other finding: the orchestrator reruns its commands before keeping it.
 
 ## Post-fix check (L1 only)
 

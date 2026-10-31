@@ -1,6 +1,6 @@
 # Notice
 
-okay-prototype is a fork of the `prototype` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-prototype`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-prototype is a fork of the `prototype` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-prototype`, `license: MIT` added to the frontmatter, description rewritten, flow added (grilling round first, 1 to 3 samples, one switcher, one command or URL, `prototype/<name>` branch, trial-feedback record handed to `okay-to-spec`), architecture spike shape added, `LOGIC.md` and `UI.md` adjusted to match.
 
 | Source | Used for |
 |---|---|
