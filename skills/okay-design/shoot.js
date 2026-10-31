@@ -49,22 +49,26 @@ if (!bin) { console.error('no Chrome/Edge/Chromium found; pass --bin or set BROW
   const once = (method) => new Promise((r) => { const w = (m) => { if (m.method === method) { waiters.splice(waiters.indexOf(w), 1); r(m); } }; waiters.push(w); });
   const val = async (expression) => (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result.result.value;
 
-  fs.mkdirSync(outDir, { recursive: true });
-  await send('Page.enable');
-  for (const w of widths) {
-    await send('Emulation.setDeviceMetricsOverride', { width: w, height, deviceScaleFactor: 1, mobile: w < 768 });
-    const loaded = once('Page.loadEventFired');
-    await send('Page.navigate', { url });
-    await loaded;
-    if (evalJs) { const r = await val(evalJs); if (r !== undefined) console.log(`  eval(${w}): ${JSON.stringify(r)}`); }
-    await new Promise((r) => setTimeout(r, 400)); // let fonts, transitions and the forced state settle
-    const inner = await val('innerWidth');
-    const overflow = await val('document.documentElement.scrollWidth > document.documentElement.clientWidth');
-    const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: full });
-    const file = path.join(outDir, `${name}-${w}.png`);
-    fs.writeFileSync(file, Buffer.from(shot.result.data, 'base64'));
-    console.log(`${file}  innerWidth=${inner}${inner === w ? '' : ' MISMATCH'}${overflow ? '  HORIZONTAL OVERFLOW' : ''}`);
+  try {
+    fs.mkdirSync(outDir, { recursive: true });
+    await send('Page.enable');
+    for (const w of widths) {
+      await send('Emulation.setDeviceMetricsOverride', { width: w, height, deviceScaleFactor: 1, mobile: w < 768 });
+      const loaded = once('Page.loadEventFired');
+      const nav = await send('Page.navigate', { url });
+      if (nav.result.errorText) throw new Error(`cannot load ${url}: ${nav.result.errorText}`); // Chrome would screenshot its own error page
+      await loaded;
+      if (evalJs) { const r = await val(evalJs); if (r !== undefined) console.log(`  eval(${w}): ${JSON.stringify(r)}`); }
+      await new Promise((r) => setTimeout(r, 400)); // let fonts, transitions and the forced state settle
+      const inner = await val('innerWidth');
+      const overflow = await val('document.documentElement.scrollWidth > document.documentElement.clientWidth');
+      const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: full });
+      const file = path.join(outDir, `${name}-${w}.png`);
+      fs.writeFileSync(file, Buffer.from(shot.result.data, 'base64'));
+      console.log(`${file}  innerWidth=${inner}${inner === w ? '' : ' MISMATCH'}${overflow ? '  HORIZONTAL OVERFLOW' : ''}`);
+    }
+  } finally { // also when the URL is unreachable: never leave the browser running
+    ws.close(); proc.kill();
+    try { fs.rmSync(profile, { recursive: true, force: true }); } catch {}
   }
-  ws.close(); proc.kill();
-  try { fs.rmSync(profile, { recursive: true, force: true }); } catch {}
 })().catch((e) => { console.error(e.message); process.exit(1); });

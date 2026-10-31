@@ -7,7 +7,8 @@ Every dev request gets exactly one lane. A compound request is split into sub-ta
 | L1 | Small fix or bug fix inside the L1 threshold | okay-fix |
 | L2 | Planned feature: an existing issue, spec, or ticket link | okay-dev |
 | L3 | New feature with no agreed plan | okay-dev |
-| L4 | Architecture: hard to reverse, cross-module structure, no code | okay-think |
+| New product | No existing codebase, or a separate new app or service | okay-dev, L3 flow (prototype-first) |
+| L4 | Architecture: hard to reverse, cross-module structure, no production code | okay-think |
 | L5 | UI/UX work | okay-design |
 | perf | A performance claim or regression | okay-perf |
 
@@ -32,8 +33,8 @@ New product, L3 and L4 never start from an assumed spec. L1 and L2 (already plan
 4. Collect structured feedback: worked / did not / surprised me.
 5. Only then grill the remaining gaps, write the spec, cut tickets, implement.
 
-- Samples are throwaway: variants behind one switcher where possible, runnable with one command or URL, kept on a `prototype/<name>` branch and linked from the spec.
-- L4 samples are spikes that exercise the risky assumption; measure it when it is a performance or scale question.
+- Samples are throwaway code: variants behind one switcher where possible, runnable with one command or URL, kept on a `prototype/<name>` branch and linked from the spec. A `prototype/<name>` branch is never merged.
+- L4 samples are spikes, also throwaway code on `prototype/<name>`, that exercise the risky assumption; measure it when it is a performance or scale question.
 - The spec may inline decision-rich snippets from the chosen sample (state machine, schema, type shape).
 
 ## Escalation
@@ -52,10 +53,10 @@ No commit, no PR, no merge after an escalation.
 | Size | Files | Rule |
 |---|---|---|
 | XS | 1 | |
-| S | 1-2 | |
+| S | 2 | |
 | M | 3-5 | |
-| L | 5-8 | Split |
-| XL | 8+ | Must split |
+| L | 6-8 | Split |
+| XL | 9+ | Must split |
 
 ## Process rules
 

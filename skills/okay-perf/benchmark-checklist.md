@@ -25,7 +25,7 @@ Answer each question with evidence from a run, not a guess about the code. The i
 - Give the number with its unit, run count, range and limiter.
 - Inconclusive when a difference is claimed but the limiter is unnamed, a side ran untuned, or questions 4 and 7 could not be checked. Name the gap.
 - Same conditions before and after; cold and warm cache are different experiments.
-- Neutral means revert. Correctness gates the metric: green tests, same work done.
+- Verdict rules (neutral means revert, correctness gates the metric, regressions): [method.md](method.md) Verdict rule.
 - Every attempt, kept or reverted, is in the ledger.
 - A PR body carries one primary number; the rest lives in the report.
 

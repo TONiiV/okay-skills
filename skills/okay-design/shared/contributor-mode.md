@@ -13,5 +13,5 @@ Read `~/.claude/okay.local.md` (machine-local, never committed). Each bullet und
 3. Specs and tickets stay local and untracked, under `.scratch/`, kept out of git through `.git/info/exclude`.
 4. Output is an MR whose description has exactly these sections: Problem / Cause / Fix / Evidence.
 5. Lessons go to local memory only; nothing goes to the lessons repo.
-6. Nothing is sent to Jev.
+6. Nothing is sent to Jev or to another model family (Codex): no `codex:rescue`, no cross-family judge or review pass. Where a skill names Codex, take its fallback.
 7. Never merge; the maintainers do.
