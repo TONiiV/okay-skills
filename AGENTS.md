@@ -13,6 +13,7 @@ Tracker: github
 | `skills/<name>/` | One folder per skill. Auto-discovered; never list skills by hand. |
 | `shared/` | Single source of rules shared by every okay-* skill |
 | `scripts/build.js` | Copies `shared/*` into every `skills/okay-*/shared/` |
+| `hooks/` | Plugin hooks (auto-discovered `hooks/hooks.json`), see Hooks |
 | `tests/` | `node:test` suites |
 
 Every okay-* skill folder holds:
@@ -29,6 +30,16 @@ A skill references shared rules only as `shared/<file>.md`, relative to its own 
 1. After any change in `shared/`, run `npm run build` and commit the generated copies.
 2. Run `npm test` before every commit. It fails when a copy drifts, a frontmatter key is outside the allowed six, a link escapes a skill folder, or evals fall below the minimums.
 3. Validate the plugin with `claude plugin validate .`.
+
+## Hooks
+
+`hooks/hooks.json` runs `hooks/reflect.js` on Stop, SessionEnd and SessionStart; it dispatches on `hook_event_name`.
+
+- Stop: blocks once with "run okay-reflect" while `<git dir>/okay-reflect-pending` exists (the marker from `shared/delivery.md`); never when `stop_hook_active` is true.
+- SessionEnd: moves a still-pending marker into `~/.okay/reflect-queue.jsonl` (`OKAY_HOME` overrides `~/.okay`).
+- SessionStart: when the queue is not empty, adds context with the count and offers okay-reflect, which removes the entries it handles.
+
+Hook scripts are Node with no dependencies, exit 0 and print nothing when there is nothing to do or anything fails, and work outside git repos. If the marker format in `shared/delivery.md` changes, update `hooks/reflect.js` and `tests/hooks.test.js` in the same PR.
 
 ## Commits and PRs
 
