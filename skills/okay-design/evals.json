@@ -1,0 +1,95 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-design invocation with a UI task",
+    "prompt": "/okay-design a pricing page for our B2B invoicing tool",
+    "expectations": ["okay-design runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese redesign request without the skill name",
+    "prompt": "帮我重新设计一下设置页，现在太乱了，我想看看几种方案",
+    "expectations": ["okay-design runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Layout request for a new screen",
+    "prompt": "Design the empty state and first-run screen for our dashboard",
+    "expectations": ["okay-design runs"]
+  },
+  {
+    "id": "pos-3",
+    "kind": "positive",
+    "description": "Restyle request with visual intent",
+    "prompt": "The landing page looks generic. Restyle it so it feels more editorial, mobile first.",
+    "expectations": ["okay-design runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "A one-line UI bug belongs to okay-fix",
+    "prompt": "/okay-fix the Save button on the profile form stays disabled after a valid email is typed",
+    "expectations": ["okay-design does not run", "okay-fix runs"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Architecture request belongs to okay-think",
+    "prompt": "Design the data model and service boundaries for a multi-tenant billing system, no code yet",
+    "expectations": ["okay-design does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "Rendering performance belongs to okay-perf",
+    "prompt": "The product table drops to 15 fps when scrolling 10,000 rows. Get it to 60 fps and show before/after numbers.",
+    "expectations": ["okay-design does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Happy path: intake, three variants, pick, build, before/after, independent critique",
+    "prompt": "/okay-design redesign the account settings page of our web app (React, Tailwind, existing /settings route). Audience is small-business owners on laptops and phones.",
+    "expectations": [
+      "Reports which design skills are installed (frontend-design, impeccable, landing-page-design) after checking, and names the fallback checklist for any that are missing",
+      "Asks the intake questions in one batched message with a recommended answer for each, and states unanswered ones as assumptions in one line",
+      "Captures before screenshots on the base branch at 320, 768, 1024 and 1440 before any variant is built",
+      "Spawns three separate agents in parallel, one per variant, each with a different direction that differs in layout or hierarchy, not only in colour",
+      "Wires the variants behind one switcher driven by a variant search param and keeps them on a prototype/<name> branch",
+      "States which screenshot tool was used and shows the three variants side by side before asking the user to pick",
+      "Does not choose a variant for the user",
+      "Builds the chosen design on a separate branch with no switcher or losing variants in the diff",
+      "Produces after screenshots at the same viewports and states as the before screenshots, and lists any state that was not captured",
+      "Runs an accessibility check and reports its result",
+      "Spawns a separate fresh critic agent that receives the screenshots and the contract but not the builder's summary, and uses only proven findings",
+      "Opens a PR with before/after evidence, asks for the user's approval before merging, and does not merge on its own"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "User asks for fewer variants and no design skills are installed",
+    "prompt": "/okay-design just one direction please, a compact toolbar for the editor. Keep it quick.",
+    "expectations": [
+      "Builds exactly one variant and states that the user asked for one",
+      "Does not skip the intake, the before/after screenshots, the accessibility check or the independent critique",
+      "When no design skill is installed, says so in one line and follows the fallback checklist",
+      "When the headless browser is used, runs screenshots through a method that sets the exact viewport width and reports a measured innerWidth of 320 for the 320 image, not a clamped window size"
+    ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "Contributor mode leaves no footprint",
+    "prompt": "/okay-design a new filter panel for the orders list (this repo is on my contributor list)",
+    "expectations": [
+      "Creates no issue and writes no repo docs",
+      "Keeps prototype and screenshot files local and untracked, and never pushes a prototype branch",
+      "Ends with an MR description whose sections are Problem, Cause, Fix and Evidence",
+      "Never merges"
+    ]
+  }
+]
