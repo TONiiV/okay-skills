@@ -61,7 +61,7 @@ Count changed lines on the full diff. Each pass is one more fresh agent with its
 | Auth, session, token, permission, payment or data-deletion code touched (any size), or backend changes over 100 lines | Security |
 | Over 100 lines | Simplification |
 | Over 200 lines, or the previous round had a critical finding (security hole, data loss, broken core behaviour) | Adversarial (interrogate) |
-| Lane L4 and the codex plugin is available | Codex cross-family pass: send the artifact and contract to Codex through the plugin's `codex:rescue` subagent with the adversarial brief. Plugin missing or errored: `skip: codex unavailable`, never block. |
+| Lane L4 and the codex plugin is available | Codex cross-family pass: send the artifact and contract to Codex through the plugin's `codex:rescue` subagent with the adversarial brief, and ask for a read-only run: no `--write`, and the request says Codex must not edit the tree. Plugin missing or errored: `skip: codex unavailable`, never block. |
 
 ## Comment
 

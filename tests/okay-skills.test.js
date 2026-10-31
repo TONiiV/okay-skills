@@ -35,6 +35,40 @@ function frontmatter(text) {
   return fm;
 }
 
+// Fenced code blocks (``` or ~~~) hold examples, not links. An unclosed fence runs to the end of the file.
+function stripFences(text) {
+  const out = [];
+  let fence = null;
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^\s*(```+|~~~+)/);
+    if (fence) {
+      if (m && m[1][0] === fence[0] && m[1].length >= fence.length) fence = null;
+    } else if (m) {
+      fence = m[1];
+    } else {
+      out.push(line);
+    }
+  }
+  return out.join('\n');
+}
+
+const linkTargets = (text) => [...stripFences(text).matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+
+describe('link check', () => {
+  it('ignores links inside fenced code blocks', () => {
+    const text = ['[a](a.md)', '```md', '[x](../../escape.md)', '```', '[b](b.md)', '~~~', '[y](../out.md)', '~~~', ''].join('\n');
+    assert.deepEqual(linkTargets(text), ['a.md', 'b.md']);
+  });
+
+  it('treats an unclosed fence as running to the end, and handles CRLF', () => {
+    assert.deepEqual(linkTargets('[a](a.md)\r\n```\r\n[x](../x.md)\r\n'), ['a.md']);
+  });
+
+  it('still sees links outside fences, including escaping ones', () => {
+    assert.deepEqual(linkTargets('[x](../../shared/a.md)\n```\n[y](y.md)\n```\n'), ['../../shared/a.md']);
+  });
+});
+
 it('there is at least one okay-* skill', () => {
   assert.ok(okaySkills.length > 0);
 });
@@ -67,7 +101,7 @@ for (const name of okaySkills) {
     it('relative links resolve inside the skill folder', () => {
       for (const file of walk(dir).filter((f) => f.endsWith('.md'))) {
         const text = fs.readFileSync(file, 'utf-8');
-        for (const [, target] of text.matchAll(/\]\(([^)\s]+)\)/g)) {
+        for (const target of linkTargets(text)) {
           if (/^[a-z]+:|^#/.test(target)) continue;
           const resolved = path.resolve(path.dirname(file), target.split('#')[0]);
           const rel = path.relative(dir, resolved);

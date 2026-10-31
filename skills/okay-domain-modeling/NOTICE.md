@@ -1,6 +1,6 @@
 # Notice
 
-okay-domain-modeling is a fork of the `domain-modeling` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-domain-modeling`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-domain-modeling is a fork of the `domain-modeling` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-domain-modeling`, `license: MIT` added to the frontmatter, description reworded, heading renamed, `docs/decisions/` reused when it exists, doc layout pointed at `shared/docs-layout.md`, no files written in contributor mode (`shared/contributor-mode.md`), relative links written without `./`, sub-context links in `CONTEXT-FORMAT.md` turned into code spans.
 
 | Source | Used for |
 |---|---|

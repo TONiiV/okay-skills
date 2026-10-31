@@ -1,6 +1,6 @@
 # Notice
 
-okay-tdd is a fork of the `tdd` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-tdd`, frontmatter reduced to the keys claude.ai accepts, cross-references pointed at the `okay-*` skills, glossary fixed to `CONTEXT.md`, tracker steps pointed at `shared/tracker.md`.
+okay-tdd is a fork of the `tdd` skill from [mattpocock/skills](https://github.com/mattpocock/skills), Copyright (c) Matt Pocock, used under the MIT License. Edits: renamed to `okay-tdd`, `license: MIT` added to the frontmatter, description reworded, heading renamed, the `codebase-design` skill call replaced by inline guidance on interface depth and seams, the refactor pointer changed from `code-review` to `okay-review`.
 
 | Source | Used for |
 |---|---|
