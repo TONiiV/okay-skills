@@ -98,6 +98,10 @@ for (const name of okaySkills) {
       assert.ok(fm.description.length <= 1024, `description is ${fm.description.length} chars`);
     });
 
+    it('description has no angle brackets (claude.ai rejects them as XML tags)', () => {
+      assert.ok(!/[<>]/.test(fm.description), 'description contains < or >');
+    });
+
     it('relative links resolve inside the skill folder', () => {
       for (const file of walk(dir).filter((f) => f.endsWith('.md'))) {
         const text = fs.readFileSync(file, 'utf-8');
@@ -136,6 +140,42 @@ for (const name of okaySkills) {
     });
   });
 }
+
+describe('okay-design style-seed.js', () => {
+  const { execFileSync } = require('node:child_process');
+  const SEED = path.join(SKILLS, 'okay-design', 'style-seed.js');
+  const run = (...a) => execFileSync(process.execPath, [SEED, ...a], { encoding: 'utf-8', stdio: 'pipe' });
+
+  it('gives the same picks for the same seed', () => {
+    assert.equal(run('12345'), run('12345'));
+    assert.deepEqual(JSON.parse(run('12345', '--json')), JSON.parse(run('12345', '--json')));
+  });
+
+  it('gives different style picks across seeds, not only a different hue', () => {
+    const all = [1, 2, 3, 4, 5, 6, 7, 8].map((s) => JSON.parse(run(String(s), '--json')));
+    const styles = new Set(all.map(({ seed, hue, ...rest }) => JSON.stringify(rest)));
+    assert.equal(styles.size, 8);
+    assert.ok(new Set(all.map((p) => p.layout)).size >= 3, 'layouts vary');
+    assert.ok(new Set(all.map((p) => p.palette)).size >= 3, 'palettes vary');
+  });
+
+  it('prints a drawn seed and every axis when no seed is given', () => {
+    const out = run();
+    assert.match(out, /^seed: \d+$/m);
+    for (const axis of ['hue', 'palette', 'type', 'scale', 'layout', 'density', 'shape', 'texture', 'motion']) {
+      assert.match(out, new RegExp(`^${axis}: \\S`, 'm'));
+    }
+    // Three draws from a 1e9 range: all equal only if the RNG is fixed.
+    const seeds = new Set([out, run(), run()].map((o) => o.match(/^seed: (\d+)$/m)[1]));
+    assert.ok(seeds.size > 1, 'no-argument runs draw different seeds');
+  });
+
+  it('rejects a bad or too-long seed with exit 2', () => {
+    for (const bad of ['abc', '-1', '1234567890']) {
+      assert.throws(() => run(bad), (e) => e.status === 2 && /usage/.test(e.stderr), bad);
+    }
+  });
+});
 
 describe('okay-design shoot.js', () => {
   const { spawn } = require('node:child_process');
