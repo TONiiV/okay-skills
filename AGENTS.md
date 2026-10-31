@@ -30,6 +30,7 @@ A skill references shared rules only as `shared/<file>.md`, relative to its own 
 1. After any change in `shared/`, run `npm run build` and commit the generated copies.
 2. Run `npm test` before every commit. It fails when a copy drifts, a frontmatter key is outside the allowed six, a link escapes a skill folder, or evals fall below the minimums.
 3. Validate the plugin with `claude plugin validate .`.
+4. CI (`.github/workflows/test.yml`) runs `npm test` and `npm run package` on every PR and on pushes to main.
 
 ## Hooks
 
