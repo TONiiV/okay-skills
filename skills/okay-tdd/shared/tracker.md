@@ -34,3 +34,22 @@ If the Linear connector is missing in this session (ToolSearch finds no `save_is
 - The same table serves `Tracker: github`, `gitlab`, and `local`. With no remote, use local files.
 - Unknown host: ask the user once which CLI to use.
 - A local issue file holds a title line, the body, and its blocking edges as text (`Blocked by: 01, 03`).
+
+## When `gh` or `glab` fails
+
+`gh`/`glab` is missing or unauthenticated, or a call is refused. Cloud sessions (`CLAUDE_CODE_REMOTE=true`) block GraphQL at their proxy, so `gh pr` and `gh issue` fail there with 403. Do the same operation the first way below that works, and say so in one line:
+
+1. REST through `gh api` (or `glab api`). In a cloud session it reaches only the repos attached to the session. `gh api` fills in `{owner}/{repo}` from the current repo.
+2. The code host's MCP tools: load them with ToolSearch and refer to them by suffix, e.g. `create_pull_request`, `add_issue_comment`.
+3. Neither works: put the exact text and commands in the final reply as next steps ([delivery.md](delivery.md)).
+
+| Operation | REST through `gh api` |
+|---|---|
+| Read an issue or PR, its comments | `gh api repos/{owner}/{repo}/issues/<n>`, `gh api repos/{owner}/{repo}/issues/<n>/comments` |
+| PR head SHA, PR diff | `gh api repos/{owner}/{repo}/pulls/<n> --jq .head.sha`; the same path with `-H "Accept: application/vnd.github.diff"` |
+| Create an issue | `gh api repos/{owner}/{repo}/issues -f title=<title> -F body=@<file>` |
+| Comment on an issue or PR | `gh api repos/{owner}/{repo}/issues/<n>/comments -F body=@<file>` |
+| Edit a comment, a PR body | `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`; `gh api -X PATCH repos/{owner}/{repo}/pulls/<n> -F body=@<file>` |
+| Open a PR | `gh api repos/{owner}/{repo}/pulls -f title=<title> -f head=<branch> -f base=<base branch name> -F body=@<file>` |
+
+Merging has no fallback: see [git.md](git.md).

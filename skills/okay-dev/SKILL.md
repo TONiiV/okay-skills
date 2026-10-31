@@ -35,6 +35,7 @@ Create it first. Steps that do not apply stay as `skip: <reason>`.
 1. Contributor mode per [shared/contributor-mode.md](shared/contributor-mode.md). On: the rules there override every step below (see Contributor mode).
 2. Pick the tracker per [shared/tracker.md](shared/tracker.md).
 3. Note the base branch per [shared/git.md](shared/git.md).
+4. Contributor mode off and the repo's `.claude/settings.json` lacks the attribution block from [shared/git.md](shared/git.md) (Attribution settings): offer once to add it. Add it only on a yes, as its own commit. Never offer it in contributor mode.
 
 ## 2. Split
 

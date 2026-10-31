@@ -15,6 +15,7 @@ Shared rules, by reference:
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
 - Commit, PR, merge (promotion PRs): [shared/git.md](shared/git.md)
 - Delivery and the reflection marker: [shared/delivery.md](shared/delivery.md)
+- Code host, and what to do when `gh` fails: [shared/tracker.md](shared/tracker.md)
 
 Reviewer and synthesizer prompts: [prompts.md](prompts.md).
 
@@ -37,10 +38,11 @@ Create this task list first. A step you skip stays on it as `skip: <reason>`.
 1. Contributor mode on? Then steps 4-5 change as written there; nothing leaves the machine.
 2. Collect the work to reflect on:
    - this session: the marker at `$(git rev-parse --git-dir)/okay-reflect-pending` (one line per delivered task: time, skill, task);
-   - earlier sessions: entries in `${OKAY_HOME:-~/.okay}/reflect-queue.jsonl` (`repo`, `marker`, `transcript_path`, `session_id`), when the user asked to handle them.
+   - earlier sessions: entries in `${OKAY_HOME:-~/.okay}/reflect-queue.jsonl` (`repo`, `marker`, `transcript_path`, `session_id`), when the user asked to handle them;
+   - parked candidates (contributor mode off and the inbox reachable): see Harvest below.
 3. Find each transcript: the path the Stop hook named, the queue entry's `transcript_path`, or the newest `~/.claude/projects/<project-slug>/*.jsonl` whose first user message matches this session. No transcript file (for example a claude.ai session): write a digest that quotes events verbatim (failed commands with output, errors, the user's corrections) and contains no judgment of your own.
 4. List the okay-* skills that actually ran: a skill tool call or a read of `skills/okay-*/SKILL.md` in the transcript, or a skill named on a marker line. Only these can receive a lesson.
-5. User said skip, or the session has no error, failed command, or user correction at all: outcome is "no change". Go to step 6.
+5. User said skip, or the session has no error, failed command, or user correction at all: outcome is "no change". File any parked candidates (Harvest in step 4), then go to step 6.
 
 ## 2. Review
 
@@ -92,7 +94,25 @@ The inbox is the private GitHub repo `TONiiV/okay-lessons`. Moving it (for examp
 | Promote | `gh issue edit <n> -R TONiiV/okay-lessons --add-label lesson:promoted --remove-label lesson:candidate`, then comment the PR link |
 | Reject | `gh issue edit <n> -R TONiiV/okay-lessons --add-label lesson:rejected --remove-label lesson:candidate`, then `gh issue close <n> -R TONiiV/okay-lessons --comment "<reason>"` |
 
-A missing `skill:<skill>` label: create it with `gh label create`. No access to the inbox (no `gh`, no auth): show the candidates to the user as next steps and keep the marker.
+A missing `skill:<skill>` label: create it with `gh label create`. When `gh issue` fails, use the REST form from [shared/tracker.md](shared/tracker.md); labels go as `-f 'labels[]=lesson:candidate'`.
+
+### Inbox unreachable
+
+Neither `gh` nor its fallbacks reach `TONiiV/okay-lessons` (for example a cloud session with only the work repo attached):
+
+1. Post all candidates as ONE comment on the delivered PR. Its first line is exactly `okay-lesson-candidates`; then one block per candidate, headed `### <k>. [<skill>] <class>: <principle>`, holding the step 4.2 text.
+2. No delivered PR: show the candidates to the user as next steps instead.
+3. Keep the marker (step 6), and say in the report where the candidates wait.
+
+Never in contributor mode: there step 4 keeps lessons local. A multi-repo cloud session that has `TONiiV/okay-lessons` attached (the Claude GitHub App installed on it) reaches the inbox through `gh api` REST and files directly.
+
+### Harvest
+
+A local run with inbox access first files candidates parked on PRs. They already passed the gates, so they skip steps 2-3:
+
+1. Find them: `gh api -X GET search/issues -f q='"okay-lesson-candidates" in:comments is:pr commenter:<login>'`, with `<login>` from `gh api user --jq .login`. In each PR, read the comments whose first line is `okay-lesson-candidates`.
+2. File each candidate block that has no `filed:` line for its number yet, per step 4.
+3. Right after filing candidate `<k>` as issue `<n>`, edit the comment (`gh api -X PATCH repos/<owner>/<repo>/issues/comments/<id> -F body=@<file>`) to append the line `filed: okay-lessons#<n> (<k>)`, so it is never filed twice.
 
 ## 5. Promote
 

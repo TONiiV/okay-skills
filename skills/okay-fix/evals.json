@@ -54,7 +54,7 @@
       "Spawns a separate sonnet reviewer whose prompt contains the diff and the bug report but no summary of the fix",
       "Creates exactly one commit with a one-line message and no trailer",
       "Opens a PR whose body has Problem, Cause, Change, Evidence, Not touched and Risks sections and no AI attribution",
-      "Merges only after a PR comment starting with APPROVED and green CI",
+      "Merges only after the reviewer's APPROVED (round N) comment names the PR head SHA and CI is green",
       "Writes the okay-reflect-pending marker inside the git dir after delivering"
     ]
   },
@@ -90,8 +90,20 @@
     "expectations": [
       "Asks the user before pushing the branch",
       "Does not run gh pr merge or glab mr merge",
-      "Stops once the PR has a comment starting with APPROVED and green CI",
+      "Stops once the reviewer's APPROVED (round N) comment names the PR head SHA and CI is green",
       "Hands the PR link to the user to merge"
+    ]
+  },
+  {
+    "id": "beh-4",
+    "kind": "behavioural",
+    "description": "A commit pushed after APPROVED voids the approval",
+    "prompt": "/okay-fix trim() leaves a trailing tab; after the reviewer approves, also fix the typo it flagged as non-blocking",
+    "expectations": [
+      "The reviewer subagent, not the main thread, posts the comment whose first line is APPROVED (round 1) at the reviewed head SHA",
+      "After the extra commit, a fresh agent checks the new diff and posts a new APPROVED line naming the new head SHA",
+      "Never posts or edits an APPROVED comment from the main thread",
+      "Merges only when the PR head equals the SHA in the latest APPROVED comment"
     ]
   }
 ]

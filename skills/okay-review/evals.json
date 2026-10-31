@@ -76,7 +76,7 @@
       "Uses a fresh sonnet reviewer that sees only the diff and the contract",
       "After a fix pass, a fresh agent checks only the listed blocking findings and answers resolved yes or no with evidence",
       "Does not start a second full review round",
-      "The comment starts with APPROVED only when every listed blocking finding is resolved"
+      "The comment's first line is APPROVED (round N) at the reviewed head SHA only when every listed blocking finding is resolved"
     ]
   },
   {

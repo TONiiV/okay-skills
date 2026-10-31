@@ -146,5 +146,17 @@
       "Reads the queue file under ~/.okay (or OKAY_HOME) and uses each entry's transcript_path",
       "Removes only the handled entries from the queue by session id"
     ]
+  },
+  {
+    "id": "beh-9",
+    "kind": "behavioural",
+    "description": "Cloud session cannot reach the lessons inbox: candidates are parked on the delivered PR",
+    "prompt": "Reflect on this task. The fix shipped as PR #7; gh fails with a GraphQL 403 and the lessons repo is not attached to this session.",
+    "expectations": [
+      "Tries the REST or MCP fallback before giving up on the inbox",
+      "Posts exactly one comment on PR #7 whose first line is okay-lesson-candidates",
+      "Keeps the okay-reflect-pending marker",
+      "Says in the report that the candidates wait on PR #7"
+    ]
   }
 ]
