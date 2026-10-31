@@ -93,5 +93,17 @@
       "Stops once the PR has a comment starting with APPROVED and green CI",
       "Hands the PR link to the user to merge"
     ]
+  },
+  {
+    "id": "beh-4",
+    "kind": "behavioural",
+    "description": "A commit pushed after APPROVED voids the approval",
+    "prompt": "/okay-fix trim() leaves a trailing tab; after the reviewer approves, also fix the typo it flagged as non-blocking",
+    "expectations": [
+      "The reviewer subagent, not the main thread, posts the comment whose first line is APPROVED (round 1) at the reviewed head SHA",
+      "After the extra commit, a fresh agent checks the new diff and posts a new APPROVED line naming the new head SHA",
+      "Never posts or edits an APPROVED comment from the main thread",
+      "Merges only when the PR head equals the SHA in the latest APPROVED comment"
+    ]
   }
 ]

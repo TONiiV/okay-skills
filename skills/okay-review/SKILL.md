@@ -33,7 +33,7 @@ If the caller hands you a summary of what the change does, a self-assessment, or
 
 ## Steps
 
-1. **Pin the artifact.** PR/MR: `gh pr diff <n>` or `glab mr diff <n>`. Range: `git diff <base>...<head>`. Run `git add -N .` first when reviewing a working tree. Confirm the diff is non-empty; stop and tell the caller if it is empty. Measure changed lines (added + removed) and list touched paths.
+1. **Pin the artifact.** PR/MR: `gh pr diff <n>` or `glab mr diff <n>`. Range: `git diff <base>...<head>`. Run `git add -N .` first when reviewing a working tree. Confirm the diff is non-empty; stop and tell the caller if it is empty. Measure changed lines (added + removed) and list touched paths. Record the head SHA you review (PR: `gh pr view <n> --json headRefOid --jq .headRefOid`; range: `git rev-parse <head>`).
 2. **Assemble the contract.** The request text, the fetched spec or issue, and the repo standards files that exist (AGENTS.md, CLAUDE.md, CONSTRAINTS.md). No spec found: the spec axis reports "no spec available" and the comment says so.
 3. **Pick the mode and depth** (below).
 4. **Spawn fresh reviewers in parallel**, each with the artifact and the contract only, using the prompts in [briefs.md](briefs.md). Never pass the CLAIM (what the author or you think the change achieves).
@@ -68,7 +68,7 @@ Count changed lines on the full diff. Each pass is one more fresh agent with its
 Post one comment per invocation. Its first word is the verdict.
 
 ```
-APPROVED | CHANGES REQUESTED | ESCALATE: R<round>, lane <lane>
+APPROVED | CHANGES REQUESTED | ESCALATE (round <round>) at <head sha>, lane <lane>
 Depth: <passes run>; skip: <passes not run and why>
 
 ## Standards
@@ -86,7 +86,7 @@ Depth: <passes run>; skip: <passes not run and why>
 <the one fact the change is safe because of, and how it was established: stated / line / walked / ran / reproduced>
 ```
 
-- `APPROVED` only when no blocking finding is open. Non-blocking findings may ride along.
+- `APPROVED` only when no blocking finding is open. Non-blocking findings may ride along. The SHA binds the approval ([shared/review.md](shared/review.md)): if the PR head moved since step 1, review the new head before posting.
 - Post with `gh pr comment <n> --body-file <file>` or `glab mr note <n> -m`. Use a file for the body so quotes and backticks survive.
 - No PR/MR yet (a bare range): do not post; return the comment body to the caller, who posts it once the PR exists, and say `posted: no`.
 - Contributor mode: do not post to the MR unless the user asks; return the comment body to the caller.

@@ -1,6 +1,6 @@
 ---
 name: okay-fix
-description: "L1 lane of the okay-* pack: small fixes and bug fixes. Reproduces the bug, fixes it at the root cause with a regression test, checks the L1 threshold (escalates if exceeded), gets one fresh-agent review of the diff, commits one line, and opens a PR that auto-merges on APPROVED + green CI when the merge allow rule is set (otherwise stops at APPROVED and hands the merge to the user). Use for /okay-fix followed by the bug, or when the user reports something broken, throwing, or wrong that looks small (a few lines, at most 2 files). Not for new features, architecture, UI design, or performance work."
+description: "L1 lane of the okay-* pack: small fixes and bug fixes. Reproduces the bug, fixes it at the root cause with a regression test, checks the L1 threshold (escalates if exceeded), commits one line, opens a PR, gets one fresh-agent review that posts an approval bound to the head commit, and auto-merges on APPROVED + green CI when the merge allow rule is set (otherwise stops at APPROVED and hands the merge to the user). Use for /okay-fix followed by the bug, or when the user reports something broken, throwing, or wrong that looks small (a few lines, at most 2 files). Not for new features, architecture, UI design, or performance work."
 license: MIT
 ---
 
@@ -28,8 +28,8 @@ Create this task list first. A step you skip stays on it as `skip: <reason>`.
 3. Root cause
 4. Fix + regression test
 5. L1 threshold check
-6. Review
-7. Commit + PR
+6. Commit + PR
+7. Review
 8. Merge
 9. Deliver
 10. reflect
@@ -71,37 +71,36 @@ Cannot build a loop: stop, list what you tried, and ask the user for access, a r
 
 Measure the whole diff as [shared/lanes.md](shared/lanes.md) says. Any condition exceeded: stop, send the escalation message from that file with the condition and the measured value, and end the task there. No commit, no PR, no merge.
 
-## 6. Review
+## 6. Commit + PR
+
+1. Commit with one line, no body, no trailer: the repo's style, else `fix: <subject>`.
+2. Push the branch: with the merge allow rule the L1 merge policy covers the push; without it, ask the user before pushing. Then open the PR with the body from [shared/git.md](shared/git.md). Evidence holds the repro command with its red-then-green output; Cause names the hypothesis that held.
+
+No remote: commit on the branch and skip the PR (`skip: no remote`); the reviewer below returns its reply instead of posting. Contributor mode: open an MR with the Problem / Cause / Fix / Evidence description, have the reviewer return its reply instead of posting, and skip step 8.
+
+## 7. Review
 
 One round, by a fresh subagent on the sonnet tier with high effort, separate from you. Give it only:
 
-- the diff: the output of `git add -N . && git diff <base>`;
+- the artifact: the PR number and its head SHA (no remote: `git diff <base>` and `git rev-parse HEAD`);
 - the contract: the bug report in the user's own words, the repro command, and the repo standards files (AGENTS.md, CLAUDE.md, CONSTRAINTS.md when present).
 
 Never give it your explanation, your hypotheses, or your claims about what passes. Use this prompt:
 
 ```
-You review one small bug fix. You get the diff and the contract only.
+You review one small bug fix. You get the PR at one head commit and the contract only.
 Report on two axes, separately: standards (repo rules, smells) and spec (does the diff fix the reported bug at its root cause, with a regression test where a seam exists).
 Report only findings you proved: quote the line, or show a command you ran and its output.
 Invert one condition the diff adds and run the tests; a suite that stays green is a finding.
 Tag each finding [R1-<n>] blocking|non-blocking.
-If there is no blocking finding, your reply starts with APPROVED.
+Post your reply as one PR comment yourself. If there is no blocking finding, its first line is: APPROVED (round 1) at <head sha>
 ```
 
 Then:
 
-1. No blocking finding: keep the reply as the approval.
-2. Blocking findings: make one fix pass on them, re-run the tests and the step 5 check. Then give a fresh sonnet subagent the new diff plus the blocking findings only, and ask whether each one is resolved (yes/no with evidence). All yes: that reply, starting with `APPROVED`, is the approval. Any no: do not merge; open the PR, post the open findings, and escalate to the user.
-3. There is no second review round.
-
-## 7. Commit + PR
-
-1. Commit with one line, no body, no trailer: the repo's style, else `fix: <subject>`.
-2. Push the branch: with the merge allow rule the L1 merge policy covers the push; without it, ask the user before pushing. Then open the PR with the body from [shared/git.md](shared/git.md). Evidence holds the repro command with its red-then-green output; Cause names the hypothesis that held.
-3. Post the reviewer's findings as a PR comment with their `[R1-<n>]` tags, then the approval as a separate comment starting with `APPROVED`.
-
-No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: open an MR with the Problem / Cause / Fix / Evidence description and skip step 8.
+1. No blocking finding: the reviewer's comment is the approval.
+2. Blocking findings: make one fix pass on them, re-run the tests and the step 5 check, commit one line and push. Then a fresh sonnet subagent gets the diff since the reviewed SHA plus the blocking findings only, answers whether each one is resolved (yes/no with evidence), and posts that as a PR comment. All yes: its first line is `APPROVED (round 2) at <new head sha>`, and that is the approval. Any no: do not merge; escalate the open findings to the user.
+3. There is no second review round. You never post or edit an approval yourself, and any later commit (a non-blocking fix too) voids it until the post-fix check runs again on the new head ([shared/review.md](shared/review.md)).
 
 ## 8. Merge
 

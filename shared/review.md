@@ -15,7 +15,10 @@
 
 ## Approval
 
-GitHub refuses self-approval, so approval is a PR/MR comment whose first word is `APPROVED`.
+GitHub refuses self-approval, so approval is a PR/MR comment whose first line is `APPROVED (round <n>) at <sha>`. `<sha>` is the PR head commit the reviewer read (`gh pr view <n> --json headRefOid --jq .headRefOid`); the reviewer checks the head again just before posting and re-reviews if it moved.
+
+- Only the reviewer posts it. The author and the fixer never post, edit, or repeat an approval.
+- Any commit after `<sha>` voids the approval. Before merge, a fresh agent re-checks the new diff (`git diff <sha>..<new head>`) against the contract and, if it passes, posts a new `APPROVED (round <n>) at <new head>`. For L1 this is the post-fix check (it counts as round 2); for L2+ it is the next review round.
 
 ## Rounds
 
