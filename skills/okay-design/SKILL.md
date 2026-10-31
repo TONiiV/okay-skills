@@ -23,6 +23,7 @@ Supporting files in this folder:
 - [briefs.md](briefs.md): prompts for the variant builders, the switcher, the builder of the chosen design, the critic and the fixer, plus the switcher and contact-sheet snippets.
 - [shoot.js](shoot.js): dependency-free screenshots at exact widths.
 - [a11y-probe.js](a11y-probe.js): a console probe for objective accessibility failures.
+- [style-seed.js](style-seed.js): draws a random style seed and maps it to one pick per style axis, so variants do not converge on one template.
 
 This is lane L5, so the main thread is the PM: it runs the intake, writes the briefs, dispatches agents, takes screenshots and talks to the user. It does not write or review UI code. Every code change below goes to a subagent.
 
@@ -91,7 +92,13 @@ Keep screenshots under `.scratch/design/<slug>/{before,after,variants}/`. If `.s
 
 **Three variants, by default.** Fewer only when the user says so (for example "just one", "two options"); then build exactly what they asked for, state the count with their instruction as the reason, and continue the flow with that count. More than three is never useful.
 
-1. **Write three direction briefs.** The three must differ in structure, not just in colour. Choose at least two of these axes and make every variant take a different position on them:
+1. **Draw one style seed per variant.** Run `node style-seed.js` from this folder once per variant. Each run draws a fresh random seed and prints its picks for palette and base hue, type, scale, layout, density, shape, texture and motion. The seed keeps variants from all sliding into the same template.
+   - Each variant follows its seed's picks. It may break a pick only for accessibility or contrast, and says which and why.
+   - The user's request and the project's design system (see Precedence) win: the seed fills only the axes they leave open. Mark the others `user` or `project`.
+   - Two seeds with the same layout: draw again for the later variant, so structures still differ.
+   - Record the seed in the direction brief, at the top of the variant's entry file (`style-seed: <n>`) and in the step 5 reply. `node style-seed.js <n>` reproduces the picks.
+   - No shell (for example claude.ai without code execution): say so, choose a seed yourself and derive the picks by hand from the tables in [style-seed.js](style-seed.js), using the rule in its header.
+2. **Write three direction briefs**, built on the seeds' picks. The three must differ in structure, not just in colour. Choose at least two of these axes and make every variant take a different position on them:
    - layout archetype (single narrative column, split panes, dense dashboard grid, sidebar plus canvas, card wall, list-first)
    - information hierarchy and the primary affordance (what the eye lands on and what the first click is)
    - density (airy to compact)
@@ -99,17 +106,17 @@ Keep screenshots under `.scratch/design/<slug>/{before,after,variants}/`. If `.s
    - colour strategy (monochrome with one accent, warm neutral, high contrast, dark-first)
 
    Test: if two directions can be described with the same sentence, redo one of them with an explicit "do not use <the shared pattern>" line. Three card grids with three palettes is wallpaper.
-2. **Build in parallel.** Spawn one fresh agent per variant in the same message, each with its own direction and its own directory (`variants/a/`, `variants/b/`, `variants/c/`), so no two agents touch the same file. Use the variant-builder brief in [briefs.md](briefs.md). Model: sonnet, high effort. Tell each builder to load `frontend-design` (and `landing-page-design` for a landing page) when step 1.3 found them; otherwise to follow [CHECKLIST.md](CHECKLIST.md).
-3. **Follow the prototype playbook** (borrowed from pstack): speed over polish, throwaway code, no tests, no abstractions, real data or stubs, read-only. The rigor is in picking the right design cheaply.
-4. **One switcher.** After the builders return, one haiku agent wires them behind a single switcher (spec in [briefs.md](briefs.md)): a `?variant=a|b|c` search param, a small fixed bar with previous and next buttons and the variant name, and arrow keys. Prefer to host the variants on the real route so they sit next to the real header, data and density; use a throwaway `prototype` route only when no host page exists. The switcher is hidden in production builds.
-5. **Keep it off main.** Create `prototype/<slug>` from the base branch before writing, commit the variants and the switcher there, and never merge it. Push it only with the user's OK. Contributor mode: stays local. Commit messages follow [shared/git.md](shared/git.md).
-6. **Check the result yourself.** Open each variant, confirm it runs from the one command or URL, and confirm the three are visibly different. A variant that crashes or duplicates another goes back to its builder once.
+3. **Build in parallel.** Spawn one fresh agent per variant in the same message, each with its own direction and its own directory (`variants/a/`, `variants/b/`, `variants/c/`), so no two agents touch the same file. Use the variant-builder brief in [briefs.md](briefs.md). Model: sonnet, high effort. Tell each builder to load `frontend-design` (and `landing-page-design` for a landing page) when step 1.3 found them; otherwise to follow [CHECKLIST.md](CHECKLIST.md).
+4. **Follow the prototype playbook** (borrowed from pstack): speed over polish, throwaway code, no tests, no abstractions, real data or stubs, read-only. The rigor is in picking the right design cheaply.
+5. **One switcher.** After the builders return, one haiku agent wires them behind a single switcher (spec in [briefs.md](briefs.md)): a `?variant=a|b|c` search param, a small fixed bar with previous and next buttons and the variant name, and arrow keys. Prefer to host the variants on the real route so they sit next to the real header, data and density; use a throwaway `prototype` route only when no host page exists. The switcher is hidden in production builds.
+6. **Keep it off main.** Create `prototype/<slug>` from the base branch before writing, commit the variants and the switcher there, and never merge it. Push it only with the user's OK. Contributor mode: stays local. Commit messages follow [shared/git.md](shared/git.md).
+7. **Check the result yourself.** Open each variant, confirm it runs from the one command or URL, and confirm the three are visibly different. A variant that crashes or duplicates another goes back to its builder once.
 
 ## 5. Show
 
 Capture each variant at 1440 and 320 in the default state (add the state that matters most when the task is about one). Put them side by side with the contact-sheet snippet from [briefs.md](briefs.md), view it, and show the user the sheet plus the individual images.
 
-Reply with, in this order: the run command or URL and the `?variant=` keys, the sheet, then one line per variant naming its direction and its main trade-off. Say which screenshot tool you used. End with the single question in step 6.
+Reply with, in this order: the run command or URL and the `?variant=` keys, the sheet, then one line per variant naming its style seed, its direction and its main trade-off. Say which screenshot tool you used. End with the single question in step 6.
 
 ## 6. Pick
 

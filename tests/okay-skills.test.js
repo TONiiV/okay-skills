@@ -137,6 +137,33 @@ for (const name of okaySkills) {
   });
 }
 
+describe('okay-design style-seed.js', () => {
+  const { execFileSync } = require('node:child_process');
+  const SEED = path.join(SKILLS, 'okay-design', 'style-seed.js');
+  const run = (...a) => execFileSync(process.execPath, [SEED, ...a], { encoding: 'utf-8' });
+
+  it('gives the same picks for the same seed', () => {
+    assert.equal(run('12345'), run('12345'));
+    assert.deepEqual(JSON.parse(run('12345', '--json')), JSON.parse(run('12345', '--json')));
+  });
+
+  it('gives different picks across seeds', () => {
+    const picks = new Set([1, 2, 3, 4, 5, 6, 7, 8].map((s) => {
+      const { seed, ...rest } = JSON.parse(run(String(s), '--json'));
+      return JSON.stringify(rest);
+    }));
+    assert.equal(picks.size, 8);
+  });
+
+  it('prints a drawn seed and every axis when no seed is given', () => {
+    const out = run();
+    assert.match(out, /^seed: \d+$/m);
+    for (const axis of ['hue', 'palette', 'type', 'scale', 'layout', 'density', 'shape', 'texture', 'motion']) {
+      assert.match(out, new RegExp(`^${axis}: \\S`, 'm'));
+    }
+  });
+});
+
 describe('okay-design shoot.js', () => {
   const { spawn } = require('node:child_process');
   const http = require('node:http');

@@ -27,6 +27,7 @@ You build ONE throwaway UI variant. Speed over polish: no tests, no abstractions
 <design context block>
 
 Your direction: <variant letter and a one-paragraph direction: layout archetype, hierarchy and primary affordance, density, typographic voice, colour strategy>
+Your style seed: <seed and its picks from style-seed.js; axes fixed by the user or the project marked as such>
 The other variants take these directions, so do NOT build anything like them: <one line each>
 
 Rules:
@@ -35,7 +36,8 @@ Rules:
 3. Structure must differ from the other variants: different layout, different hierarchy, different primary affordance. A palette swap is a failure.
 4. If frontend-design / landing-page-design is installed, load it first and follow it; otherwise follow CHECKLIST.md sections 3 to 6.
 5. It must work at 320 and 1440 without horizontal scroll.
-6. Do not interview the user. Everything you need is above.
+6. Follow every pick of your style seed. Break one only for accessibility or contrast, and say which and why in your return. Put `style-seed: <n>` in a comment at the top of your entry file.
+7. Do not interview the user. Everything you need is above.
 
 Return: the files you wrote, and one sentence on what makes this variant different.
 ```
