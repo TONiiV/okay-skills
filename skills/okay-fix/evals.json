@@ -1,0 +1,85 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-fix invocation with a small bug",
+    "prompt": "/okay-fix formatPrice(0) returns an empty string instead of \"$0.00\"",
+    "expectations": ["okay-fix runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese bug report about a wrong return value",
+    "prompt": "parseDate 在闰年 2 月 29 日返回 null，帮我修一下",
+    "expectations": ["okay-fix runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Off-by-one bug report without the skill name",
+    "prompt": "The CSV export always drops the last row. Can you fix it?",
+    "expectations": ["okay-fix runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Architecture request belongs to okay-think",
+    "prompt": "设计一个新的通知系统架构，要支持邮件、短信和推送，先别写代码",
+    "expectations": ["okay-fix does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Performance work belongs to okay-perf",
+    "prompt": "Cut the p95 latency of the /search endpoint by 30% and show me before/after numbers",
+    "expectations": ["okay-fix does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "UI design request belongs to okay-design",
+    "prompt": "Add a dark mode toggle to the settings page and show me three design options",
+    "expectations": ["okay-fix does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Happy path: small bug fixed end to end",
+    "prompt": "/okay-fix slugify(\"Hello  World\") returns \"hello--world\"; it should collapse repeated spaces into one dash",
+    "expectations": [
+      "Shows a repro command and its failing output before any source file is edited",
+      "Greps the callers of slugify before changing it",
+      "Adds a regression test that fails before the fix and passes after it",
+      "Reports the L1 threshold check with the measured file and line counts",
+      "Spawns a separate sonnet reviewer whose prompt contains the diff and the bug report but no summary of the fix",
+      "Creates exactly one commit with a one-line message and no trailer",
+      "Opens a PR whose body has Problem, Cause, Change, Evidence, Not touched and Risks sections and no AI attribution",
+      "Merges only after a PR comment starting with APPROVED and green CI",
+      "Writes the okay-reflect-pending marker inside the git dir after delivering"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "L1 threshold exceeded: escalate instead of shipping",
+    "prompt": "/okay-fix user ids overflow as ints; change the id type to a UUID string everywhere in the API and the database",
+    "expectations": [
+      "Stops before committing",
+      "Sends an escalation message that starts with 'L1 exceeded:' and names the data-structure or public-interface change",
+      "Suggests a lane other than L1",
+      "Creates no commit, no PR and no merge"
+    ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "Blocking review finding gets one fix pass, no second review round",
+    "prompt": "/okay-fix getPage(n) skips the first item when n is 1",
+    "expectations": [
+      "When the reviewer reports a [R1-n] blocking finding, makes exactly one fix pass",
+      "After the fix pass, a fresh agent checks only the listed blocking findings",
+      "Does not start a second full review round",
+      "Does not merge if any blocking finding is still unresolved"
+    ]
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "name": "okay-skills",
+  "version": "0.1.0",
+  "description": "okay-* development skill pack: lane routing, independent review, one PR per task, post-task reflection.",
+  "author": {
+    "name": "TONiiV",
+    "url": "https://github.com/TONiiV"
+  },
+  "repository": "https://github.com/TONiiV/okay-skills"
+}
