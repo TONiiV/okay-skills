@@ -18,7 +18,7 @@ Tracker: github
 
 Every okay-* skill folder holds:
 
-- `SKILL.md`: frontmatter keys only from `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`. `name` equals the folder name. `license: MIT` is required. `description` at most 1024 chars.
+- `SKILL.md`: frontmatter keys only from `name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`. `name` equals the folder name. `license: MIT` is required. `description` at most 1024 chars. `description` contains no `<` or `>` (claude.ai rejects them as XML tags).
 - `evals.json`: an array of `{id, kind, description, prompt, expectations}` with `kind` one of `positive`, `negative`, `behavioural`; at least 3 positive, 2 negative, 1 behavioural.
 - `NOTICE.md` (optional): credits for borrowed material. Attribution goes here, per skill.
 - `shared/`: generated. Never edit it by hand.
@@ -30,6 +30,7 @@ A skill references shared rules only as `shared/<file>.md`, relative to its own 
 1. After any change in `shared/`, run `npm run build` and commit the generated copies.
 2. Run `npm test` before every commit. It fails when a copy drifts, a frontmatter key is outside the allowed six, a link escapes a skill folder, or evals fall below the minimums.
 3. Validate the plugin with `claude plugin validate .`.
+4. CI (`.github/workflows/test.yml`) runs `npm test` and `npm run package` on every PR and on pushes to main.
 
 ## Hooks
 
