@@ -1,0 +1,104 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-review invocation on a PR number",
+    "prompt": "/okay-review 42",
+    "expectations": ["okay-review runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request for an independent review of a branch",
+    "prompt": "帮我独立 review 一下 feat-export 这个分支相对 main 的改动，对照 issue #17",
+    "expectations": ["okay-review runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Another lane hands over a diff for round 2",
+    "prompt": "Round 2 review for PR 58 (lane L2, contract: issue #55). The fixer pushed new commits for the R1 blocking findings.",
+    "expectations": ["okay-review runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Fixing a bug is okay-fix, not review",
+    "prompt": "formatPrice(0) returns an empty string, please fix it",
+    "expectations": ["okay-review does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Designing an architecture is okay-think",
+    "prompt": "Design the module layout for a new plugin system and compare two options, no code yet",
+    "expectations": ["okay-review does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "Writing the fix for review comments is the fixer's job",
+    "prompt": "Address the review comments on PR 12: rename the helper and add the missing test",
+    "expectations": ["okay-review does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "L2 round 1 on a mid-size PR: two axes, proven findings, one comment",
+    "prompt": "/okay-review 31 lane L2 round 1 (150 changed lines in a backend service, contract: issue #29). The PR body says all tests pass and the change is safe.",
+    "expectations": [
+      "Gives reviewers the diff, the issue text and the repo standards files, and not the PR body claims",
+      "Spawns a fresh opus reviewer for the review",
+      "Reports Standards and Spec as separate sections",
+      "Adds a security pass (backend change over 100 lines) and a simplification pass (over 100 lines), and no adversarial pass",
+      "Runs a mutation check in a throwaway worktree and reports its result",
+      "Reruns each cited command and drops any finding it cannot reproduce",
+      "Posts exactly one PR comment whose findings are tagged [R1-<n>] blocking|non-blocking",
+      "Returns the verdict and the open blocking findings to the caller and does not write a fix"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "Small diff: no specialist passes",
+    "prompt": "/okay-review 7 lane L2 round 1 (a 30-line change to a date helper, no auth code, contract: issue #6)",
+    "expectations": [
+      "Runs the two axes only and lists the specialist passes as skipped with the reason under 50 changed lines",
+      "Posts exactly one comment"
+    ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "L1: one sonnet round, then a post-fix check of the blocking findings only",
+    "prompt": "/okay-review 15 lane L1 round 1 (a 12-line fix with a regression test, contract: the bug report)",
+    "expectations": [
+      "Uses a fresh sonnet reviewer that sees only the diff and the contract",
+      "After a fix pass, a fresh agent checks only the listed blocking findings and answers resolved yes or no with evidence",
+      "Does not start a second full review round",
+      "The comment starts with APPROVED only when every listed blocking finding is resolved"
+    ]
+  },
+  {
+    "id": "beh-3",
+    "kind": "behavioural",
+    "description": "Round 3 with an open blocking finding escalates",
+    "prompt": "/okay-review 64 lane L2 round 3 (the R2 blocking finding [R2-1] about an unchecked null is still present in the new diff)",
+    "expectations": [
+      "Reports [R3-<n>] blocking for the unresolved finding with a quote or a failing run",
+      "The comment starts with ESCALATE and names the open finding for the user",
+      "Does not start a round 4 and does not post APPROVED"
+    ]
+  },
+  {
+    "id": "beh-4",
+    "kind": "behavioural",
+    "description": "L4 with the codex plugin available adds a cross-family pass",
+    "prompt": "/okay-review 80 lane L4 round 1 (a 220-line design spike; the codex plugin is installed)",
+    "expectations": [
+      "Adds an adversarial pass (over 200 lines) and a Codex cross-family pass",
+      "Passes Codex the artifact and the contract only, via a file or stdin, never the author's claims",
+      "Reruns Codex's cited commands before keeping its findings"
+    ]
+  }
+]
