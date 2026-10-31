@@ -1,0 +1,123 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit /okay-think invocation with an architecture question",
+    "prompt": "/okay-think how should we structure sync between the mobile app and the server so edits made offline merge cleanly",
+    "expectations": ["okay-think runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to design a hard-to-reverse structure without code",
+    "prompt": "设计一个新的通知系统架构，要支持邮件、短信和推送，先别写代码，把决策记下来",
+    "expectations": ["okay-think runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Build-vs-adopt question with a hard-to-reverse choice, skill not named",
+    "prompt": "We have to pick between an event-sourced order model and plain tables. It is expensive to change later. Help me decide and write it up.",
+    "expectations": ["okay-think runs"]
+  },
+  {
+    "id": "pos-3",
+    "kind": "positive",
+    "description": "Asks for an ADR and a spec for a structural change",
+    "prompt": "We want to split the monolith's billing module into its own service. Work out the design, record the decision, and publish a spec.",
+    "expectations": ["okay-think runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Small bug report belongs to okay-fix",
+    "prompt": "parseDate returns null for Feb 29 on leap years, please fix it",
+    "expectations": ["okay-think does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "UI look and feel belongs to okay-design",
+    "prompt": "Redesign the settings page so it feels calmer and works on a phone",
+    "expectations": ["okay-think does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "A planned feature with an existing ticket skips architecture",
+    "prompt": "Implement issue #42 as written, the spec is already approved",
+    "expectations": ["okay-think does not run"]
+  },
+  {
+    "id": "neg-3",
+    "kind": "negative",
+    "description": "Performance claim belongs to okay-perf",
+    "prompt": "Make the nightly import 2x faster and show before/after numbers",
+    "expectations": ["okay-think does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Full flow on a design with a risky scale assumption",
+    "prompt": "/okay-think replace our polling job with a queue-based fan-out for 50k subscribers; I'm not sure the queue keeps up. The repo has docs/decisions/ with 4 ADRs and the codex plugin is installed.",
+    "expectations": [
+      "Runs a short okay-grilling round that names the decisions, the risky assumption as a falsifiable sentence, and the trial signals, and asks no question it can look up",
+      "Writes the caller's usage before the shape, and produces at least two structurally different designs from fresh opus agents each given a distinct lens",
+      "Screens the candidates against the design red flags",
+      "Sends the shuffled, unlabelled candidates to a read-only Codex judge scored against the rubric, and does not let the judge pick the winner",
+      "Builds 1 to 3 spikes through okay-prototype that exercise the queue-throughput assumption, states the count with the reason, and measures it with repeated fresh-process runs and reports the machine",
+      "Stops and waits for the user to try the spikes and give worked / did not / surprised feedback before writing the ADR or the spec",
+      "Writes the ADR into the existing docs/decisions/ in its numbering, not a new docs/adr/",
+      "Publishes the spec through okay-to-spec linking the prototype branch, and creates no production source file"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "Effort too big for one session becomes wayfinder decision tickets",
+    "prompt": "/okay-think move our whole platform (auth, billing, search, notifications) from a monolith to services. I only have a loose idea of the order.",
+    "expectations": [
+      "Applies the size gate and decides one session cannot hold the effort",
+      "Names the destination first, then grills breadth-first to find the frontier",
+      "Creates a map issue labelled wayfinder:map and decision tickets labelled wayfinder:<type> (research, prototype, grilling, task) on the tracker chosen by shared/tracker.md, with blocking edges wired in a second pass",
+      "Keeps unspecifiable questions in a Not yet specified section instead of creating tickets for them",
+      "Resolves no ticket by hand in the charting session and stops after delivering the map link",
+      "Writes no production code and no ADR in the charting session"
+    ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "ADR gate: a cheap-to-reverse choice gets no ADR",
+    "prompt": "/okay-think pick the folder layout for our new CLI's internal helpers; we can rename folders any time. The repo already has docs/adr/.",
+    "expectations": [
+      "Applies the three-part ADR test and finds the decision is not hard to reverse",
+      "Writes no ADR and says in one line which test failed",
+      "Still ends with a rationale and a spec, or says the question needs neither",
+      "Creates no second decisions folder"
+    ]
+  },
+  {
+    "id": "beh-3",
+    "kind": "behavioural",
+    "description": "Codex unavailable: a fresh opus judge, no blocking",
+    "prompt": "/okay-think choose between a shared database and per-service databases for the reporting module (the codex plugin is not installed)",
+    "expectations": [
+      "Uses a fresh opus sub-agent as the judge and states judge: opus (codex unavailable)",
+      "Does not block or ask the user to install Codex",
+      "The judge is read-only and gets the candidates without the author lenses or any recommendation"
+    ]
+  },
+  {
+    "id": "beh-4",
+    "kind": "behavioural",
+    "description": "Contributor mode leaves no footprint",
+    "prompt": "/okay-think design the caching layer for the pricing service (this repo matches a contributor pattern in ~/.claude/okay.local.md)",
+    "expectations": [
+      "Writes no CONTEXT.md, no ADR and no docs file in the repo",
+      "Creates no issue or comment; the rationale and spec stay under .scratch/ kept out of git through .git/info/exclude",
+      "Keeps the prototype branch local and never pushes it",
+      "Never merges anything"
+    ]
+  }
+]
