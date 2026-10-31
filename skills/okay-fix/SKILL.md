@@ -1,6 +1,7 @@
 ---
 name: okay-fix
 description: "L1 lane of the okay-* pack: small fixes and bug fixes. Reproduces the bug, fixes it at the root cause with a regression test, checks the L1 threshold (escalates if exceeded), gets one fresh-agent review of the diff, commits one line, and opens a PR that auto-merges on APPROVED + green CI. Use for /okay-fix <bug>, or when the user reports something broken, throwing, or wrong that looks small (a few lines, at most 2 files). Not for new features, architecture, UI design, or performance work."
+license: MIT
 ---
 
 # okay-fix

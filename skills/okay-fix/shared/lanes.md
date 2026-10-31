@@ -13,14 +13,14 @@ Every dev request gets exactly one lane. A compound request is split into sub-ta
 
 ## L1 threshold
 
-A change is L1 only when ALL of these hold, measured on the full diff against the base branch (test files and untracked files included):
+A change is L1 only when ALL of these hold, measured on the full diff against the base branch, untracked files included. Test files do not count toward the file or line budget; count only non-test files:
 
 1. At most 2 files changed.
 2. Fewer than 50 changed lines (added + removed).
 3. No public interface change (exported signature, CLI flag, HTTP route, config key, schema) and no data-structure change (persisted shape, wire format, type of a shared field).
 4. Nothing touching auth, payment, or data deletion.
 
-Measure with `git add -N . && git diff --numstat <base>`.
+Measure with `git add -N . && git diff --numstat <base>`, then drop test files (`*.test.*`, `*.spec.*`, `test/`, `tests/`, `__tests__/`) from the count.
 
 ## Escalation
 
