@@ -108,7 +108,7 @@ Cloud sessions do not load plugins or `~/.claude/`; uploading the skills to your
 npm run package   # builds, then writes dist/<skill>.zip for every okay-* skill (dist/ is gitignored); needs Node 20.15+
 ```
 
-Then, for each zip in `dist/`: claude.ai > Settings > Capabilities > Skills > Upload skill. Upload all fourteen: `okay-dev` calls the others by name. Each zip has the skill folder as its root (`okay-fix/SKILL.md`).
+Then upload the zips in `dist/`: claude.ai > Customize > Skills > Add > Upload skill. You can select several zips in one upload. Upload all fourteen: `okay-dev` calls the others by name. Each zip has the skill folder as its root (`okay-fix/SKILL.md`).
 
 In the cloud: skill descriptions route the request (there is no CLAUDE.md pointer); there is no `okay.local.md` (contributor mode is off) and usually no Jev key (`okay-dev` classifies itself); the plugin hooks do not run, so reflection relies on the last step of each task list.
 
@@ -119,7 +119,7 @@ claude plugin marketplace update okay-skills
 claude plugin update okay-skills@okay-skills
 ```
 
-For claude.ai, run `npm run package` again and re-upload the zips.
+For claude.ai, run `npm run package` again and re-upload the zips the same way.
 
 ## paper-tree
 
