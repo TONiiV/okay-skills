@@ -60,13 +60,12 @@ Read before you ask: `CONTEXT.md`, the ADRs in the area, `AGENTS.md`, `CONSTRAIN
 
 ## 3. Size gate
 
-Decide now whether one session can hold this. It cannot when any of these holds:
+Decide now whether one session can hold this. It cannot when either of these holds:
 
 - more than 3 spikes would be needed to answer the open questions;
-- the work spans several subsystems whose interaction you cannot yet state;
-- after one grilling round the frontier is still mostly fog.
+- the work spans several subsystems whose interaction you cannot yet state.
 
-Too big: follow [WAYFINDER.md](WAYFINDER.md) (chart the map, resolve one decision ticket per session) and stop there. Otherwise continue.
+Too big: follow [WAYFINDER.md](WAYFINDER.md) (chart the map, resolve one decision ticket per session) and stop there. Otherwise continue; step 4 re-checks the gate after its first grilling round.
 
 ## 4. Grill the decisions
 
@@ -75,6 +74,8 @@ Run `okay-grilling`, short, per the prototype-first rule in [shared/lanes.md](sh
 1. The decisions the design must make (not the whole spec).
 2. The **risky assumption**: the one belief that, if false, sinks a candidate. Name it as a falsifiable sentence.
 3. The trial signals: what the user will do with a spike and what would count as "worked". For a performance or scale assumption, the number that decides.
+
+After the first round, finish the size gate: if the frontier is still mostly fog, one session cannot hold this. Follow [WAYFINDER.md](WAYFINDER.md) and stop there.
 
 Facts you can look up are never asked. Use `okay-domain-modeling` the moment a fuzzy term appears, and write the resolved term to `CONTEXT.md` (glossary only; none in contributor mode).
 
@@ -95,7 +96,7 @@ Stuck on one shape after two tries: say so and ask the user for a different cons
 Score the candidates against [RUBRIC.md](RUBRIC.md) with a **cross-family judge**:
 
 1. Codex through the codex plugin's `codex:rescue` subagent, read-only (it may read the repo, it must not write). Write the brief to a file and pass it by file or stdin; never interpolate candidates into a quoted shell argument.
-2. Codex missing or errored: a fresh opus sub-agent, high effort, said plainly as `judge: opus (codex unavailable)`. Never block on Codex.
+2. Codex missing, errored, or contributor mode on ([shared/contributor-mode.md](shared/contributor-mode.md): nothing goes to Codex): a fresh opus sub-agent, high effort, said plainly as `judge: opus (codex unavailable)`. Never block on Codex.
 
 The judge sees the problem, constraints, usage and the candidates in shuffled order labelled A/B/C, without the author lens or any recommendation. It returns scores with a quote per score, the ranking, and the assumption each candidate depends on. Rerun any command it cites before relying on it. The judge ranks and sharpens what to test; **it does not decide**. The user's trial does.
 
