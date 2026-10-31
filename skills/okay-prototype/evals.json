@@ -1,0 +1,61 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit prototype request for a new product",
+    "prompt": "/okay-prototype a habit tracker app, I do not know yet what the core loop should be",
+    "expectations": [
+      "okay-prototype runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to sanity-check a state model",
+    "prompt": "先做个原型验证一下订单状态机对不对，别写正式代码",
+    "expectations": [
+      "okay-prototype runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Architecture spike for a risky assumption",
+    "prompt": "Before we commit, spike whether SQLite can handle 50k writes per minute for our event log",
+    "expectations": [
+      "okay-prototype runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Planned feature with a spec skips prototyping",
+    "prompt": "Implement spec #9, it is fully approved and the tickets exist",
+    "expectations": [
+      "okay-prototype does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Small bug fix is not a prototype",
+    "prompt": "/okay-fix the pagination total is off by one",
+    "expectations": [
+      "okay-prototype does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Count and reason, one switcher, one command, prototype branch, feedback record",
+    "prompt": "Prototype what the onboarding flow should look like for our note-taking app.",
+    "expectations": [
+      "States the sample count (1 to 3) and the reason for it",
+      "Puts the samples behind one switcher (for example ?variant=) rather than separate apps",
+      "Gives a single command or URL that runs the prototype",
+      "Keeps the work on a prototype/<name> branch and does not merge it to the base branch",
+      "After the trial, records feedback under worked / did not / surprised me, and names okay-to-spec as the consumer",
+      "Does not write the spec before the trial"
+    ]
+  }
+]

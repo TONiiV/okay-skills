@@ -1,0 +1,60 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit spec request after a design chat",
+    "prompt": "/okay-to-spec turn what we just discussed into a spec",
+    "expectations": [
+      "okay-to-spec runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to write up the plan as a spec",
+    "prompt": "把刚才讨论的结论整理成一份 spec 发到 tracker 上",
+    "expectations": [
+      "okay-to-spec runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Publish the agreed plan as a spec issue",
+    "prompt": "We agreed on the plan. Write it up as a spec issue so the team can break it into tickets.",
+    "expectations": [
+      "okay-to-spec runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Splitting a spec into work items is okay-to-tickets",
+    "prompt": "Break this spec into tickets with blocking edges",
+    "expectations": [
+      "okay-to-spec does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Open design questions need grilling, not synthesis",
+    "prompt": "I have a vague idea for a plugin system but no decisions yet, interview me about it",
+    "expectations": [
+      "okay-to-spec does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Spec consumes prototype trial feedback and uses the tracker adapter",
+    "prompt": "Write the spec for the share-link feature. The prototype is on prototype/share-link and FEEDBACK.md says: worked - variant B copy flow; did not - expiry picker; surprised - users expected a QR code.",
+    "expectations": [
+      "Does not interview the user",
+      "Reads the trial-feedback record and turns its entries into user stories or implementation decisions",
+      "Links the prototype/share-link branch in Further Notes",
+      "Publishes via the tracker adapter (Linear parent issue labelled spec, GitHub or GitLab issue, or a local file), not a hard-coded tracker",
+      "Does not include file paths or code snippets except decision-rich prototype snippets"
+    ]
+  }
+]
