@@ -2,7 +2,7 @@
 
 ## Base branch
 
-Base branch: `b=$(git symbolic-ref --short -q refs/remotes/origin/HEAD) && b=${b#origin/} || b=main`. It falls back to `main` when `origin/HEAD` is unset (a repo made with `git remote add`, not `git clone`). Branch off, diff against, and open PRs to `origin/$b`.
+Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin/main)`. It falls back to `origin/main` when `origin/HEAD` is unset (a repo made with `git remote add`, not `git clone`). Each Bash call may run in a fresh shell, so never keep it in a variable: paste the substitution into the same command that uses it. Branch off, diff against, and open PRs to that ref; wherever a skill says `<base>`, use it.
 
 ## Commits
 
