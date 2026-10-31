@@ -48,6 +48,8 @@ Suggested lane: <L2|L3|L4|L5|perf>. Next: run /okay-dev with this task, or tell 
 
 No commit, no PR, no merge after an escalation.
 
+A breach found after the PR is open (an L1 fix pass): post the same message as a comment on that PR, push nothing more, and do not merge. The new lane continues on that PR.
+
 ## Task size
 
 | Size | Files | Rule |

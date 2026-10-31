@@ -76,13 +76,13 @@ Measure the whole diff as [shared/lanes.md](shared/lanes.md) says. Any condition
 1. Commit with one line, no body, no trailer: the repo's style, else `fix: <subject>`.
 2. Push the branch: with the merge allow rule the L1 merge policy covers the push; without it, ask the user before pushing. Then open the PR with the body from [shared/git.md](shared/git.md). Evidence holds the repro command with its red-then-green output; Cause names the hypothesis that held.
 
-No remote: commit on the branch and skip the PR (`skip: no remote`); the reviewer below returns its reply instead of posting. Contributor mode: open an MR with the Problem / Cause / Fix / Evidence description, have the reviewer return its reply instead of posting, and skip step 8.
+No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: commit, but push and open the MR (Problem / Cause / Fix / Evidence description) only after step 7, and skip step 8. In both cases step 7 reviews the local range and posts nothing ([shared/review.md](shared/review.md)).
 
 ## 7. Review
 
 One round, by a fresh subagent on the sonnet tier with high effort, separate from you. Give it only:
 
-- the artifact: the PR number and its head SHA (no remote: `git diff <base>` and `git rev-parse HEAD`);
+- the artifact: the PR number and its head SHA (no PR: `git diff <base>` and `git rev-parse HEAD`);
 - the contract: the bug report in the user's own words, the repro command, and the repo standards files (AGENTS.md, CLAUDE.md, CONSTRAINTS.md when present).
 
 Never give it your explanation, your hypotheses, or your claims about what passes. Use this prompt:
@@ -93,18 +93,18 @@ Report on two axes, separately: standards (repo rules, smells) and spec (does th
 Report only findings you proved: quote the line, or show a command you ran and its output.
 Invert one condition the diff adds and run the tests; a suite that stays green is a finding.
 Tag each finding [R1-<n>] blocking|non-blocking.
-Post your reply as one PR comment yourself. If there is no blocking finding, its first line is: APPROVED (round 1) at <head sha>
+Post your reply as one PR comment yourself; with no PR, return it and post nothing. If there is no blocking finding, its first line is: APPROVED (round 1) at <head sha>
 ```
 
 Then:
 
 1. No blocking finding: the reviewer's comment is the approval.
-2. Blocking findings: make one fix pass on them, re-run the tests and the step 5 check, commit one line and push. Then a fresh sonnet subagent gets the diff since the reviewed SHA plus the blocking findings only, answers whether each one is resolved (yes/no with evidence), and posts that as a PR comment. All yes: its first line is `APPROVED (round 2) at <new head sha>`, and that is the approval. Any no: do not merge; escalate the open findings to the user.
+2. Blocking findings: make one fix pass on them, re-run the tests and the step 5 check, commit one line and push. Then a fresh sonnet subagent gets the diff since the reviewed SHA plus the blocking findings only, answers whether each one is resolved (yes/no with evidence), and posts that as a PR comment. All yes: its first line is `APPROVED (round 2) at <new head sha>`, and that is the approval. Any no: do not merge; escalate the open findings to the user. A step 5 breach here, with the PR already open: escalate on that PR as [shared/lanes.md](shared/lanes.md) says.
 3. There is no second review round. You never post or edit an approval yourself, and any later commit (a non-blocking fix too) voids it until the post-fix check runs again on the new head ([shared/review.md](shared/review.md)).
 
 ## 8. Merge
 
-Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Never merge without the `APPROVED` comment.
+Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Never merge without the reviewer's approval at the PR head.
 
 ## 9. Deliver
 

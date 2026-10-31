@@ -156,7 +156,7 @@ A **fresh agent** (opus, high effort, never the builder or a variant author) cri
 
 Findings follow [shared/review.md](shared/review.md): `[R<round>-<n>] blocking|non-blocking`, each proven by a screenshot file and region, a command and its output, or a measured value. P0 and P1 are blocking. A finding without proof is dropped.
 
-Blocking findings go to a separate fixer agent (sonnet, high; the critic never fixes). Then return to step 8 for the affected states and widths, and run a fresh critic on the new result. The 3-round cap and the escalation to the user from [shared/review.md](shared/review.md) apply. Post the final critique with the PR.
+Blocking findings go to a separate fixer agent (sonnet, high; the critic never fixes). Then return to step 8 for the affected states and widths, and run a fresh critic on the new result. The 3-round cap and the escalation to the user from [shared/review.md](shared/review.md) apply. Post the final critique with the PR. It is not an approval: only the okay-review reviewer posts one ([shared/review.md](shared/review.md)).
 
 ## 10. PR and review
 

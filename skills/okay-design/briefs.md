@@ -142,7 +142,7 @@ Rules:
 1. Report only findings you proved. Cite a screenshot file and region, a command and its output, or a measured value. Drop anything you cannot prove.
 2. Tag each finding [R<round>-<n>] blocking|non-blocking, with severity P0 to P3 (P0 and P1 blocking), per CHECKLIST.md section 12.
 3. Separate the two parts in your report: Critique, then Audit. Give a score from 0 to 4 for each of hierarchy, consistency, states, responsiveness, accessibility, with one line of evidence each.
-4. If there is no blocking finding, your reply starts with APPROVED.
+4. Your reply starts with CRITIQUE: PASS when there is no blocking finding, else CRITIQUE: BLOCKING. Never start it with APPROVED; only the code reviewer approves.
 5. Do not suggest redesigns that change the chosen direction; judge the result against its own brief.
 ```
 

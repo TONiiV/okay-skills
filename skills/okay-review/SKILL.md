@@ -1,6 +1,6 @@
 ---
 name: okay-review
-description: "Independent reviewer used by every lane of the okay-* pack. Takes a PR/MR number or a base..head range plus the contract (request, spec or issue links, repo standards), lane and round. A fresh agent reviews the artifact and the contract only, never the author's claims, on two separate axes (standards with a smell baseline; spec), runs a mutation check, keeps only proven findings, and scales depth with diff size and risk (security, simplification, adversarial, Codex for L4). Posts exactly one PR/MR comment tagged [RN-K] blocking|non-blocking, or one starting with APPROVED, and returns the verdict to the caller. L1: one sonnet round plus a post-fix check. L2+: opus rounds, 3-round cap. Use for /okay-review followed by the PR or when another okay-* skill needs a review. Does not write fixes."
+description: "Independent reviewer used by every lane of the okay-* pack. Takes a PR/MR number or a base..head range plus the contract (request, spec or issue links, repo standards), lane and round. A fresh agent reviews the artifact and the contract only, never the author's claims, on two separate axes (standards with a smell baseline; spec), runs a mutation check, keeps only proven findings, and scales depth with diff size and risk (security, simplification, adversarial, Codex for L4). Posts exactly one PR/MR comment tagged [RN-K] blocking|non-blocking, or an approval naming the reviewed head commit, and returns the verdict to the caller. L1: one sonnet round plus a post-fix check. L2+: opus rounds, 3-round cap. Use for /okay-review followed by the PR or when another okay-* skill needs a review. Does not write fixes."
 license: MIT
 ---
 
@@ -68,8 +68,8 @@ Count changed lines on the full diff. Each pass is one more fresh agent with its
 Post one comment per invocation. Its first word is the verdict.
 
 ```
-APPROVED | CHANGES REQUESTED | ESCALATE (round <round>) at <head sha>, lane <lane>
-Depth: <passes run>; skip: <passes not run and why>
+APPROVED | CHANGES REQUESTED | ESCALATE (round <round>) at <head sha>
+Lane <lane>. Depth: <passes run>; skip: <passes not run and why>
 
 ## Standards
 [R<round>-<k>] blocking|non-blocking: <finding with quote or command + output>
@@ -88,10 +88,9 @@ Depth: <passes run>; skip: <passes not run and why>
 
 - `APPROVED` only when no blocking finding is open. Non-blocking findings may ride along. The SHA binds the approval ([shared/review.md](shared/review.md)): if the PR head moved since step 1, review the new head before posting.
 - Post with `gh pr comment <n> --body-file <file>` or `glab mr note <n> -m`. Use a file for the body so quotes and backticks survive.
-- No PR/MR yet (a bare range): do not post; return the comment body to the caller, who posts it once the PR exists, and say `posted: no`.
-- Contributor mode: do not post to the MR unless the user asks; return the comment body to the caller.
+- No PR/MR yet (a bare range), or contributor mode: do not post, and say `posted: no`. Return the verdict, the reviewed SHA and the comment body; nobody posts them as an approval ([shared/review.md](shared/review.md)).
 - No AI attribution in the comment.
 
 ## Return to the caller
 
-Reply with: the verdict word, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), and the count of non-blocking findings. Nothing else; the caller decides on the fixer, the merge and the escalation.
+Reply with: the verdict word, the reviewed head SHA, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), and the count of non-blocking findings. Nothing else; the caller decides on the fixer, the merge and the escalation.

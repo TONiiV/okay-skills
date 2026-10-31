@@ -20,9 +20,9 @@ Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin
 
 ## Merge policy
 
-- Merge needs an allow rule for `gh pr merge` / `glab mr merge` (the auto-mode classifier refuses merges without one). Without that rule, stop at `APPROVED` and hand the merge to the user with the PR/MR link.
+- Merge needs an allow rule for `gh pr merge` / `glab mr merge` (the auto-mode classifier refuses merges without one). Without that rule, or when `gh pr merge` / `glab mr merge` cannot run (for example in a cloud session), stop at the approval and hand the merge to the user with the PR/MR link. Never merge through REST: it can fall back to the default body with its trailers.
 - Merge only when the PR head equals the SHA in the latest `APPROVED (round <n>) at <sha>` comment ([review.md](review.md)). A newer head needs a fresh check first. Pass that SHA to the merge so a late push makes it fail: `--match-head-commit <sha>` (`glab`: `--sha <sha>`).
-- Squash merges pass an explicit subject and an empty body, which drops the Co-authored-by and Claude-Session trailers the default body collects: `gh pr merge --squash --match-head-commit <sha> --subject "<PR title> (#<n>)" --body ""`. REST form: [tracker.md](tracker.md).
+- Squash merges pass an explicit subject and an empty body, which drops the Co-authored-by and Claude-Session trailers the default body collects: `gh pr merge --squash --match-head-commit <sha> --subject "<PR title> (#<n>)" --body ""`.
 - L1 with the allow rule: merge once the PR has the approval above and CI is green. Use `gh pr merge --auto` with the flags above (or `glab mr merge --auto-merge --squash --sha <sha>`). If auto-merge is disabled on the repo, wait with `gh pr checks --watch`, then merge. If the repo has no CI checks at all, run the full test suite locally, paste the result in the PR, and merge only if it passes.
 - L2+: merge only after the user explicitly approves in the conversation, and only with the allow rule above.
 - Pushing needs the user's OK unless the lane's merge policy already covers it (L1 with the allow rule does). One batch-level OK at the throughput checkpoint covers the pushes and PRs of every ticket in that batch; do not ask again per push.

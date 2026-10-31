@@ -6,7 +6,7 @@ const { spawnSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
 const ATTRIBUTION = { commit: '', pr: '', sessionUrl: false };
-const ignored = (p) => spawnSync('git', ['check-ignore', '-q', p], { cwd: ROOT }).status === 0;
+const ignored = (p) => spawnSync('git', ['check-ignore', '-q', '--no-index', p], { cwd: ROOT }).status === 0;
 
 describe('repo .claude/settings.json', () => {
   it('turns off Claude Code attribution', () => {

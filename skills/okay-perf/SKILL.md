@@ -42,12 +42,12 @@ Create this task list first. A skipped step stays on it as `skip: <reason>`.
 6. Change (one at a time)
 7. Verdict
 8. Report
-9. Review
-10. Commit + PR
+9. Commit + PR
+10. Review
 11. Deliver
 12. reflect
 
-You own the measurement and the verdict. Delegate each code change to a fresh subagent (sonnet, high; opus for cross-module work, per [shared/models.md](shared/models.md)) with a tight scope, and review its diff yourself. The reviewer in step 9 is a different agent again.
+You own the measurement and the verdict. Delegate each code change to a fresh subagent (sonnet, high; opus for cross-module work, per [shared/models.md](shared/models.md)) with a tight scope, and review its diff yourself. The reviewer in step 10 is a different agent again.
 
 ## 1. Mode check
 
@@ -123,22 +123,23 @@ Loop to step 6 for the next idea until the target is met or the remaining ideas 
 
 Write `docs/perf/<YYYY-MM-DD>-<topic>.md` from the report template in [templates.md](templates.md), verdict first, with raw per-run numbers beside it (`<date>-<topic>-runs.csv`) so a reviewer can recompute the test. Contributor mode: keep the same content in the MR description and under `.scratch/`.
 
-## 9. Review
+## 9. Commit + PR
 
-Run okay-review (lane `perf`, opus). The reviewer is a fresh agent. Hand it:
+1. One commit per accepted change, one line, `perf: <subject>` (or the repo's style). The report is its own commit: `docs: add perf report for <topic>`.
+2. Push per the merge policy in [shared/git.md](shared/git.md) (L2+ rules: ask the user), then open the PR with the body in [templates.md](templates.md): one primary number, the verdict, the link to the report path.
 
-- the diff, including the report and the raw runs file;
+No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: commit, but push and open the MR only after step 10. In both cases step 10 reviews the local range and posts nothing ([shared/review.md](shared/review.md)).
+
+## 10. Review
+
+Run okay-review on the PR, or the local range when there is none (lane `perf`, opus). The reviewer is a fresh agent and posts its own comments; you never post them. Hand it:
+
+- the PR, whose diff includes the report and the raw runs file;
 - the contract: the user's original request, `CONSTRAINTS.md` if present, the repo standards files, and the full text of [benchmark-checklist.md](benchmark-checklist.md) plus the verdict rule from [method.md](method.md) as the standard the method is judged against.
 
 Never hand it your conclusions. Ask it to recompute the statistic from the raw runs, rerun a few runs of both sides, and to treat a missing answer to any of the seven questions as a finding. Rounds, fixer, 3-round cap: [shared/review.md](shared/review.md).
 
-## 10. Commit + PR
-
-1. One commit per accepted change, one line, `perf: <subject>` (or the repo's style). The report is its own commit: `docs: add perf report for <topic>`.
-2. Push per the merge policy in [shared/git.md](shared/git.md) (L2+ rules: ask the user), then open the PR with the body in [templates.md](templates.md): one primary number, the verdict, the link to the report path.
-3. Post the review comments as the PR comments. Merge only after `APPROVED` and the user's explicit approval.
-
-No remote: commit on the branch and skip the PR (`skip: no remote`).
+Merge only at the approved SHA ([shared/git.md](shared/git.md)) and after the user's explicit approval.
 
 ## 11. Deliver
 

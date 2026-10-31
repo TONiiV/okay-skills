@@ -51,4 +51,5 @@ If the Linear connector is missing in this session (ToolSearch finds no `save_is
 | Comment on an issue or PR | `gh api repos/{owner}/{repo}/issues/<n>/comments -F body=@<file>` |
 | Edit a comment, a PR body | `gh api -X PATCH repos/{owner}/{repo}/issues/comments/<id> -F body=@<file>`; `gh api -X PATCH repos/{owner}/{repo}/pulls/<n> -F body=@<file>` |
 | Open a PR | `gh api repos/{owner}/{repo}/pulls -f title=<title> -f head=<branch> -f base=<base branch name> -F body=@<file>` |
-| Squash-merge | `gh api -X PUT repos/{owner}/{repo}/pulls/<n>/merge -f merge_method=squash -f sha=<approved sha> -f commit_title=<title> -f commit_message=` |
+
+Merging has no fallback: see [git.md](git.md).
