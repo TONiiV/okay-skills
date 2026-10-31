@@ -19,6 +19,7 @@ Take the first that applies:
 - Tickets are sub-issues of the spec. Blocking edges are native `blocks` relations. Each ready ticket carries the `ready-for-agent` label.
 - After each delivery wave, post a project status update (`save_status_update`): health, what shipped, what is next.
 - Branch names carry the identifier: `ton-<n>-short-slug`, e.g. `ton-12-shared-rules`.
+- PR bodies end with `Fixes TON-<n>`, see [git.md](git.md).
 
 ## GitHub fallback
 
