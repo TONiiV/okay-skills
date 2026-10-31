@@ -4,7 +4,7 @@ okay-pm adapts ideas from the following MIT-licensed works. The text here is con
 
 | Source | Used for |
 |---|---|
-| [mattpocock/skills](https://github.com/mattpocock/skills) `triage` (`SKILL.md`, `AGENT-BRIEF.md`, `OUT-OF-SCOPE.md`), Copyright (c) Matt Pocock | Category and state roles, redundancy and prior-rejection checks, claim verification before grilling, durable agent briefs, the AI disclaimer line, the needs-info notes |
+| [mattpocock/skills](https://github.com/mattpocock/skills) `triage` (`SKILL.md`, `AGENT-BRIEF.md`, `OUT-OF-SCOPE.md`), Copyright (c) Matt Pocock | Category and state roles, redundancy and prior-rejection checks, claim verification before grilling, durable agent briefs, the needs-info notes |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
 
 The status report sections (shipped, risks and open items, next) follow the author's own `super-pm` skill.
