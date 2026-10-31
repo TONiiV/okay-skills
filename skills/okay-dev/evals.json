@@ -1,0 +1,204 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Plain feature request with no slash command",
+    "prompt": "Add CSV export to the reports page",
+    "expectations": ["okay-dev runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to implement an existing issue",
+    "prompt": "把 issue #12 实现了",
+    "expectations": ["okay-dev runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "New product from scratch",
+    "prompt": "Build me a small habit-tracker web app from scratch",
+    "expectations": ["okay-dev runs"]
+  },
+  {
+    "id": "pos-3",
+    "kind": "positive",
+    "description": "Compound prompt mixing a bug and a feature",
+    "prompt": "Fix the login redirect loop and also add a password strength meter to signup",
+    "expectations": ["okay-dev runs"]
+  },
+  {
+    "id": "pos-4",
+    "kind": "positive",
+    "description": "Refactor request without a skill name",
+    "prompt": "Refactor the config loader so every command reads settings the same way",
+    "expectations": ["okay-dev runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Explicit call to another okay-* skill skips routing",
+    "prompt": "/okay-review 42",
+    "expectations": ["okay-dev does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "A question that changes no code",
+    "prompt": "What does this regex match: ^\\d{3}-\\d{4}$ ?",
+    "expectations": ["okay-dev does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "Reflection request belongs to okay-reflect",
+    "prompt": "复盘一下刚才这个任务",
+    "expectations": ["okay-dev does not run"]
+  },
+  {
+    "id": "beh-l1",
+    "kind": "behavioural",
+    "description": "L1: small bug routes to okay-fix",
+    "prompt": "formatPrice(0) returns an empty string instead of \"$0.00\"",
+    "expectations": [
+      "Announces lane L1 with a one-line reason",
+      "Runs okay-fix for the task",
+      "Does not run okay-grilling, okay-prototype or okay-to-spec"
+    ]
+  },
+  {
+    "id": "beh-l2",
+    "kind": "behavioural",
+    "description": "L2: planned ticket skips grill and spec and stops at approval",
+    "prompt": "Implement issue #34 (it has acceptance criteria and touches 3 files)",
+    "expectations": [
+      "Announces lane L2",
+      "Fetches issue #34 before planning",
+      "Lists grill, prototype, spec and tickets as skip: <reason> on the task list",
+      "Writes the throughput checkpoint with blocking first steps, independent workstreams and shared mutable state",
+      "Asks once before pushing the branch and opening the PR",
+      "Dispatches a separate implementer agent that runs okay-tdd in a worktree; the main thread writes no code",
+      "Calls okay-review with the PR, the issue link, lane L2 and round 1",
+      "Does not merge until the user explicitly approves the PR in the conversation"
+    ]
+  },
+  {
+    "id": "beh-l3",
+    "kind": "behavioural",
+    "description": "L3: new feature runs prototype first, then spec citing the chosen sample",
+    "prompt": "Add offline sync to the notes app; nothing is planned yet",
+    "expectations": [
+      "Announces lane L3",
+      "Runs okay-prototype before okay-to-spec, with a short grill limited to the decisions the samples must answer",
+      "States the sample count (1-3) with a reason and hands over one command or URL to try them",
+      "Waits for the user's trial and records worked / did not / surprised me in FEEDBACK.md",
+      "Grills only the gaps the trial left, then runs okay-to-spec and okay-to-tickets",
+      "Checks that the spec names the chosen sample and links the prototype/<name> branch",
+      "Runs the throughput checkpoint before any ticket is implemented"
+    ]
+  },
+  {
+    "id": "beh-l4",
+    "kind": "behavioural",
+    "description": "L4: architecture routes to okay-think",
+    "prompt": "Design how we split the monolith's billing module into a separate service. No code yet.",
+    "expectations": [
+      "Announces lane L4",
+      "Routes to okay-think on the opus tier",
+      "Dispatches no implementer agent"
+    ]
+  },
+  {
+    "id": "beh-l5",
+    "kind": "behavioural",
+    "description": "L5: UI work routes to okay-design",
+    "prompt": "Redesign the onboarding screens so they feel less cluttered",
+    "expectations": [
+      "Announces lane L5",
+      "Routes to okay-design"
+    ]
+  },
+  {
+    "id": "beh-perf",
+    "kind": "behavioural",
+    "description": "perf: a latency claim routes to okay-perf",
+    "prompt": "The /search endpoint got slower since last week; get p95 back under 200 ms",
+    "expectations": [
+      "Announces lane perf",
+      "Routes to okay-perf"
+    ]
+  },
+  {
+    "id": "beh-escalation",
+    "kind": "behavioural",
+    "description": "L1 escalation: okay-fix exceeds the threshold and the task is re-routed",
+    "prompt": "Fix the date parsing bug in the importer. (During the fix, okay-fix reports: L1 exceeded: public interface change (changes exported parseDate signature). Suggested lane: L3.)",
+    "expectations": [
+      "Starts in L1 with okay-fix",
+      "After the escalation, tells the user what was exceeded and the measured value in one line",
+      "Re-classifies the task and continues in the new lane without a commit, PR or merge from the L1 attempt"
+    ]
+  },
+  {
+    "id": "beh-compound",
+    "kind": "behavioural",
+    "description": "Compound prompt is split and routed per sub-task, parallel by file ownership",
+    "prompt": "Fix the typo in the README badge, add rate limiting to the public API, and make the settings page look like the new design",
+    "expectations": [
+      "Splits the prompt into three sub-tasks",
+      "Routes them separately: L1 for the typo, L2 or L3 for rate limiting, L5 for the settings page",
+      "Lists the files each sub-task owns",
+      "Dispatches sub-tasks with disjoint files in parallel in one message, with a model and effort per sub-task from the models table",
+      "Serializes or merges sub-tasks that would write the same file"
+    ]
+  },
+  {
+    "id": "beh-new-product",
+    "kind": "behavioural",
+    "description": "New product routes to the prototype-first flow",
+    "prompt": "Start a new CLI tool that turns markdown notes into flashcards",
+    "expectations": [
+      "Routes the request as a new product through the L3 prototype-first flow",
+      "Runs okay-prototype before any spec is written",
+      "Collects the user's trial feedback before okay-to-spec"
+    ]
+  },
+  {
+    "id": "beh-contributor",
+    "kind": "behavioural",
+    "description": "Contributor mode: no Jev, no issues, local spec, MR, no merge",
+    "prompt": "Add a retry option to the uploader (this repo matches a pattern under Contributor repos in ~/.claude/okay.local.md, and OPENROUTER_JEV_API_KEY is set)",
+    "expectations": [
+      "Detects contributor mode from ~/.claude/okay.local.md",
+      "Does not call Jev and classifies the lane itself",
+      "Creates no issue and no issue comment; any spec or tickets go under .scratch/ and stay untracked",
+      "Writes no repo docs",
+      "Ends in an MR whose description has Problem / Cause / Fix / Evidence",
+      "Does not merge",
+      "Keeps any lesson in local memory only"
+    ]
+  },
+  {
+    "id": "beh-jev",
+    "kind": "behavioural",
+    "description": "Jev classifies with a one-line summary; low confidence falls back to self",
+    "prompt": "Add pagination to the admin users list (OPENROUTER_JEV_API_KEY is set, not contributor mode; Jev answers lane L2 with confidence 0.41)",
+    "expectations": [
+      "Calls the jev script with lane and tier choice questions and a one-line summary as state",
+      "Sends no code, file contents or full conversation to Jev",
+      "Treats confidence below 0.6 as unsure and classifies the lane itself, saying so"
+    ]
+  },
+  {
+    "id": "beh-review-loop",
+    "kind": "behavioural",
+    "description": "Review loop: fixer between rounds, escalation after round 3",
+    "prompt": "Continue the ticket loop for PR 77 (lane L3). okay-review returned CHANGES REQUESTED in rounds 1, 2 and 3.",
+    "expectations": [
+      "Dispatches a separate fresh fixer agent with the open findings after each CHANGES REQUESTED round",
+      "Calls okay-review again with the round number increased by one",
+      "Stops after round 3 and escalates the open findings and the PR link to the user",
+      "Does not merge the PR"
+    ]
+  }
+]
