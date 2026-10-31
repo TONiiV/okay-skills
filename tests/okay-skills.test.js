@@ -98,6 +98,10 @@ for (const name of okaySkills) {
       assert.ok(fm.description.length <= 1024, `description is ${fm.description.length} chars`);
     });
 
+    it('description has no angle brackets (claude.ai rejects them as XML tags)', () => {
+      assert.ok(!/[<>]/.test(fm.description), 'description contains < or >');
+    });
+
     it('relative links resolve inside the skill folder', () => {
       for (const file of walk(dir).filter((f) => f.endsWith('.md'))) {
         const text = fs.readFileSync(file, 'utf-8');

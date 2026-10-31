@@ -1,6 +1,6 @@
 ---
 name: okay-prototype
-description: "Build 1-3 throwaway runnable samples to answer a design or logic question before a spec is written, keep them on a prototype/<name> branch, and capture structured trial feedback (worked / did not / surprised) for okay-to-spec. Use for new products, new features, architecture spikes, or when the user wants to sanity-check a state model or explore what a UI should look like."
+description: "Build 1-3 throwaway runnable samples to answer a design or logic question before a spec is written, keep them on a prototype/NAME branch, and capture structured trial feedback (worked / did not / surprised) for okay-to-spec. Use for new products, new features, architecture spikes, or when the user wants to sanity-check a state model or explore what a UI should look like."
 license: MIT
 ---
 
