@@ -1,0 +1,59 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Glossary edit request",
+    "prompt": "Add \"Settlement\" to our CONTEXT.md, it means the end-of-day batch that closes all open orders",
+    "expectations": [
+      "okay-domain-modeling runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Overloaded term in a design discussion",
+    "prompt": "In this codebase \"account\" means both the customer and the login. Help me sort out the terminology.",
+    "expectations": [
+      "okay-domain-modeling runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "ADR request",
+    "prompt": "Record an ADR for choosing Postgres over DynamoDB for the write model",
+    "expectations": [
+      "okay-domain-modeling runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Docs typo is not domain modeling",
+    "prompt": "Fix the typo in the README intro paragraph",
+    "expectations": [
+      "okay-domain-modeling does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Performance work is not domain modeling",
+    "prompt": "Profile the checkout endpoint and cut p95 latency by 20%",
+    "expectations": [
+      "okay-domain-modeling does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Glossary stays free of implementation detail; ADRs are rare",
+    "prompt": "We decided orders are cancelled whole, never partially, and the table is called order_cancel_log. Capture this.",
+    "expectations": [
+      "Adds the term \"cancellation\" to CONTEXT.md as a definition only",
+      "Leaves the table name and other implementation detail out of CONTEXT.md",
+      "Offers an ADR only if hard to reverse, surprising without context, and a real trade-off; otherwise says it is skipping the ADR",
+      "Writes CONTEXT.md at the repo root, not in a spec or scratch file"
+    ]
+  }
+]

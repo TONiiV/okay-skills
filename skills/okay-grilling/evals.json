@@ -1,0 +1,60 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit grill request on a plan",
+    "prompt": "Grill me on this plan: we move the job queue from cron to a message broker next quarter",
+    "expectations": [
+      "okay-grilling runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese stress-test request",
+    "prompt": "帮我拷问一下这个方案：把用户权限从角色模型改成属性模型",
+    "expectations": [
+      "okay-grilling runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Stress-test phrasing without the word grill",
+    "prompt": "Stress-test my decision to build our own auth instead of buying one. Poke holes before I commit.",
+    "expectations": [
+      "okay-grilling runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Planned work with an existing ticket needs no grilling",
+    "prompt": "Implement ticket #12 exactly as written, the spec is already approved",
+    "expectations": [
+      "okay-grilling does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Small bug fix is not a grilling target",
+    "prompt": "/okay-fix the footer year shows 2023 instead of the current year",
+    "expectations": [
+      "okay-grilling does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Round shape: whole frontier, recommended answers, facts looked up",
+    "prompt": "Grill me on adding offline mode to our mobile app. The repo has a sync module already.",
+    "expectations": [
+      "Asks every currently answerable question in one numbered round",
+      "Each question carries a recommended answer",
+      "Does not ask the user for facts it can read from the repo (for example how sync works today); explores instead",
+      "Questions that depend on an unanswered question wait for a later round",
+      "Does not start implementing before the user confirms shared understanding"
+    ]
+  }
+]

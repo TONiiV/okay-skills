@@ -1,0 +1,60 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit tickets request from a spec",
+    "prompt": "/okay-to-tickets split spec #7 into tickets",
+    "expectations": [
+      "okay-to-tickets runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to break a plan into tickets",
+    "prompt": "把这个 spec 拆成可以并行的 ticket，标出依赖关系",
+    "expectations": [
+      "okay-to-tickets runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Tracer-bullet slicing request",
+    "prompt": "Break the billing rewrite plan into vertical slices, each with what blocks it",
+    "expectations": [
+      "okay-to-tickets runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Writing the spec itself is okay-to-spec",
+    "prompt": "Summarise our conversation into a spec issue",
+    "expectations": [
+      "okay-to-tickets does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Implementing a single ticket is not planning",
+    "prompt": "Implement the ticket \"add retry to the uploader\" using the existing spec",
+    "expectations": [
+      "okay-to-tickets does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Vertical slices, blocking edges, user approval before publishing",
+    "prompt": "Split this spec into tickets: add search to the catalog (index, API, UI, tests).",
+    "expectations": [
+      "Drafts vertical tracer-bullet slices, not one ticket per layer",
+      "Gives each ticket its blocking edges or \"None (can start immediately)\"",
+      "Presents the breakdown and asks about granularity and edges before publishing anything",
+      "Publishes blockers first, using Linear sub-issues with blocks relations, or GitHub or GitLab issues, or one local file per ticket",
+      "Does not close or modify the parent spec"
+    ]
+  }
+]

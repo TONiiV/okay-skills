@@ -1,0 +1,59 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit test-first request",
+    "prompt": "/okay-tdd add a discount code field to the checkout total",
+    "expectations": [
+      "okay-tdd runs"
+    ]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Red-green-refactor mention",
+    "prompt": "Let us do red-green-refactor on the new rate limiter",
+    "expectations": [
+      "okay-tdd runs"
+    ]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "Chinese test-first request",
+    "prompt": "用测试驱动的方式实现购物车合并功能",
+    "expectations": [
+      "okay-tdd runs"
+    ]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Doc-only change has no test loop",
+    "prompt": "Update the install section of the README for the new CLI flag",
+    "expectations": [
+      "okay-tdd does not run"
+    ]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Throwaway exploration is a prototype, not TDD",
+    "prompt": "Mock up three layouts for the settings page so I can pick one",
+    "expectations": [
+      "okay-tdd does not run"
+    ]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Seams confirmed first, one vertical slice at a time",
+    "prompt": "Build the coupon validation feature test-first.",
+    "expectations": [
+      "Proposes the public seams to test and gets them confirmed before writing any test",
+      "Writes one failing test, then only enough code to pass it, then the next (no bulk of tests first)",
+      "Tests behaviour through the public interface, with expected values from an independent source rather than recomputed by the code",
+      "Leaves refactoring to the review stage instead of folding it into the loop"
+    ]
+  }
+]
