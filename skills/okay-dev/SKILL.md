@@ -34,7 +34,7 @@ Create it first. Steps that do not apply stay as `skip: <reason>`.
 
 1. Contributor mode per [shared/contributor-mode.md](shared/contributor-mode.md). On: the rules there override every step below (see Contributor mode).
 2. Pick the tracker per [shared/tracker.md](shared/tracker.md).
-3. Note the base branch: `git rev-parse --abbrev-ref origin/HEAD`, else `main`.
+3. Note the base branch without the remote prefix: `git rev-parse --abbrev-ref origin/HEAD | sed 's|^origin/||'`, else `main`.
 
 ## 2. Split
 
@@ -59,21 +59,21 @@ Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), plu
 Ask Jev only when `OPENROUTER_JEV_API_KEY` is set and contributor mode is off ([shared/jev.md](shared/jev.md)). Jev picks the lane and the model tier, nothing else.
 
 1. Write a one-line summary of the sub-task: no code, no file contents, no names of people, clients or private repos.
-2. Write the request to a temp file and run `python ~/.claude/skills/jev/scripts/jev.py ask <request.json>`:
+2. Write the request to a temp file and send it the way [shared/jev.md](shared/jev.md) says (local `jev` script first):
 
    ```json
    {
      "state": {"task": "<one-line summary>"},
      "questions": {
        "lane": {"type": "choice", "instructions": "Which lane fits `task`?",
-                "criteria": {"L1": "small fix inside the L1 threshold", "L2": "planned: an existing issue, spec or ticket", "L3": "new feature with no agreed plan", "L4": "architecture, no code", "L5": "UI/UX work", "perf": "a performance claim or regression", "new-product": "a new app or service from scratch"}},
+                "criteria": {"L1": "small fix inside the L1 threshold", "L2": "planned: an existing issue, spec or ticket", "L3": "new feature with no agreed plan", "L4": "architecture, no code", "L5": "UI/UX work", "perf": "a performance claim or regression"}},
        "tier": {"type": "choice", "instructions": "Smallest model tier that implements `task` well?",
                 "criteria": {"haiku": "lookups, mechanical edits", "sonnet": "normal fixes and tickets", "opus": "architecture, cross-module work"}}
      }
    }
    ```
 
-3. An answer with `confidence` below 0.6, an error, or a missing script: classify yourself with the tables. Never block on Jev.
+3. Fall back to classifying yourself on any condition in [shared/jev.md](shared/jev.md) rule 5. A new product comes back as L3, which runs the same flow.
 4. Jev only classifies. Never hand Jev, or a `jev-*` helper agent the Jev router suggests, the whole request; okay-dev dispatches its own agents.
 
 Tell the user the routing in one line per sub-task before dispatching: `1. <sub-task> | L3 | sonnet high | okay-dev L3 flow | <reason>` (add `(Jev 0.82)` when Jev decided).
@@ -140,11 +140,7 @@ Per ticket, in its own worktree (the repo's convention, else `git worktree add .
 
 ## 5. Merge
 
-Follow the merge policy in [shared/git.md](shared/git.md):
-
-- L1: okay-fix merges on `APPROVED` + green CI when the allow rule exists; otherwise it hands the PR to the user.
-- L2+: merge only after the user explicitly approves that PR in the conversation, and only with the allow rule. Without the rule, hand the approved PR link to the user.
-- Contributor mode: never merge.
+Follow the merge policy in [shared/git.md](shared/git.md). L1 merges happen inside okay-fix; okay-dev merges L2+ PRs only.
 
 ## 6. Deliver
 
@@ -152,11 +148,8 @@ Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR
 
 ## Contributor mode
 
-All of [shared/contributor-mode.md](shared/contributor-mode.md) applies. In okay-dev that means:
+All of [shared/contributor-mode.md](shared/contributor-mode.md) applies. What it adds in okay-dev:
 
-- No Jev call: classify yourself.
-- No issues and no issue comments: okay-to-spec and okay-to-tickets write under `.scratch/`, untracked; the prototype branch stays local.
-- No repo docs written.
-- Each ticket ends in an MR with the contributor-mode description; okay-review returns its comment body instead of posting it.
-- No merge, and no status updates.
-- okay-reflect keeps lessons in local memory.
+- okay-to-spec and okay-to-tickets write under `.scratch/`; the prototype branch stays local.
+- Each ticket ends in an MR; okay-review returns its comment body instead of posting it.
+- No Linear status updates.
