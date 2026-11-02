@@ -18,7 +18,7 @@ Turn an architecture question into a decision the user has tried, an ADR where o
 - Research that hits 429/403/paywall: [shared/monid.md](shared/monid.md)
 - Delivery and reflection: [shared/delivery.md](shared/delivery.md)
 
-Supporting files: [RATIONALE.md](RATIONALE.md) (template), [RED-FLAGS.md](RED-FLAGS.md), [RUBRIC.md](RUBRIC.md) (judge brief), [WAYFINDER.md](WAYFINDER.md) (oversized efforts).
+Supporting files: [RATIONALE.md](RATIONALE.md) (template), [RED-FLAGS.md](RED-FLAGS.md), [RUBRIC.md](RUBRIC.md) (judge brief), [WAYFINDER.md](WAYFINDER.md) (oversized efforts), [MODEL-CHECK.md](MODEL-CHECK.md) (state machine and concurrency spikes).
 
 Skills called by name: `okay-grilling`, `okay-domain-modeling`, `okay-prototype`, `okay-to-spec`, `okay-to-tickets`, `okay-review`. If one is not installed, say so in one line and do its step by hand from the rules here.
 
@@ -26,7 +26,7 @@ Skills called by name: `okay-grilling`, `okay-domain-modeling`, `okay-prototype`
 
 - Nothing under the repo's source tree is created or edited. The outputs are prose, an ADR, `CONTEXT.md` terms, and a spec.
 - Type and signature sketches (bodies are `not implemented`) may appear inside the rationale and spec text only.
-- The one exception is the spikes: throwaway runnable code on a `prototype/<name>` branch, never merged, built by `okay-prototype`.
+- The one exception is the spikes: throwaway runnable code on a `prototype/<name>` branch, never merged, built by `okay-prototype`. A model-check model is a spec, not code, and is kept ([MODEL-CHECK.md](MODEL-CHECK.md)).
 - Tempted to "just wire it up"? That is the signal to stop and hand off to a ticket (`okay-to-tickets`, then `okay-dev`).
 
 ## Task list
@@ -106,6 +106,7 @@ Call `okay-prototype` in its spike shape ([shared/lanes.md](shared/lanes.md) pro
 
 - 1 to 3 spikes, count chosen by how open the question is, stated with the reason in the reply (1 = one risky assumption, 2 = two credible designs, 3 = wide open).
 - Each spike exercises the risky assumption from step 4, not the whole design. Candidates compared sit behind one switcher (`--variant` flag or env var).
+- State machine or concurrency assumption: one spike is a model check. A checker (TLA+/PlusCal or Alloy) tries every state against invariants written down first; the fallback without a new tool is a property test over every state and event pair. The model stays in the repo with one re-run command. Details: [MODEL-CHECK.md](MODEL-CHECK.md).
 - Performance or scale assumption: measure it. Fresh process per run, at least 10 runs, A/B interleaved, report the numbers with the machine (CPU, cores, RAM, OS, runtime version). An argument from reading the code is not evidence.
 - One command to run everything. Kept on `prototype/<name>`, never merged. Push only with the user's OK; contributor mode keeps it local.
 
@@ -139,7 +140,7 @@ Cutting tickets is a separate step the user triggers (`okay-to-tickets`); offer 
 
 ## 12. Review
 
-ADR or `CONTEXT.md` changed: open a PR with them only (commit `docs: <subject>`, body per [shared/git.md](shared/git.md)) and call `okay-review` with lane L4 and the spec as contract. Round rules are in [shared/review.md](shared/review.md); the merge waits for the user's explicit approval (L2+ policy). No repo files changed (no ADR, contributor mode): `skip: no PR`.
+ADR, `CONTEXT.md` or a model-check model (with its `AGENTS.md` line) changed: open a PR with them only (commit `docs: <subject>`, body per [shared/git.md](shared/git.md)) and call `okay-review` with lane L4 and the spec as contract. Round rules are in [shared/review.md](shared/review.md); the merge waits for the user's explicit approval (L2+ policy). No repo files changed (no ADR, no model, contributor mode): `skip: no PR`.
 
 ## 13. Deliver
 

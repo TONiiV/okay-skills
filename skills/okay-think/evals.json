@@ -119,5 +119,32 @@
       "Keeps the prototype branch local and never pushes it",
       "Never merges anything"
     ]
+  },
+  {
+    "id": "beh-5",
+    "kind": "behavioural",
+    "description": "State-machine and race risk leads to a model-check spike",
+    "prompt": "/okay-think design the order lifecycle (placed, paid, shipped, cancelled, refunded). Payment webhooks, warehouse callbacks and customer cancels can arrive in any order, and I'm worried an order can end up both shipped and refunded. The repo has docs/adr/ and no docs/models/ yet.",
+    "expectations": [
+      "Names the risky assumption as a state machine or concurrency risk and makes one of the 1 to 3 spikes a model check",
+      "Writes a small bounded model in TLA+, PlusCal or Alloy with the order states, events, guards and the racing actors, using the CONTEXT.md terms",
+      "Lists the invariants in plain sentences before the first run, including that an order is never both shipped and refunded",
+      "Runs the checker and records the checker version, bounds, distinct states explored and pass or fail per property, and turns any counterexample trace into a domain-language scenario for the trial",
+      "Removes one guard and re-runs to show the model can fail before trusting a green result",
+      "Keeps the model under docs/models/<system>/ with one re-run command in its header, repeated in the spec and as one AGENTS.md line, and opens the step 12 PR with it",
+      "Adds no dependency to the project's manifest and writes no production source file"
+    ]
+  },
+  {
+    "id": "beh-6",
+    "kind": "behavioural",
+    "description": "Model-check fallback when the project refuses a new tool",
+    "prompt": "/okay-think rework the subscription state machine (trial, active, past_due, paused, cancelled). We can't install Java or any new tool in this project or CI.",
+    "expectations": [
+      "Uses the fallback instead of TLA+ or Alloy: a property test in the project's existing test runner, with no new dependency",
+      "The test tries every state and event pair, asserting legal pairs keep the invariants and illegal pairs are rejected, then walks reachable states breadth first to a stated depth",
+      "Breaks one guard to show the test can fail",
+      "Keeps the test on the prototype branch and puts it in the spec as an acceptance criterion to land in the suite, instead of adding it to the suite itself"
+    ]
   }
 ]
