@@ -6,7 +6,7 @@ Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin
 
 ## Worktrees
 
-Look in the project root for an existing worktree folder (`.worktrees/`, `worktrees/`, or `.claude/worktrees/`) and use it. None: create `.worktrees/`. Put every worktree at `<folder>/<branch>`. Before adding one, make sure the folder is git-ignored (`git check-ignore -q <folder>`); if not, add it to `.gitignore` and commit that line. Work only inside your own worktree.
+Look in the project root for an existing worktree folder (`.worktrees/`, `worktrees/`, or `.claude/worktrees/`) and use it. None: create `.worktrees/`. Put every worktree at `<folder>/<branch>`. Before adding one, make sure the folder is git-ignored: `git check-ignore -q <folder>/` (keep the trailing slash; without it a folder that does not exist yet reads as not ignored). If not, add `<folder>/` to `.gitignore` and commit that line on its own. Work only inside your own worktree.
 
 ## Commits
 
