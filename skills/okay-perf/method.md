@@ -118,6 +118,26 @@ print("test", "welch" if normal else "rank-sum", "p", res.pvalue,
 
 Faster means `p < 0.05` and the median gap above the IQR in the right direction. Put the test name, the p-value and the numbers in the report.
 
+## Guards
+
+A kept change, or a rolled-back regression, needs a check in CI that fails when the gain goes away. Without one, the next unrelated change can undo it and nobody measures again.
+
+| Kind | Use it when | Example |
+|---|---|---|
+| Size budget | The win cut bytes: bundle, first download, binary, image | Test fails when the built bundle is over 180 KB gzip |
+| Count budget | The win cut work you can count deterministically | Test fails when the export issues more than 3 queries, or allocates more than N objects per row |
+| Time or latency ceiling | Only a timing captures the win | Benchmark step fails when p50 on the CI dataset goes above the ceiling |
+| Lint rule | The win removed a code pattern | Rule bans allocation in per-frame code, or sync I/O in a request handler |
+
+Rules:
+
+1. Prefer counts and sizes to wall time. They do not flake, and they hold on any runner. A time ceiling is the last resort.
+2. A time ceiling is measured on the CI runner, not copied from the report: run the after side there (at least 10 runs) and set the ceiling above its spread and below the baseline median. A ceiling that the baseline also passes guards nothing; one inside the after side's spread flakes.
+3. Prove the guard both ways: it fails on the baseline commit (or with the change reverted) and passes on the head. A guard never seen failing is a guess.
+4. Wire it into the job that already runs the tests. Note the job and test name in the report; a check nobody runs is not a guard.
+5. `CONSTRAINTS.md` budgets: a numeric budget with no CI check is a gap. List it in the report. The budget this claim targets gets its check from this guard; other gaps stay listed for a separate ticket.
+6. Constraint in the path (offer, do not impose): a naming convention such as a `.hot.` suffix marks per-frame or per-request code. A lint rule scoped to that glob enforces the ban, and an agent opening the file sees the constraint before it edits.
+
 ## Kept or reverted: log it
 
 A reverted idea leaves no trace in git, so the same dead end gets retried. Every attempt, kept or discarded, is a row in the attempt ledger in the report ([templates.md](templates.md)). Read the ledger before proposing the next idea.
