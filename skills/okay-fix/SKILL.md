@@ -48,7 +48,9 @@ Build a feedback loop before reading code for a theory. It is one command that:
 - gives the same verdict every run (a flaky bug needs a pinned, high reproduction rate);
 - runs in seconds, unattended.
 
-Try in order: a failing test at the nearest seam, a CLI call with a fixture, a curl against a dev server, a headless browser script, a throwaway harness, a bisect script. Run it, show the command and its red output with secrets replaced by `<REDACTED>`. Shrink the repro until every remaining part is load-bearing.
+Input-driven system (a simulation, a game loop, an event log, a message queue): first try to record the inputs that lead to the bug (events or messages in order, plus the seed and clock readings) and replay them through the real code path. Replay twice and compare: a replay that does not give the same verdict both times is not a loop yet, so pin the seed and clock or fall back to the list below. A replay that shows the bug is kept, shrunk to the inputs that matter, as the regression test in step 4.
+
+Otherwise, try in order: a failing test at the nearest seam, a CLI call with a fixture, a curl against a dev server, a headless browser script, a throwaway harness, a bisect script. Run it, show the command and its red output with secrets replaced by `<REDACTED>`. Shrink the repro until every remaining part is load-bearing.
 
 Cannot build a loop: stop, list what you tried, and ask the user for access, a redacted artifact, or permission to instrument. Do not guess a fix.
 
