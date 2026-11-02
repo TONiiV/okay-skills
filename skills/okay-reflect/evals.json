@@ -158,5 +158,26 @@
       "Keeps the okay-reflect-pending marker",
       "Says in the report that the candidates wait on PR #7"
     ]
+  },
+  {
+    "id": "beh-10",
+    "kind": "behavioural",
+    "description": "Promotion with the eval runner available measures before and after rates",
+    "prompt": "/okay-reflect (an okay-fix lesson class now has occurrences from two sessions; the okay-skills checkout has npm run eval and claude plugin eval works)",
+    "expectations": [
+      "Runs npm run eval for okay-fix on the default branch with the new evals.json and again on the lesson branch",
+      "Shows the positive trigger, negative false-trigger and behavioural pass rates before and after next to the diff and the regression prompt",
+      "Waits for approve, edit, or reject before committing"
+    ]
+  },
+  {
+    "id": "beh-11",
+    "kind": "behavioural",
+    "description": "Promotion without the eval runner says the rates were not measured",
+    "prompt": "/okay-reflect (an okay-review lesson class now has occurrences from two sessions; claude plugin eval is not available on this machine)",
+    "expectations": [
+      "Shows the diff and regression prompt with a line saying the rates were not measured and why",
+      "Does not state any trigger or pass rate"
+    ]
   }
 ]

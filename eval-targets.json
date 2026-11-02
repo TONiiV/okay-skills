@@ -1,0 +1,8 @@
+{
+  "default": {
+    "positiveTriggerMin": 0.9,
+    "negativeFalseTriggerMax": 0.05,
+    "behaviouralPassMin": 0.8
+  },
+  "skills": {}
+}
