@@ -38,3 +38,5 @@ Answer each question with evidence from a run, not a guess about the code. The i
 - A test changed, skipped or deleted to make the change pass.
 - Total runtime reported for a latency or throughput claim.
 - Raw per-run numbers absent, so the statistic cannot be recomputed.
+- A kept change with no guard, or a guard never shown failing on the baseline.
+- A numeric budget in `CONSTRAINTS.md` missing from the report's budget list.

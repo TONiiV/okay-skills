@@ -71,6 +71,29 @@
     ]
   },
   {
+    "id": "beh-guard-0",
+    "kind": "behavioural",
+    "description": "Class guard step: a small guard ships in the same PR, proven red on the pre-fix code",
+    "prompt": "/okay-fix loadConfig() crashes with \"Cannot read properties of undefined\" because fetchUser() can return undefined and the caller dereferences it without a check",
+    "expectations": [
+      "After the regression test passes, asks whether a lint rule, a type or a test can stop this class of bug in other files",
+      "Adds a small guard (for example a stricter return type or a test over every caller) in the same PR, and the L1 threshold check counts the whole diff with the guard included",
+      "Shows the guard failing with only the fix reverted and passing with the fix restored, and puts both outputs in the PR Evidence"
+    ]
+  },
+  {
+    "id": "beh-guard-1",
+    "kind": "behavioural",
+    "description": "Class guard step: a guard that changes a team convention becomes a next step, not part of the fix",
+    "prompt": "/okay-fix saveDraft() silently drops errors because a promise is not awaited; the repo's ESLint config has no no-floating-promises rule and turning it on flags 40 other files",
+    "expectations": [
+      "Fixes the missing await with a regression test",
+      "Does not enable the new lint rule or edit the lint config in this PR",
+      "Lists the lint rule as a next step under Not touched in the PR body, naming the rule and the class of bug it stops",
+      "Does not send an 'L1 exceeded' escalation because of the guard"
+    ]
+  },
+  {
     "id": "beh-2",
     "kind": "behavioural",
     "description": "Blocking review finding gets one fix pass, no second review round",
@@ -80,6 +103,18 @@
       "After the fix pass, a fresh agent checks only the listed blocking findings",
       "Does not start a second full review round",
       "Does not merge if any blocking finding is still unresolved"
+    ]
+  },
+  {
+    "id": "beh-replay",
+    "kind": "behavioural",
+    "description": "Bug in an input-driven system: record and replay the inputs as the repro",
+    "prompt": "/okay-fix in our turn-based game the server sometimes rejects a valid high score; we log every player input and the RNG seed for each match",
+    "expectations": [
+      "Tries a record-and-replay repro first: feeds the logged inputs and seed through the real code path before trying the other repro kinds",
+      "Replays at least twice and shows both runs give the same failing verdict before relying on it",
+      "Shrinks the recorded inputs to the ones that still show the bug",
+      "Keeps the shrunk replay as the regression test that fails before the fix and passes after it"
     ]
   },
   {

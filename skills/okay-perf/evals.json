@@ -73,5 +73,20 @@
       "When the result is not significant, reports no measurable difference and leaves the commit in place",
       "Notes that layout alone can explain a few percent"
     ]
+  },
+  {
+    "id": "beh-2",
+    "kind": "behavioural",
+    "description": "Accepted bundle-size win with a CONSTRAINTS.md budget: guard the win in CI and map every budget to its check",
+    "prompt": "/okay-perf the first page load downloads too much JavaScript; lazy-load the chart library. CONSTRAINTS.md says: first download at most 200 KB gzip, p95 API latency at most 300 ms. CI runs npm test on GitHub Actions.",
+    "expectations": [
+      "Reads CONSTRAINTS.md before changing code and finds, for each numeric budget, the CI check that enforces it, by reading the CI config and tests",
+      "After the change is kept on the verdict rule, adds a guard that fails CI when the gain goes away: a size budget test on the built first-download bytes, not a wall-time ceiling",
+      "Sets the guard's limit between the after size and the baseline size, so the baseline fails it and the head passes",
+      "Shows the guard failing on the baseline commit and passing on the head, and puts both results in the report",
+      "Runs the guard in the CI job that already runs npm test, and commits it on its own with a one-line message",
+      "The report names the guard and lists both budgets with their CI check; the 300 ms latency budget with no check is marked as a gap, not silently left out",
+      "Does not add a guard or a check for the latency budget the claim does not touch"
+    ]
   }
 ]
