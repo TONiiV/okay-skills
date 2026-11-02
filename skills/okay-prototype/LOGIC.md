@@ -53,7 +53,7 @@ Keep it beautiful but restrained: clean typography, generous spacing, one accent
 
 ### 4. Hand it over
 
-Give the one command that opens the file (for example `start path/to/file.html` on Windows, `open path/to/file.html` on macOS), or open it for them. If there is more than one candidate model (1 to 3, with the reason stated), put them behind a model selector in the same page. They'll click through the walkthroughs and free-play whenever they get to it; the interesting moments are when they say "wait, that shouldn't be possible" or "huh, I assumed X would be different"; those are the bugs in the _idea_, which is the whole point. If they want new actions or a new scenario, add them. Prototypes evolve.
+Give the one command that opens the file (for example `start path/to/file.html` on Windows, `open path/to/file.html` on macOS), or open it for them. If there is more than one candidate model (1 to 3, with the reason stated), put them behind a model selector in the same page. They'll click through the walkthroughs and free-play whenever they get to it; the interesting moments are when they say "wait, that shouldn't be possible" or "huh, I assumed X would be different"; those are the bugs in the _idea_, which is the whole point. If they want new actions or a new scenario, add them. Prototypes evolve. When the walkthrough turns up cases too many or too tangled to click through (several actors, races, "can X and Y ever both happen?"), say so and propose a machine check: okay-think's model-check spike (its `MODEL-CHECK.md`) tries every state.
 
 ### 5. Capture the answer and the prototype
 
