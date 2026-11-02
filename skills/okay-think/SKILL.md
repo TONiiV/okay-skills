@@ -58,6 +58,8 @@ Create it first. A step you skip stays on it as `skip: <reason>`.
 
 Read before you ask: `CONTEXT.md`, the ADRs in the area, `AGENTS.md`, `CONSTRAINTS.md` when present, and the code the design touches. Dispatch haiku sub-agents for lookups. Write down the constraints the design must honour (callers you cannot break, existing types, invariants, budgets). Naming a file is not grounding: trace the real data flow.
 
+Input-driven system (a simulation, a game loop, an event log, a message queue): ask whether replaying the same inputs must give the same state. If yes, the design must say where seeds, the clock, floating point, and iteration order come from; write that down as a constraint. Not yet known: it is a decision for step 4.
+
 ## 3. Size gate
 
 Decide now whether one session can hold this. It cannot when either of these holds:

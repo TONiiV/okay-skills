@@ -83,6 +83,18 @@
     ]
   },
   {
+    "id": "beh-replay",
+    "kind": "behavioural",
+    "description": "Bug in an input-driven system: record and replay the inputs as the repro",
+    "prompt": "/okay-fix in our turn-based game the server sometimes rejects a valid high score; we log every player input and the RNG seed for each match",
+    "expectations": [
+      "Tries a record-and-replay repro first: feeds the logged inputs and seed through the real code path before trying the other repro kinds",
+      "Replays at least twice and shows both runs give the same failing verdict before relying on it",
+      "Shrinks the recorded inputs to the ones that still show the bug",
+      "Keeps the shrunk replay as the regression test that fails before the fix and passes after it"
+    ]
+  },
+  {
     "id": "beh-3",
     "kind": "behavioural",
     "description": "No merge allow rule: stop at APPROVED and hand over the PR",
