@@ -23,6 +23,8 @@ A change is L1 only when ALL of these hold, measured on the full diff against th
 
 Measure with `git add -N . && git diff --numstat <base>`, then drop test files (the repo's test-file convention, e.g. `*.test.*`, `*.spec.*`, `test_*.py`, `*_test.go`, `test/`, `tests/`, `__tests__/`) from the count.
 
+Lint config (`eslint.config.*`, `.eslintrc*`, `ruff.toml`, a lint section in `pyproject.toml`) and custom lint rule files count toward the budget like source files; a rule's own tests and fixtures follow the test-file convention and do not. A rule or a config line runs on every contributor's code in every CI run, and a misfiring one blocks unrelated work, so it gets the same budget as source. A class guard written as a test stays free, which makes a test the cheaper guard in L1.
+
 ## Prototype first
 
 New product, L3 and L4 never start from an assumed spec. L1 and L2 (already planned) are unchanged; UI work already runs three variants in okay-design.
