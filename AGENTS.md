@@ -57,7 +57,7 @@ Hook scripts are Node with no dependencies, exit 0 and print nothing when there 
 
 ## Worktrees
 
-Create worktrees under `.claude/worktrees/<branch>` (ignored by git). Work only inside your own worktree.
+Follow the Worktrees rule in `shared/git.md`: reuse an existing worktree folder in the root, else create `.worktrees/<branch>` (ignored by git). Work only inside your own worktree.
 
 ## Content rules
 

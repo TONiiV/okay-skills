@@ -4,6 +4,10 @@
 
 Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin/main)`. It falls back to `origin/main` when `origin/HEAD` is unset (a repo made with `git remote add`, not `git clone`). Each Bash call may run in a fresh shell, so never keep it in a variable: paste the substitution into the same command that uses it. Branch off, diff against, and open PRs to that ref; wherever a skill says `<base>`, use it.
 
+## Worktrees
+
+Look in the project root for an existing worktree folder (`.worktrees/`, `worktrees/`, or `.claude/worktrees/`) and use it. None: create `.worktrees/`. Put every worktree at `<folder>/<branch>`. Before adding one, make sure the folder is git-ignored: `git check-ignore -q <folder>/` (keep the trailing slash; without it a folder that does not exist yet reads as not ignored). If not, add `<folder>/` to `.gitignore` and commit that line on its own. Work only inside your own worktree.
+
 ## Commits
 
 - One line. No body. No trailers (no Co-Authored-By).

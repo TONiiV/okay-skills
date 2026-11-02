@@ -42,7 +42,7 @@ Blast radius: name the one fact the change is safe because of (for example "this
 
 ## Mutation check
 
-Run it inside the spec reviewer, in a throwaway `git worktree` so the real tree stays untouched; delete the worktree after.
+Run it inside the spec reviewer, in a throwaway `git worktree` (folder per [shared/git.md](shared/git.md)) so the real tree stays untouched; delete the worktree after.
 
 ```
 Pick one condition the change adds (a negation, a boundary, an && or ||). Invert it. Run the repo's tests. Restore the file.

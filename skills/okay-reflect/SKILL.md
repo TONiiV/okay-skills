@@ -123,7 +123,7 @@ A local run with inbox access first files candidates parked on PRs. They already
 3. Add exactly one regression prompt to that skill's `evals.json`: `kind: "behavioural"`, `id: "lesson-<n>"`, a generic prompt that reproduces the situation, and expectations that fail on the old text.
 4. Strip private details: replace every repo, company, person, host, path, and code identifier from the occurrences with a generic stand-in, then grep the diff for the session's repo names and remote hosts. Any hit: fix it before showing.
 5. Measure before and after when the runner is available: the checkout has `npm run eval` and `claude plugin eval --help` succeeds. Both sides use the new `evals.json`, so only the skill text differs:
-   - before: a temporary worktree of the default branch with the new `evals.json` copied over that skill's, then `npm run eval -- --skill <skill> --max-cost-usd 5`;
+   - before: a temporary worktree (folder per [shared/git.md](shared/git.md)) of the default branch with the new `evals.json` copied over that skill's, then `npm run eval -- --skill <skill> --max-cost-usd 5`;
    - after: the same command on the lesson branch.
 
    Keep the three rates per side (positive trigger, negative false trigger, behavioural pass) and the `lesson-<n>` case result. Runner not available, or the run failed: write `rates: not measured (<reason>)` instead. Never invent a rate.
