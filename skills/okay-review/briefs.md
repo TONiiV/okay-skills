@@ -4,7 +4,7 @@ Paste a brief verbatim into the fresh agent's prompt, followed by `ARTIFACT:` (t
 
 ## Proof rule (appended to every brief)
 
-Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run.
+Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run. A finding whose class can recur in another file names the guard that would stop it: a lint rule, a type, or a test, and where it would live.
 
 ## Standards axis
 
@@ -30,6 +30,7 @@ Fowler smells, each as what it is, then the fix. Always a labelled heuristic ("p
 - Message Chains: long `a.b().c().d()` navigation. Hide the walk behind one method.
 - Middle Man: a class or function that only delegates. Call the real target.
 - Refused Bequest: a subclass that ignores or overrides most of what it inherits. Prefer composition.
+- Recurring Class: a defect shape that can be written again in any file (an unawaited promise, an unchecked nullable return, string-built SQL). Name the guard that would stop the class: a lint rule, a type, or a test, and where it would live. Naming it is the finding; adding it in this PR is not required.
 
 ## Spec axis
 

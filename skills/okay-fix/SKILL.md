@@ -26,7 +26,7 @@ Create this task list first. A step you skip stays on it as `skip: <reason>`.
 1. Mode check
 2. Reproduce
 3. Root cause
-4. Fix + regression test
+4. Fix + regression test + class guard
 5. L1 threshold check
 6. Commit + PR
 7. Review
@@ -61,13 +61,22 @@ Cannot build a loop: stop, list what you tried, and ask the user for access, a r
 3. Confirm the surviving mechanism with runtime evidence.
 4. Before editing a function, grep every caller of it. Fix it once where all callers route through, not only on the path the report names.
 
-## 4. Fix + regression test
+## 4. Fix + regression test + class guard
 
 1. If a correct seam exists (the test exercises the real bug pattern as it happens at the call site), turn the minimal repro into a failing test and watch it fail.
 2. Apply the smallest fix the evidence justifies.
 3. Watch the test pass, then re-run the original loop from step 2.
 4. No correct seam: write that down for the PR body. It is a finding, not a skip.
-5. Remove every `[DEBUG-` line and throwaway file. Run the repo's test suite.
+5. Remove every `[DEBUG-` line and throwaway file.
+6. Add the class guard (below), then run the repo's test suite.
+
+### Class guard
+
+The regression test pins this call site; the next agent can write the same bug in another file. Ask once: can a lint rule, a type, or a test stop this whole class of bug wherever it is written?
+
+- **Yes, and the guard is small**: the whole diff, guard included, stays inside the L1 threshold and the guard changes no team convention. Add it in the same PR. Show it fails on the pre-fix code and passes after: revert only the fix and keep the guard (`git stash push -- <fixed files>` when the guard lives elsewhere), run the guard and see it fail on the bug's pattern, restore the fix (`git stash pop`), run it again and see it pass. Both outputs go in the PR Evidence. Prefer a test or a type: tests do not count toward the L1 budget, lint config and rule files do ([shared/lanes.md](shared/lanes.md)).
+- **The guard would break the L1 threshold, or changes a team convention** (a new lint rule or a stricter setting the team has not agreed on, or a rule that flags existing code elsewhere): do not add it. List it in the PR body under Not touched as a next step: the guard, where it would live, and the class it stops. Never escalate for a guard; the fix ships without it.
+- **Nothing mechanical can catch the class** (it needs judgement): say so in one line under Not touched.
 
 ## 5. L1 threshold check
 
@@ -91,7 +100,7 @@ Never give it your explanation, your hypotheses, or your claims about what passe
 
 ```
 You review one small bug fix. You get the PR at one head commit and the contract only.
-Report on two axes, separately: standards (repo rules, smells) and spec (does the diff fix the reported bug at its root cause, with a regression test where a seam exists).
+Report on two axes, separately: standards (repo rules, smells) and spec (does the diff fix the reported bug at its root cause, with a regression test where a seam exists; a class guard it adds must fail on the pre-fix code).
 Report only findings you proved: quote the line, or show a command you ran and its output.
 Invert one condition the diff adds and run the tests; a suite that stays green is a finding.
 Tag each finding [R1-<n>] blocking|non-blocking.
