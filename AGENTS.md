@@ -13,6 +13,8 @@ Tracker: github
 | `skills/<name>/` | One folder per skill. Auto-discovered; never list skills by hand. |
 | `shared/` | Single source of rules shared by every okay-* skill |
 | `scripts/build.js` | Copies `shared/*` into every `skills/okay-*/shared/` |
+| `scripts/eval-rates.js` | Runs the evals through `claude plugin eval` and checks rates against `eval-targets.json` |
+| `eval-targets.json` | Per-skill eval rate targets: a `default` set, overrides under `skills` |
 | `hooks/` | Plugin hooks (auto-discovered `hooks/hooks.json`), see Hooks |
 | `tests/` | `node:test` suites |
 
@@ -31,6 +33,10 @@ A skill references shared rules only as `shared/<file>.md`, relative to its own 
 2. Run `npm test` before every commit. It fails when a copy drifts, a frontmatter key is outside the allowed six, a link escapes a skill folder, or evals fall below the minimums.
 3. Validate the plugin with `claude plugin validate .`.
 4. CI (`.github/workflows/test.yml`) runs `npm test` and `npm run package` on every PR and on pushes to main.
+5. Measure a skill with `npm run eval -- --skill <name>` (all skills without `--skill`). It writes one `claude plugin eval` case per `evals.json` entry to `eval-cases/` (ignored by git), runs them with the plugin loaded, and prints per skill: positive trigger rate, negative false-trigger rate, behavioural pass rate, each against `eval-targets.json` (defaults: at least 90%, at most 5%, at least 80%). Exit 1 means a target was missed. Positive and negative cases pass on whether the Skill tool loaded that skill; behavioural cases are judged by an LLM grader against the expectations. Runs that error are left out of the rate and counted.
+   - Needs: Claude Code with `claude plugin eval`, logged in or `ANTHROPIC_API_KEY` set. Every run is a full `claude` session on that credential and costs money (3 runs per case by default; pass `--runs 1` and `--max-cost-usd <usd>` to bound it). The first run asks to trust the plugin; `--trust-plugin` answers it.
+   - Other flags go to `claude plugin eval` as given. `--results <file>` checks an earlier `--json` result without running anything; `--cases-only` only writes the cases.
+   - Not in CI: it needs a paid credential as a secret. The rate math is unit-tested in `tests/eval-rates.test.js`.
 
 ## Hooks
 

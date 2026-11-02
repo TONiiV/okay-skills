@@ -122,9 +122,14 @@ A local run with inbox access first files candidates parked on PRs. They already
    - a prose edit in the owning skill's section, carrying a one-line why and its source, e.g. `Why: <reason> (lesson: okay-lessons#<n>)`.
 3. Add exactly one regression prompt to that skill's `evals.json`: `kind: "behavioural"`, `id: "lesson-<n>"`, a generic prompt that reproduces the situation, and expectations that fail on the old text.
 4. Strip private details: replace every repo, company, person, host, path, and code identifier from the occurrences with a generic stand-in, then grep the diff for the session's repo names and remote hosts. Any hit: fix it before showing.
-5. Show the user the exact unified diff plus the regression prompt and ask: approve, edit, or reject. Wait for the answer.
-6. Reject or "no change": mark the issue rejected with the user's reason. Done.
-7. Approve: in the okay-skills checkout run `npm run build` if `shared/` changed and `npm test`, commit one line (`type: subject`), push, and open a PR per [shared/git.md](shared/git.md) (L2+ merge policy: the user merges). Mark the issue promoted with the PR link.
+5. Measure before and after when the runner is available: the checkout has `npm run eval` and `claude plugin eval --help` succeeds. Both sides use the new `evals.json`, so only the skill text differs:
+   - before: a temporary worktree of the default branch with the new `evals.json` copied over that skill's, then `npm run eval -- --skill <skill> --max-cost-usd 5`;
+   - after: the same command on the lesson branch.
+
+   Keep the three rates per side (positive trigger, negative false trigger, behavioural pass) and the `lesson-<n>` case result. Runner not available, or the run failed: write `rates: not measured (<reason>)` instead. Never invent a rate.
+6. Show the user the exact unified diff, the regression prompt, and the before/after rates (or the not-measured line), and ask: approve, edit, or reject. Wait for the answer.
+7. Reject or "no change": mark the issue rejected with the user's reason. Done.
+8. Approve: in the okay-skills checkout run `npm run build` if `shared/` changed and `npm test`, commit one line (`type: subject`), push, and open a PR per [shared/git.md](shared/git.md) (L2+ merge policy: the user merges). The PR's Evidence section carries the before/after rates. Mark the issue promoted with the PR link.
 
 ## 6. Clear
 
