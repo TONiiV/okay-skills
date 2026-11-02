@@ -8,7 +8,7 @@ Each kind of knowledge has one home:
 | `CLAUDE.md` | Only the line `@AGENTS.md` |
 | `CONTEXT.md` | Glossary of domain terms only |
 | `docs/adr/` | Decision records (reuse an existing `docs/decisions/` instead) |
-| `CONSTRAINTS.md` | Optional: quality bar and perf budgets |
+| `CONSTRAINTS.md` | Optional: quality bar and perf budgets. Each numeric budget should have a CI check that fails when it is exceeded |
 | `docs/perf/` | Perf baseline reports, `<date>-<topic>.md` |
 
 Specs and tickets live in the tracker (see [tracker.md](tracker.md)), not in the repo. Contributor mode writes none of these files.

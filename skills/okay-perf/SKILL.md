@@ -19,8 +19,8 @@ Prove a performance change or a suspected regression with numbers a skeptic woul
 
 Skill-local references, open each when its step says so:
 
-- [method.md](method.md): harness table, layout variation, causal profiling, verdict rule, test recipes
-- [templates.md](templates.md): platform spec, report, attempt ledger, PR body
+- [method.md](method.md): harness table, layout variation, causal profiling, verdict rule, guards, test recipes
+- [templates.md](templates.md): platform spec, report, attempt ledger, guards and budgets, PR body
 - [benchmark-checklist.md](benchmark-checklist.md): the seven questions; part of the reviewer's contract
 
 ## Why this skill exists
@@ -41,19 +41,20 @@ Create this task list first. A skipped step stays on it as `skip: <reason>`.
 5. Causal profile
 6. Change (one at a time)
 7. Verdict
-8. Report
-9. Commit + PR
-10. Review
-11. Deliver
-12. reflect
+8. Guard
+9. Report
+10. Commit + PR
+11. Review
+12. Deliver
+13. reflect
 
-You own the measurement and the verdict. Delegate each code change to a fresh subagent (sonnet, high; opus for cross-module work, per [shared/models.md](shared/models.md)) with a tight scope, and review its diff yourself. The reviewer in step 10 is a different agent again.
+You own the measurement and the verdict. Delegate each code change to a fresh subagent (sonnet, high; opus for cross-module work, per [shared/models.md](shared/models.md)) with a tight scope, and review its diff yourself. The reviewer in step 11 is a different agent again.
 
 ## 1. Mode check
 
 - Contributor mode on? Apply [shared/contributor-mode.md](shared/contributor-mode.md): no `docs/perf/` file, the report goes in the MR description (Problem / Cause / Fix / Evidence), raw files stay under `.scratch/`.
 - Pick the tracker from [shared/tracker.md](shared/tracker.md). Note the base branch and branch off it: `perf/<slug>` (with a tracker id when the tracker wants one).
-- Read `CONSTRAINTS.md` if present: perf budgets there are the target.
+- Read `CONSTRAINTS.md` if present: perf budgets there are the target. For each numeric budget (size, time, latency, memory), find the CI check that fails when it is exceeded by reading the CI config and the tests it runs. No such check: the budget is a gap. Step 9 reports the list.
 
 ## 2. Claim and metric
 
@@ -119,18 +120,32 @@ Regressions use the same rule before any rollback: measure the suspect against i
 
 Loop to step 6 for the next idea until the target is met or the remaining ideas are marginal. Do not relax the target to end the loop.
 
-## 8. Report
+## 8. Guard
 
-Write `docs/perf/<YYYY-MM-DD>-<topic>.md` from the report template in [templates.md](templates.md), verdict first, with raw per-run numbers beside it (`<date>-<topic>-runs.csv`) so a reviewer can recompute the test. Contributor mode: keep the same content in the MR description and under `.scratch/`.
+A win with no guard regresses silently. Read [method.md](method.md) section "Guards". Once the loop ends, lock in every kept change (and every confirmed regression that was rolled back) with a check that fails CI when the gain goes away. Nothing kept: `skip: nothing kept`.
 
-## 9. Commit + PR
+1. Pick the guard: a budget test (a ceiling on size, time or latency) or a lint rule that bans the slow pattern the change removed. Prefer a deterministic measure the change moved (bytes, allocations, queries, calls) over wall time; CI runners are noisy and are not the platform in the spec.
+2. Set the limit between the after side and the baseline, clear of the after side's spread on the CI runner, so it fails when the gain is gone and not on noise.
+3. Prove it: the guard fails on the baseline commit and passes on the head. Paste both results in the report.
+4. Run it where CI already runs the tests. When the claim's budget comes from `CONSTRAINTS.md`, the guard is that budget's check and closes its gap.
+5. Commit it on its own: `test: guard <what>` (or the repo's style).
 
-1. One commit per accepted change, one line, `perf: <subject>` (or the repo's style). The report is its own commit: `docs: add perf report for <topic>`.
-2. Push per the merge policy in [shared/git.md](shared/git.md) (L2+ rules: ask the user), then open the PR with the body in [templates.md](templates.md): one primary number, the verdict, the link to the report path.
+Contributor mode: add the guard only as a test in the suite CI already runs; no new CI job, no edit to the CI config.
 
-No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: commit, but push and open the MR only after step 10. In both cases step 10 reviews the local range and posts nothing ([shared/review.md](shared/review.md)).
+Optional, offer it, never impose it: carry the constraint in the file path, for example a hot-path suffix (`*.hot.ts`) for per-frame or per-request code. A lint rule scoped to that glob bans allocation or blocking I/O there, and an agent editing the file sees the constraint in its name.
 
-## 10. Review
+## 9. Report
+
+Write `docs/perf/<YYYY-MM-DD>-<topic>.md` from the report template in [templates.md](templates.md), verdict first, with raw per-run numbers beside it (`<date>-<topic>-runs.csv`) so a reviewer can recompute the test. The report names each guard from step 8 and lists every numeric budget in `CONSTRAINTS.md` with its CI check, or `gap` (the guards-and-budgets section of the template). Contributor mode: keep the same content in the MR description and under `.scratch/`.
+
+## 10. Commit + PR
+
+1. One commit per accepted change, one line, `perf: <subject>` (or the repo's style). Each guard is its own commit (step 8). The report is its own commit: `docs: add perf report for <topic>`.
+2. Push per the merge policy in [shared/git.md](shared/git.md) (L2+ rules: ask the user), then open the PR with the body in [templates.md](templates.md): one primary number, the verdict, the guard, the link to the report path.
+
+No remote: commit on the branch and skip the PR (`skip: no remote`). Contributor mode: commit, but push and open the MR only after step 11. In both cases step 11 reviews the local range and posts nothing ([shared/review.md](shared/review.md)).
+
+## 11. Review
 
 Run okay-review on the PR, or the local range when there is none (lane `perf`, opus). The reviewer is a fresh agent and posts its own comments; you never post them. Hand it:
 
@@ -141,6 +156,6 @@ Never hand it your conclusions. Ask it to recompute the statistic from the raw r
 
 Merge only at the approved SHA ([shared/git.md](shared/git.md)) and after the user's explicit approval.
 
-## 11. Deliver
+## 12. Deliver
 
 Reply to the user (in Chinese, per [shared/output-style.md](shared/output-style.md)): PR link first, then the verdict line with the number, the limiter, and what was reverted. Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.

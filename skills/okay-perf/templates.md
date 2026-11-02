@@ -66,6 +66,18 @@ p95 with fewer than 20 runs is about the maximum; marked as such.
 |---|---|---|---|---|
 | 1 | | | kept / reverted | |
 
+## Guards and budgets
+
+| Kept change | Guard (kind, file, CI job) | Fails on baseline | Passes on head |
+|---|---|---|---|
+| <commit, subject> | <size / count / time ceiling / lint rule>, <path>, <job> | <yes, output> | <yes, output> |
+
+| Budget in CONSTRAINTS.md | Value | CI check | Status |
+|---|---|---|---|
+| <name> | <number with unit> | <job and test name> | checked / gap |
+
+<No CONSTRAINTS.md, or no numeric budget in it: say so in one line.>
+
 ## Limits
 
 <What this does not show: other platforms, other datasets, tail beyond n, what was not checked.>
@@ -79,7 +91,7 @@ Follows [shared/git.md](shared/git.md): Problem / Cause / Change / Evidence / No
 
 - Problem: the claim and the metric.
 - Cause: the limiter the causal profile found.
-- Change: the accepted changes, one line each.
+- Change: the accepted changes, one line each, and the guard that locks each in.
 - Evidence: the verdict line (one primary number, test, p, n), the link to `docs/perf/<date>-<topic>.md`, and at most five ledger rows (kept and reverted). The full ledger lives in the report.
 - Not touched: what stayed out, including ideas reverted as neutral.
 - Risks: platform and dataset the result is limited to.
