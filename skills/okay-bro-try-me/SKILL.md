@@ -89,4 +89,4 @@ No Node (claude.ai): paste the levels JSON over `/*LEVELS*/null` in `game.html` 
 
 ## 6. Report
 
-One line in the user's language: the URL, the unit concepts, the level. Nothing else. No reflect step: this is not a dev task.
+One line in the user's language: the URL, the unit concepts, the level. Nothing else. No reflect step: shared/delivery.md's reflect rule covers dev tasks that deliver code; this skill delivers none.

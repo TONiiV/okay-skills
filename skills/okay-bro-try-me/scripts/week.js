@@ -7,7 +7,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 
-const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? Number(process.argv[i + 1]) : d; };
+const arg = (k, d) => { const i = process.argv.indexOf(k); const n = i > 0 ? Number(process.argv[i + 1]) : NaN; return n > 0 ? n : d; };
 const days = arg('--days', 7);
 const max = arg('--max', 9000);
 const since = Date.now() - days * 864e5;
@@ -17,9 +17,18 @@ const projects = path.join(claudeDir, 'projects');
 
 const clip = (s, n) => { s = s.replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; };
 const texts = (content) => typeof content === 'string' ? [content]
-  : (content || []).filter((b) => b.type === 'text').map((b) => b.text);
+  : (Array.isArray(content) ? content : []).filter((b) => b && b.type === 'text' && typeof b.text === 'string').map((b) => b.text);
 const list = (dir) => { try { return fs.readdirSync(dir); } catch { return []; } };
-const recent = (file) => { try { return fs.statSync(file).mtimeMs >= since; } catch { return false; } };
+const MAX_FILE = 100 * 1024 * 1024;
+let skipped = 0;
+const recent = (file) => {
+  try {
+    const s = fs.statSync(file);
+    if (s.mtimeMs < since) return false;
+    if (s.size > MAX_FILE) { skipped++; return false; }
+    return true;
+  } catch { return false; }
+};
 
 const out = [];
 for (const proj of list(projects)) {
@@ -30,13 +39,13 @@ for (const proj of list(projects)) {
     let cwd = proj, day = '', prompts = [], errors = [], last = '';
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
       let e; try { e = JSON.parse(line); } catch { continue; }
-      if (e.isSidechain || !e.message) continue;
-      if (e.cwd) cwd = e.cwd;
-      if (!day && e.timestamp) day = e.timestamp.slice(0, 10);
+      if (!e || e.isSidechain || !e.message || typeof e.message !== 'object') continue;
+      if (typeof e.cwd === 'string' && e.cwd) cwd = e.cwd;
+      if (!day && typeof e.timestamp === 'string') day = e.timestamp.slice(0, 10);
       const c = e.message.content;
       if (e.type === 'user') {
         for (const b of Array.isArray(c) ? c : []) {
-          if (b.type === 'tool_result' && b.is_error && errors.length < 3) {
+          if (b && b.type === 'tool_result' && b.is_error && errors.length < 3) {
             errors.push(clip(texts(b.content).join(' ') || String(b.content), 120));
           }
         }
@@ -68,6 +77,7 @@ if (lastRun && lastRun.accuracy < 0.6) level = Math.max(1, level - 1);
 let body = out.join('\n\n');
 if (body.length > max) body = body.slice(0, max) + '\n…(clipped)';
 console.log(`# last ${days} days: ${out.length} entries\n\n${body || '(nothing found)'}\n\n# player`);
+if (skipped) console.log(`note: skipped ${skipped} transcript file(s) over 100 MB`);
 console.log(`first run: ${!lastRun}; prefs: ${JSON.stringify(profile.prefs || {})}; suggested level: ${level}`
   + (lastRun ? `; last: ${lastRun.date} level ${lastRun.level} accuracy ${Math.round(lastRun.accuracy * 100)}%` : '')
   + `; review items queued: ${(profile.review || []).length}`);

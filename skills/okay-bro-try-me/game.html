@@ -73,7 +73,7 @@ const norm = (s) => String(s).trim().toLowerCase().replace(/\s+/g, ' ');
 const api = (p, body) => fetch(p, { method: 'POST', headers: { 'x-token': TOKEN, 'content-type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
 
 const S = { unit: 0, hearts: 5, xp: 0, combo: 0, answers: [], done: [] };
-let queue, pos, total, cur, check;
+let queue, pos, total, cur, check, graded, snap;
 
 function home() {
   $sheet.hidden = true;
@@ -92,6 +92,10 @@ function home() {
 
 function startUnit(i) {
   S.unit = i;
+  // restarting a quit unit rewinds hearts, XP and answers to where it began, so nothing counts twice
+  if (snap && snap.unit === i) { S.hearts = snap.hearts; S.xp = snap.xp; S.answers.length = snap.n; }
+  else snap = { unit: i, hearts: S.hearts, xp: S.xp, n: S.answers.length };
+  S.combo = 0;
   queue = DATA.units[i].items.map((item) => ({ item, tries: 0 }));
   pos = 0; total = queue.length;
   next();
@@ -100,7 +104,7 @@ function startUnit(i) {
 function next() {
   $sheet.hidden = true;
   if (pos >= queue.length) return unitDone();
-  cur = queue[pos];
+  cur = queue[pos]; graded = false;
   const u = DATA.units[S.unit], it = cur.item;
   const left = queue.length - pos;
   $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="Back to path">✕</button>
@@ -112,7 +116,7 @@ function next() {
     <div class="row"><button class="btn wide" id="check" disabled>Check</button></div>`;
   document.getElementById('quit').onclick = home;
   const $check = document.getElementById('check'), $b = document.getElementById('body');
-  const ready = (v) => $check.disabled = !v;
+  const ready = (v) => $check.disabled = !v || graded;
   check = (TYPES[it.t] || TYPES.mc)(it, $b, ready, $check);
   $check.onclick = () => { if (!$check.disabled) check(); };
 }
@@ -177,12 +181,14 @@ let keys = null;
 
 function selfGrade(reveal) {
   sheet('', `<h3>Compare yours</h3>${reveal}<div class="row"><button class="btn" id="y">I got it</button><button class="btn red" id="n">Not yet</button></div>`);
-  document.getElementById('y').onclick = () => grade(true, '', true);
-  document.getElementById('n').onclick = () => grade(false, '', true);
+  document.getElementById('y').onclick = () => grade(true, '');
+  document.getElementById('n').onclick = () => grade(false, '');
 }
 
-function grade(ok, right, self) {
-  keys = null;
+function grade(ok, right) {
+  if (graded) return;
+  graded = true; keys = null;
+  const $c = document.getElementById('check'); if ($c) $c.disabled = true;
   const it = cur.item, u = DATA.units[S.unit];
   if (!cur.tries) S.answers.push({ concept: u.concept, item: it, firstTry: ok });
   cur.tries++;
@@ -198,7 +204,7 @@ function grade(ok, right, self) {
   const comboTxt = ok && S.combo >= 3 ? ` <span class="combo">🔥 ${S.combo} in a row</span>` : '';
   const out = S.hearts === 0 && !ok ? '<p><b>Out of hearts.</b> Practice mode: keep going, XP paused.</p>' : '';
   sheet(ok ? 'ok' : 'bad', `<h3>${ok ? pick(PRAISE) : pick(COMFORT)}${comboTxt}</h3>
-    ${!ok && right && !self ? `<p><b>Answer:</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
+    ${!ok && right ? `<p><b>Answer:</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
     <button class="btn wide ${ok ? '' : 'red'}" id="cont">Continue</button>`);
   document.getElementById('cont').onclick = () => { pos++; next(); };
 }
@@ -224,7 +230,6 @@ async function finish() {
   const first = S.answers.length, right = S.answers.filter((a) => a.firstTry).length;
   const accuracy = first ? right / first : 0;
   let res = {};
-  try { localStorage.setItem('try-me-last', JSON.stringify({ xp: S.xp, accuracy, at: Date.now() })); } catch {}
   if (SERVER) { try { res = await api('/result', { level: DATA.level || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
   const weak = [...new Set(S.answers.filter((a) => !a.firstTry).map((a) => a.concept))];
   $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>Week cleared!</h1>
