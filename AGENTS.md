@@ -12,7 +12,7 @@ Tracker: github
 | `.claude-plugin/marketplace.json` | Marketplace with one plugin, source `./` |
 | `skills/<name>/` | One folder per skill. Auto-discovered; never list skills by hand. |
 | `shared/` | Single source of rules shared by every okay-* skill |
-| `scripts/build.js` | Copies `shared/*` into every `skills/okay-*/shared/` |
+| `scripts/build.js` | Copies into each `skills/okay-*/shared/` only the `shared/` files that skill references, plus the files those link to |
 | `scripts/eval-rates.js` | Runs the evals through `claude plugin eval` and checks rates against `eval-targets.json` |
 | `eval-targets.json` | Per-skill eval rate targets: a `default` set, overrides under `skills` |
 | `hooks/` | Plugin hooks (auto-discovered `hooks/hooks.json`), see Hooks |
