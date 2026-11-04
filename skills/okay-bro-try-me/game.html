@@ -70,6 +70,7 @@ const STR = {
     retry: '↻ Previous mistake, try again', ph: 'Type your answer', run: 'Run', check: 'Check', showSol: 'Show solution', cont: 'Continue',
     running: 'running…', noOut: '(no output)',
     needRunner: 'Running code needs the local runner:\n  node scripts/play.js serve\nYou can still check against the solution.',
+    noInterp: 'No interpreter for this language on this machine. Compare with the solution yourself.',
     offline: 'The code runner is offline. Start it with:\n  node scripts/play.js serve\nFor now, compare with the solution yourself.',
     compare: 'Compare yours', got: 'I got it', notYet: 'Not yet', strong: 'A strong answer:', example: 'Example:', writePh: 'Your answer, in your own words',
     answer: 'Answer:', row: (n) => `🔥 ${n} in a row`, noHearts: '<b>Out of hearts.</b> Practice mode: keep going, XP paused.',
@@ -89,6 +90,7 @@ const STR = {
     retry: '↻ 刚才答错了，再试一次', ph: '输入你的答案', run: '运行', check: '检查', showSol: '看答案', cont: '继续',
     running: '运行中…', noOut: '（没有输出）',
     needRunner: '运行代码需要本地运行器：\n  node scripts/play.js serve\n你仍然可以对照参考答案自检。',
+    noInterp: '这台机器上没有这门语言的解释器。请自己对照参考答案。',
     offline: '代码运行器未连接。请先启动：\n  node scripts/play.js serve\n现在可以自己对照参考答案。',
     compare: '对照一下你的答案', got: '我答对了', notYet: '还没有', strong: '好答案应该包含：', example: '示例：', writePh: '用你自己的话回答',
     answer: '答案：', row: (n) => `🔥 连续答对 ${n} 题`, noHearts: '<b>爱心用完了。</b>练习模式：继续做，经验暂停增加。',
@@ -120,7 +122,7 @@ function home() {
   $sheet.hidden = true;
   const units = DATA.units;
   $app.innerHTML = `<h1>${esc(DATA.title || L.title)}</h1>
-    <p class="mute">${L.stats(DATA.level || 1, units.length, S.xp)}</p>
+    <p class="mute">${L.stats(Number(DATA.level) || 1, units.length, S.xp)}</p>
     ${DATA.intro ? `<div class="story">${esc(DATA.intro)}</div>` : ''}
     <div class="path">${units.map((u, i) => {
       const st = S.done[i] ? 'done' : i === S.unit ? 'open' : '';
@@ -133,9 +135,9 @@ function home() {
 
 function startUnit(i) {
   S.unit = i;
-  // restarting a quit unit rewinds hearts, XP and answers to where it began, so nothing counts twice
-  if (snap && snap.unit === i) { S.hearts = snap.hearts; S.xp = snap.xp; S.answers.length = snap.n; }
-  else snap = { unit: i, hearts: S.hearts, xp: S.xp, n: S.answers.length };
+  // restarting a quit unit rewinds hearts and XP to where it began; answers already graded stay and are never counted twice
+  if (snap && snap.unit === i) { S.hearts = snap.hearts; S.xp = snap.xp; }
+  else snap = { unit: i, hearts: S.hearts, xp: S.xp };
   S.combo = 0;
   queue = DATA.units[i].items.map((item) => ({ item, tries: 0 }));
   pos = 0; total = queue.length;
@@ -158,7 +160,7 @@ function next() {
   document.getElementById('quit').onclick = home;
   const $check = document.getElementById('check'), $b = document.getElementById('body');
   const ready = (v) => $check.disabled = !v || graded;
-  check = (TYPES[it.t] || TYPES.mc)(it, $b, ready, $check);
+  check = (Object.hasOwn(TYPES, it.t) ? TYPES[it.t] : TYPES.mc)(it, $b, ready, $check);
   $check.onclick = () => { if (!$check.disabled) check(); };
 }
 
@@ -195,21 +197,24 @@ const TYPES = {
     $b.innerHTML = `<textarea class="code" id="ed" spellcheck="false">${esc(it.start || '')}</textarea>
       <div class="row"><button class="btn blue" id="run">▶ ${L.run} (${esc(it.lang || 'js')})</button></div><pre class="out" id="out" hidden></pre>`;
     const $ed = document.getElementById('ed'), $out = document.getElementById('out');
-    $ed.onkeydown = (e) => { if (e.key === 'Tab') { e.preventDefault(); $ed.setRangeText('  ', $ed.selectionStart, $ed.selectionEnd, 'end'); } };
-    let last = null, offline = false;
+    $ed.onkeydown = (e) => { if (e.key === 'Tab') { e.preventDefault(); $ed.setRangeText('  ', $ed.selectionStart, $ed.selectionEnd, 'end'); dirty(); } };
+    let last = null, manual = false;
+    const dirty = () => { last = null; ready(!SERVER || manual); }; // an edit needs a fresh Run before Check
+    $ed.oninput = dirty;
     document.getElementById('run').onclick = async () => {
       $out.hidden = false;
       if (!SERVER) { $out.textContent = L.needRunner; ready(true); return; }
       $out.textContent = L.running;
       try {
         const r = await api('/run', { lang: it.lang || 'js', code: $ed.value });
-        last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || L.noOut;
-      } catch { offline = true; $out.textContent = L.offline; $check.textContent = L.showSol; }
+        if (r.unavailable) { manual = true; $out.textContent = L.noInterp; $check.textContent = L.showSol; }
+        else { last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || L.noOut; }
+      } catch { manual = true; $out.textContent = L.offline; $check.textContent = L.showSol; }
       ready(true);
     };
     ready(!SERVER);
     $check.textContent = SERVER ? L.check : L.showSol;
-    return () => SERVER && !offline && it.expect != null
+    return () => SERVER && !manual && it.expect != null
       ? grade(last != null && norm(last) === norm(it.expect), it.solution || it.expect, $ed.value)
       : selfGrade(it.solution ? `<pre class="out">${esc(it.solution)}</pre>` : '', $ed.value, it.solution);
   },
@@ -233,7 +238,7 @@ function grade(ok, right, mine, shown) {
   graded = true; keys = null;
   const $c = document.getElementById('check'); if ($c) $c.disabled = true;
   const it = cur.item, u = DATA.units[S.unit];
-  if (!cur.tries) S.answers.push({ concept: u.concept, item: it, firstTry: ok });
+  if (!cur.tries && !S.answers.some((a) => a.item === it)) S.answers.push({ concept: u.concept, item: it, firstTry: ok });
   cur.tries++;
   if (ok) {
     S.combo++;
@@ -284,7 +289,7 @@ async function finish() {
   const first = S.answers.length, right = S.answers.filter((a) => a.firstTry).length;
   const accuracy = first ? right / first : 0;
   let res = {};
-  if (SERVER) { try { res = await api('/result', { level: DATA.level || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
+  if (SERVER) { try { res = await api('/result', { level: Number(DATA.level) || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
   const saved = SERVER && res.streak != null;
   const weak = [...new Set(S.answers.filter((a) => !a.firstTry).map((a) => a.concept))];
   $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>${L.cleared}</h1>

@@ -12,16 +12,19 @@ const { spawnSync, spawn } = require('node:child_process');
 
 const home = path.join(process.env.OKAY_HOME || path.join(os.homedir(), '.okay'), 'try-me');
 const profileFile = path.join(home, 'profile.json');
-const readProfile = () => { try { return JSON.parse(fs.readFileSync(profileFile, 'utf8')); } catch { return {}; } };
+const readProfile = () => {
+  try { const p = JSON.parse(fs.readFileSync(profileFile, 'utf8').replace(/^\uFEFF/, '')); return p && typeof p === 'object' && !Array.isArray(p) ? p : {}; } catch { return {}; }
+};
+const arr = (v) => (Array.isArray(v) ? v : []);
 const writeProfile = (p) => { fs.mkdirSync(home, { recursive: true }); fs.writeFileSync(profileFile, JSON.stringify(p, null, 1)); };
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }; // local date
 const flag = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : undefined; };
 const die = (m) => { console.error(m); process.exit(2); };
 
 function build(src, out) {
   const data = JSON.parse(fs.readFileSync(src, 'utf8'));
   if (!Array.isArray(data.units) || !data.units.length) die('levels.json needs a non-empty "units" array');
-  const review = (readProfile().review || []).slice(0, 3);
+  const review = arr(readProfile().review).filter((r) => r && r.item).slice(0, 3);
   if (review.length) data.units.push({ concept: 'Review', story: 'Last time these tripped you up. Again!', review: true, items: review.map((r) => r.item) });
   const html = fs.readFileSync(path.join(__dirname, '..', 'game.html'), 'utf8')
     .replace('/*LEVELS*/null', () => JSON.stringify(data).replace(/</g, '\\u003c'));
@@ -41,12 +44,12 @@ function nextStreak(streak, lastDate, date) {
 
 function saveResult(r) {
   const p = readProfile();
-  p.runs = p.runs || [];
+  p.runs = arr(p.runs);
   const last = p.runs[p.runs.length - 1];
   p.streak = nextStreak(p.streak, last && last.date, today());
   p.runs.push({ date: today(), level: r.level, accuracy: r.accuracy, xp: r.xp });
   // ponytail: two first-try hits retire a review item; swap in half-life regression if reviews pile up.
-  const review = new Map((p.review || []).map((x) => [x.item.q, x]));
+  const review = new Map(arr(p.review).filter((x) => x && x.item && x.item.q).map((x) => [x.item.q, x]));
   for (const a of r.answers || []) {
     if (!a || !a.item || !a.item.q) continue;
     const x = review.get(a.item.q);
@@ -70,7 +73,7 @@ function runCode({ lang, code }) {
       if (r.error && r.error.code === 'ENOENT') continue;
       return { out: r.stdout || '', err: (r.stderr || '') + (r.error ? String(r.error.message) : '') };
     }
-    return { out: '', err: `no ${lang} interpreter found` };
+    return { out: '', err: `no ${lang} interpreter found`, unavailable: true };
   } finally { fs.rmSync(file, { force: true }); }
 }
 

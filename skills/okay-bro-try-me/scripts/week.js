@@ -38,7 +38,7 @@ for (const proj of list(projects)) {
     if (!recent(file)) continue;
     let cwd = proj, day = '', prompts = [], errors = [], last = '';
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-      let e; try { e = JSON.parse(line); } catch { continue; }
+      let e; try { e = JSON.parse(line.replace(/^\uFEFF/, '')); } catch { continue; }
       if (!e || e.isSidechain || !e.message || typeof e.message !== 'object') continue;
       if (typeof e.cwd === 'string' && e.cwd) cwd = e.cwd;
       if (!day && typeof e.timestamp === 'string') day = e.timestamp.slice(0, 10);
@@ -46,7 +46,8 @@ for (const proj of list(projects)) {
       if (e.type === 'user') {
         for (const b of Array.isArray(c) ? c : []) {
           if (b && b.type === 'tool_result' && b.is_error && errors.length < 3) {
-            errors.push(clip(texts(b.content).join(' ') || String(b.content), 120));
+            const t = clip(texts(b.content).join(' '), 120);
+            if (t) errors.push(t);
           }
         }
         for (const t of texts(c)) if (t && !t.startsWith('<') && prompts.length < 8) prompts.push(clip(t, 200));
@@ -56,7 +57,7 @@ for (const proj of list(projects)) {
       }
     }
     if (!prompts.length) continue;
-    out.push(`## ${day} ${path.basename(cwd)}\n` + prompts.map((p) => `> ${p}`).join('\n')
+    out.push(`## ${day} ${path.basename(cwd) || proj}\n` + prompts.map((p) => `> ${p}`).join('\n')
       + (errors.length ? `\nerrors: ${errors.join(' | ')}` : '')
       + (last ? `\nend: ${clip(last, 300)}` : ''));
   }
@@ -67,8 +68,9 @@ for (const proj of list(projects)) {
 }
 
 let profile = {};
-try { profile = JSON.parse(fs.readFileSync(path.join(okayHome, 'try-me', 'profile.json'), 'utf8')); } catch {}
-const runs = profile.runs || [];
+try { profile = JSON.parse(fs.readFileSync(path.join(okayHome, 'try-me', 'profile.json'), 'utf8').replace(/^\uFEFF/, '')); } catch {}
+if (!profile || typeof profile !== 'object') profile = {};
+const runs = Array.isArray(profile.runs) ? profile.runs.filter((r) => r && typeof r === 'object') : [];
 const lastRun = runs[runs.length - 1];
 let level = lastRun ? lastRun.level : 2;
 if (lastRun && lastRun.accuracy >= 0.9) level = Math.min(5, level + 1);
@@ -80,4 +82,4 @@ console.log(`# last ${days} days: ${out.length} entries\n\n${body || '(nothing f
 if (skipped) console.log(`note: skipped ${skipped} transcript file(s) over 100 MB`);
 console.log(`first run: ${!lastRun}; prefs: ${JSON.stringify(profile.prefs || {})}; suggested level: ${level}`
   + (lastRun ? `; last: ${lastRun.date} level ${lastRun.level} accuracy ${Math.round(lastRun.accuracy * 100)}%` : '')
-  + `; review items queued: ${(profile.review || []).length}`);
+  + `; review items queued: ${Array.isArray(profile.review) ? profile.review.length : 0}`);

@@ -66,10 +66,10 @@ test('play.js serve rejects requests without the token, runs code and saves resu
 });
 
 const play = path.join(dir, 'scripts', 'play.js');
-async function withServer(fn) {
+async function withServer(fn, env = {}) {
   const home = tmp(), out = path.join(home, 'g.html');
   node([play, 'build', path.join(dir, 'example-levels.json'), '--out', out], { OKAY_HOME: home });
-  const p = spawn(process.execPath, [play, 'serve', out, '--no-open'], { env: { ...process.env, OKAY_HOME: home } });
+  const p = spawn(process.execPath, [play, 'serve', out, '--no-open'], { env: { ...process.env, OKAY_HOME: home, ...env } });
   try {
     const url = new URL(await new Promise((ok) => p.stdout.once('data', (b) => ok(String(b).trim()))));
     const t = url.searchParams.get('t');
@@ -80,7 +80,7 @@ async function withServer(fn) {
 }
 const item = { t: 'mc', q: 'Q?', opts: ['a', 'b'], a: 0 };
 const ans = (firstTry) => ({ answers: [{ concept: 'c', item, firstTry }], level: 2, accuracy: 0.5, xp: 1 });
-const daysAgo = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+const daysAgo = (n) => new Date(Date.now() - n * 864e5).toLocaleDateString('sv');
 
 test('week.js skips malformed lines and oversized files, and falls back on bad flags', () => {
   const claude = tmp();
@@ -149,8 +149,12 @@ test('the page does not count a restarted unit twice', () => {
   d.getElementById('cont').click();
   d.getElementById('quit').click();
   d.querySelector('.node.open').click();
-  assert.equal(window.eval('S.answers.length'), 0);
+  assert.equal(window.eval('S.answers.length'), 1, 'the miss stays');
   assert.equal(window.eval('S.hearts'), 5);
+  d.querySelectorAll('.opt')[1].click();
+  d.getElementById('check').click();
+  assert.equal(window.eval('S.answers.length'), 1, 'the same item is not counted twice');
+  assert.equal(window.eval('S.answers[0].firstTry'), false);
 });
 
 function page(levels, url = 'http://localhost/') {
@@ -189,4 +193,78 @@ test('the code item says the runner is offline instead of hanging, then self-gra
   assert.equal(d.getElementById('check').textContent, 'Show solution');
   d.getElementById('check').click();
   assert.ok(d.getElementById('y'), 'self-check against the solution');
+});
+
+test('levels text never becomes markup', () => {
+  const x = '<img src=x onerror="window.pwned=1">';
+  const w = page({ lang: x, level: x, title: x, intro: x, units: [{ concept: x, story: x, items: [
+    { t: 'mc', q: x, opts: [x, 'b'], a: 0, why: x },
+    { t: 'order', q: x, steps: [x, 'b'], why: x },
+    { t: 'bogus', q: x, opts: [x], a: 0 },
+  ] }] });
+  const d = w.document;
+  assert.equal(d.querySelectorAll('img').length, 0, 'home');
+  d.querySelector('.node.open').click();
+  assert.equal(d.querySelectorAll('img').length, 0, 'item');
+  d.querySelector('.opt').click();
+  d.getElementById('check').click();
+  assert.equal(d.querySelectorAll('img').length, 0, 'sheet');
+  assert.equal(w.pwned, undefined);
+});
+
+test('a missing interpreter falls back to self-check without losing a heart', async () => {
+  const levels = { lang: 'en', units: [{ concept: 'c', items: [{ t: 'code', lang: 'python', q: 'q', start: '', expect: '42', solution: 'print(42)' }] }] };
+  const w = page(levels, 'http://localhost/?t=x'), d = w.document;
+  w.fetch = () => Promise.resolve({ json: () => Promise.resolve({ out: '', err: 'no python interpreter found', unavailable: true }) });
+  d.querySelector('.node.open').click();
+  d.getElementById('run').click();
+  await tick();
+  assert.equal(d.getElementById('check').textContent, 'Show solution');
+  d.getElementById('check').click();
+  d.getElementById('y').click();
+  assert.equal(w.eval('S.hearts'), 5);
+  assert.equal(w.eval('S.answers[0].firstTry'), true);
+});
+
+test('editing the code needs a fresh Run before Check', async () => {
+  const levels = { lang: 'en', units: [{ concept: 'c', items: [{ t: 'code', q: 'q', start: '', expect: '42' }] }] };
+  const w = page(levels, 'http://localhost/?t=x'), d = w.document;
+  w.fetch = () => Promise.resolve({ json: () => Promise.resolve({ out: '42', err: '' }) });
+  d.querySelector('.node.open').click();
+  d.getElementById('run').click();
+  await tick();
+  assert.equal(d.getElementById('check').disabled, false);
+  const ed = d.getElementById('ed');
+  ed.value = 'print(7)';
+  ed.dispatchEvent(new w.Event('input'));
+  assert.equal(d.getElementById('check').disabled, true);
+});
+
+test('server: no interpreter is reported as unavailable; dates are local; a null profile is tolerated', () => withServer(async ({ post, profile, home }) => {
+  const r = await (await post('/run', { lang: 'python', code: 'print(1)' })).json();
+  assert.equal(r.unavailable, true);
+  fs.mkdirSync(path.join(home, 'try-me'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'try-me', 'profile.json'), 'null');
+  assert.equal((await post('/result', ans(false))).status, 200);
+  const zone = 'Pacific/Kiritimati';
+  assert.equal(profile().runs[0].date, new Date().toLocaleDateString('sv', { timeZone: zone }), 'local date, not UTC');
+}, { TZ: 'Pacific/Kiritimati', PATH: '' }));
+
+test('week.js tolerates a null profile, a BOM, empty errors and a root cwd', () => {
+  const claude = tmp(), okay = tmp();
+  const proj = path.join(claude, 'projects', 'proj');
+  fs.mkdirSync(proj, { recursive: true });
+  fs.mkdirSync(path.join(okay, 'try-me'), { recursive: true });
+  fs.writeFileSync(path.join(okay, 'try-me', 'profile.json'), 'null');
+  const lines = [
+    { type: 'user', cwd: '/', timestamp: '2026-11-01T10:00:00Z', message: { content: 'only prompt' } },
+    { type: 'user', message: { content: [{ type: 'tool_result', is_error: true }] } },
+  ];
+  fs.writeFileSync(path.join(proj, 's.jsonl'), String.fromCharCode(0xfeff) + lines.map((l) => JSON.stringify(l)).join('\n'));
+  const r = node([path.join(dir, 'scripts', 'week.js')], { CLAUDE_CONFIG_DIR: claude, OKAY_HOME: okay });
+  assert.equal(r.status, 0, r.stderr);
+  assert.ok(r.stdout.includes('only prompt'), 'BOM line kept');
+  assert.ok(!r.stdout.includes('undefined'));
+  assert.ok(r.stdout.includes('## 2026-11-01 proj'), 'falls back to the project folder');
+  assert.ok(r.stdout.includes('first run: true'));
 });
