@@ -16,6 +16,7 @@ Shared rules, by reference:
 - Commit, PR, merge (promotion PRs): [shared/git.md](shared/git.md)
 - Delivery and the reflection marker: [shared/delivery.md](shared/delivery.md)
 - Code host, and what to do when `gh` fails: [shared/tracker.md](shared/tracker.md)
+- Local fact memory (store, caps, gates, CLI): [shared/memory.md](shared/memory.md)
 
 Reviewer and synthesizer prompts: [prompts.md](prompts.md).
 
