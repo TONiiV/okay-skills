@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
 const SHARED = path.join(ROOT, 'shared');
+const { neededShared } = require('../scripts/build.js');
 const SKILLS = path.join(ROOT, 'skills');
 const ALLOWED_KEYS = ['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools'];
 
@@ -115,8 +116,8 @@ for (const name of okaySkills) {
       }
     });
 
-    it('shared/ is a byte-identical copy of the root shared/ (run npm run build)', () => {
-      const want = walk(SHARED).map((f) => path.relative(SHARED, f)).sort();
+    it('shared/ holds byte-identical copies of exactly the root shared/ files this skill references (run npm run build)', () => {
+      const want = neededShared(dir);
       const sharedDir = path.join(dir, 'shared');
       const got = fs.existsSync(sharedDir) ? walk(sharedDir).map((f) => path.relative(sharedDir, f)).sort() : [];
       assert.deepEqual(got, want);
