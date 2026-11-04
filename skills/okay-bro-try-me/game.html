@@ -63,8 +63,49 @@ ul.rubric{padding-left:20px}
 const DATA = /*LEVELS*/null;
 const TOKEN = new URLSearchParams(location.search).get('t');
 const SERVER = location.protocol.startsWith('http') && TOKEN;
-const PRAISE = ['Nice!', 'Nailed it!', 'You got it!', 'Big brain!', 'Smooth!', 'Exactly!'];
-const COMFORT = ['Not quite.', 'Close!', 'Almost.', 'Good try.'];
+const STR = {
+  en: {
+    title: 'This week, try me', stats: (l, n, x) => `Level ${l} · ${n} units · ⭐ ${x} XP`, unit: 'Unit', back: 'Back to path',
+    praise: ['Nice!', 'Nailed it!', 'You got it!', 'Big brain!', 'Smooth!', 'Exactly!'], comfort: ['Not quite.', 'Close!', 'Almost.', 'Good try.'],
+    retry: '↻ Previous mistake, try again', ph: 'Type your answer', run: 'Run', check: 'Check', showSol: 'Show solution', cont: 'Continue',
+    running: 'running…', noOut: '(no output)',
+    needRunner: 'Running code needs the local runner:\n  node scripts/play.js serve\nYou can still check against the solution.',
+    offline: 'The code runner is offline. Start it with:\n  node scripts/play.js serve\nFor now, compare with the solution yourself.',
+    compare: 'Compare yours', got: 'I got it', notYet: 'Not yet', strong: 'A strong answer:', example: 'Example:', writePh: 'Your answer, in your own words',
+    answer: 'Answer:', row: (n) => `🔥 ${n} in a row`, noHearts: '<b>Out of hearts.</b> Practice mode: keep going, XP paused.',
+    unitDone: 'Unit complete!', unlocked: (c, x) => `${c} unlocked. ⭐ ${x} XP so far.`, nextUnit: 'Next unit',
+    cleared: 'Week cleared!', xp: 'XP', acc: 'Accuracy', streak: 'Week streak',
+    up: 'Too easy? Next week goes up a level.', down: 'Tough week. Next week eases off a little and brings these back.', mid: 'Solid. The misses come back next week as review.',
+    review: 'Coming back for review:', saved: 'Saved. You can close this tab.',
+    notSaved: 'The runner is offline, so nothing was saved. Start it with <code>node scripts/play.js serve</code> and replay to keep your streak.',
+    file: 'Opened as a file, so nothing was saved. Run <code>node scripts/play.js serve</code> to keep your streak.',
+    copy: 'Copy question to ask in chat', copied: 'Copied',
+    ask: (q, mine, right, why) => ['I got this wrong in a practice game:', q, mine && 'My answer: ' + mine, right && 'Correct answer: ' + right, why && 'Why: ' + why, 'Can you explain it to me?'],
+    none: 'No levels yet', build: 'Build one:',
+  },
+  zh: {
+    title: '这周，来考考我', stats: (l, n, x) => `难度 ${l} · ${n} 个单元 · ⭐ ${x} 经验`, unit: '单元', back: '回到路线',
+    praise: ['答对了！', '漂亮！', '稳！', '就是这样！', '太强了！', '没错！'], comfort: ['差一点。', '再想想。', '快了。', '没关系。'],
+    retry: '↻ 刚才答错了，再试一次', ph: '输入你的答案', run: '运行', check: '检查', showSol: '看答案', cont: '继续',
+    running: '运行中…', noOut: '（没有输出）',
+    needRunner: '运行代码需要本地运行器：\n  node scripts/play.js serve\n你仍然可以对照参考答案自检。',
+    offline: '代码运行器未连接。请先启动：\n  node scripts/play.js serve\n现在可以自己对照参考答案。',
+    compare: '对照一下你的答案', got: '我答对了', notYet: '还没有', strong: '好答案应该包含：', example: '示例：', writePh: '用你自己的话回答',
+    answer: '答案：', row: (n) => `🔥 连续答对 ${n} 题`, noHearts: '<b>爱心用完了。</b>练习模式：继续做，经验暂停增加。',
+    unitDone: '单元完成！', unlocked: (c, x) => `「${c}」已解锁。目前 ⭐ ${x} 经验。`, nextUnit: '下一单元',
+    cleared: '本周通关！', xp: '经验', acc: '正确率', streak: '连续周数',
+    up: '太简单了？下周升一级。', down: '这周有点难。下周会降一点难度，并把这些题带回来。', mid: '不错。答错的题下周会作为复习回来。',
+    review: '下次复习：', saved: '已保存，可以关闭此页面。',
+    notSaved: '运行器未连接，成绩没有保存。请运行 <code>node scripts/play.js serve</code> 后重玩，以保留连续记录。',
+    file: '以文件方式打开，成绩不会保存。运行 <code>node scripts/play.js serve</code> 来保留连续记录。',
+    copy: '复制这道题，去聊天里问', copied: '已复制',
+    ask: (q, mine, right, why) => ['这道题我在练习游戏里答错了：', q, mine && '我的答案：' + mine, right && '正确答案：' + right, why && '原因：' + why, '能给我讲讲吗？'],
+    none: '还没有关卡', build: '先生成：',
+  },
+};
+const LANG = String(DATA && DATA.lang || 'en').slice(0, 2).toLowerCase();
+const L = STR[LANG] || STR.en;
+document.documentElement.lang = STR[LANG] ? LANG : 'en';
 const $app = document.getElementById('app'), $sheet = document.getElementById('sheet');
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -78,13 +119,13 @@ let queue, pos, total, cur, check, graded, snap;
 function home() {
   $sheet.hidden = true;
   const units = DATA.units;
-  $app.innerHTML = `<h1>${esc(DATA.title || 'This week, try me')}</h1>
-    <p class="mute">Level ${DATA.level || 1} · ${units.length} units · ⭐ ${S.xp} XP</p>
+  $app.innerHTML = `<h1>${esc(DATA.title || L.title)}</h1>
+    <p class="mute">${L.stats(DATA.level || 1, units.length, S.xp)}</p>
     ${DATA.intro ? `<div class="story">${esc(DATA.intro)}</div>` : ''}
     <div class="path">${units.map((u, i) => {
       const st = S.done[i] ? 'done' : i === S.unit ? 'open' : '';
       return `<div class="nodewrap" style="margin-left:${[0, 80, 0, -80][i % 4]}px">
-        <button class="node ${st}" data-i="${i}" ${st === 'open' ? '' : 'disabled'} aria-label="Unit ${i + 1}: ${esc(u.concept)}">${S.done[i] ? '★' : u.review ? '↻' : i + 1}</button>
+        <button class="node ${st}" data-i="${i}" ${st === 'open' ? '' : 'disabled'} aria-label="${L.unit} ${i + 1}: ${esc(u.concept)}">${S.done[i] ? '★' : u.review ? '↻' : i + 1}</button>
         <b>${esc(u.concept)}</b></div>`;
     }).join('')}</div>`;
   $app.querySelectorAll('.node.open').forEach((b) => b.onclick = () => startUnit(+b.dataset.i));
@@ -107,13 +148,13 @@ function next() {
   cur = queue[pos]; graded = false;
   const u = DATA.units[S.unit], it = cur.item;
   const left = queue.length - pos;
-  $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="Back to path">✕</button>
+  $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="${L.back}">✕</button>
     <div class="bar"><i style="width:${Math.round(100 * (total - Math.min(left, total)) / total)}%"></i></div>
     <span class="hearts">♥ ${S.hearts}</span></div>
     ${pos === 0 && u.story ? `<div class="story">${esc(u.story)}</div>` : ''}
-    ${cur.tries ? '<p class="mute">↻ Previous mistake, try again</p>' : ''}
+    ${cur.tries ? `<p class="mute">${L.retry}</p>` : ''}
     <div class="q">${esc(it.q)}</div><div id="body"></div>
-    <div class="row"><button class="btn wide" id="check" disabled>Check</button></div>`;
+    <div class="row"><button class="btn wide" id="check" disabled>${L.check}</button></div>`;
   document.getElementById('quit').onclick = home;
   const $check = document.getElementById('check'), $b = document.getElementById('body');
   const ready = (v) => $check.disabled = !v || graded;
@@ -129,14 +170,14 @@ const TYPES = {
     const choose = (i) => { sel = i; btns.forEach((b, j) => b.classList.toggle('sel', j === i)); ready(true); };
     btns.forEach((b, i) => b.onclick = () => choose(i));
     keys = (k) => { const n = +k - 1; if (n >= 0 && n < btns.length) choose(n); };
-    return () => grade(sel === it.a, it.opts[it.a]);
+    return () => grade(sel === it.a, it.opts[it.a], it.opts[sel]);
   },
   fill(it, $b, ready) {
-    $b.innerHTML = `<input class="fill" id="fill" autocomplete="off" placeholder="Type your answer">`;
+    $b.innerHTML = `<input class="fill" id="fill" autocomplete="off" placeholder="${L.ph}">`;
     const $i = document.getElementById('fill'); $i.focus();
     $i.oninput = () => ready($i.value.trim());
     const ok = [].concat(it.a);
-    return () => grade(ok.some((a) => norm(a) === norm($i.value)), ok[0]);
+    return () => grade(ok.some((a) => norm(a) === norm($i.value)), ok[0], $i.value);
   },
   order(it, $b, ready) {
     const pool = shuffle(it.steps.map((s, i) => ({ s, i }))), chosen = [];
@@ -148,44 +189,46 @@ const TYPES = {
       ready(!pool.length);
     };
     draw();
-    return () => grade(chosen.every((c, k) => c.i === k), it.steps.join(' → '));
+    return () => grade(chosen.every((c, k) => c.i === k), it.steps.join(' → '), chosen.map((c) => c.s).join(' → '));
   },
   code(it, $b, ready, $check) {
     $b.innerHTML = `<textarea class="code" id="ed" spellcheck="false">${esc(it.start || '')}</textarea>
-      <div class="row"><button class="btn blue" id="run">▶ Run (${esc(it.lang || 'js')})</button></div><pre class="out" id="out" hidden></pre>`;
+      <div class="row"><button class="btn blue" id="run">▶ ${L.run} (${esc(it.lang || 'js')})</button></div><pre class="out" id="out" hidden></pre>`;
     const $ed = document.getElementById('ed'), $out = document.getElementById('out');
     $ed.onkeydown = (e) => { if (e.key === 'Tab') { e.preventDefault(); $ed.setRangeText('  ', $ed.selectionStart, $ed.selectionEnd, 'end'); } };
-    let last = null;
+    let last = null, offline = false;
     document.getElementById('run').onclick = async () => {
       $out.hidden = false;
-      if (!SERVER) { $out.textContent = 'Running code needs the local runner:\n  node play.js serve\nYou can still check against the solution.'; ready(true); return; }
-      $out.textContent = 'running…';
-      const r = await api('/run', { lang: it.lang || 'js', code: $ed.value });
-      last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || '(no output)';
+      if (!SERVER) { $out.textContent = L.needRunner; ready(true); return; }
+      $out.textContent = L.running;
+      try {
+        const r = await api('/run', { lang: it.lang || 'js', code: $ed.value });
+        last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || L.noOut;
+      } catch { offline = true; $out.textContent = L.offline; $check.textContent = L.showSol; }
       ready(true);
     };
     ready(!SERVER);
-    $check.textContent = SERVER ? 'Check' : 'Show solution';
-    return () => SERVER && it.expect != null
-      ? grade(last != null && norm(last) === norm(it.expect), it.solution || it.expect)
-      : selfGrade(it.solution ? `<pre class="out">${esc(it.solution)}</pre>` : '');
+    $check.textContent = SERVER ? L.check : L.showSol;
+    return () => SERVER && !offline && it.expect != null
+      ? grade(last != null && norm(last) === norm(it.expect), it.solution || it.expect, $ed.value)
+      : selfGrade(it.solution ? `<pre class="out">${esc(it.solution)}</pre>` : '', $ed.value, it.solution);
   },
   write(it, $b, ready) {
-    $b.innerHTML = `<textarea id="w" rows="6" placeholder="Your answer, in your own words"></textarea>`;
+    $b.innerHTML = `<textarea id="w" rows="6" placeholder="${L.writePh}"></textarea>`;
     const $w = document.getElementById('w'); $w.focus();
     $w.oninput = () => ready($w.value.trim().length > 3);
-    return () => selfGrade(`${it.rubric ? `<p>A strong answer:</p><ul class="rubric">${it.rubric.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}${it.model ? `<p><b>Example:</b> ${esc(it.model)}</p>` : ''}`);
+    return () => selfGrade(`${it.rubric ? `<p>${L.strong}</p><ul class="rubric">${it.rubric.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}${it.model ? `<p><b>${L.example}</b> ${esc(it.model)}</p>` : ''}`, $w.value, it.model || (it.rubric || []).join('; '));
   },
 };
 let keys = null;
 
-function selfGrade(reveal) {
-  sheet('', `<h3>Compare yours</h3>${reveal}<div class="row"><button class="btn" id="y">I got it</button><button class="btn red" id="n">Not yet</button></div>`);
+function selfGrade(reveal, mine, right) {
+  sheet('', `<h3>${L.compare}</h3>${reveal}<div class="row"><button class="btn" id="y">${L.got}</button><button class="btn red" id="n">${L.notYet}</button></div>`);
   document.getElementById('y').onclick = () => grade(true, '');
-  document.getElementById('n').onclick = () => grade(false, '');
+  document.getElementById('n').onclick = () => grade(false, '', mine, right);
 }
 
-function grade(ok, right) {
+function grade(ok, right, mine, shown) {
   if (graded) return;
   graded = true; keys = null;
   const $c = document.getElementById('check'); if ($c) $c.disabled = true;
@@ -201,12 +244,23 @@ function grade(ok, right) {
     queue.push(cur);   // Duolingo-style: missed items come back at the end of the lesson
   }
   const $h = $app.querySelector('.hearts'); if ($h) $h.textContent = `♥ ${S.hearts}`;
-  const comboTxt = ok && S.combo >= 3 ? ` <span class="combo">🔥 ${S.combo} in a row</span>` : '';
-  const out = S.hearts === 0 && !ok ? '<p><b>Out of hearts.</b> Practice mode: keep going, XP paused.</p>' : '';
-  sheet(ok ? 'ok' : 'bad', `<h3>${ok ? pick(PRAISE) : pick(COMFORT)}${comboTxt}</h3>
-    ${!ok && right ? `<p><b>Answer:</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
-    <button class="btn wide ${ok ? '' : 'red'}" id="cont">Continue</button>`);
+  const comboTxt = ok && S.combo >= 3 ? ` <span class="combo">${L.row(S.combo)}</span>` : '';
+  const out = S.hearts === 0 && !ok ? `<p>${L.noHearts}</p>` : '';
+  sheet(ok ? 'ok' : 'bad', `<h3>${pick(ok ? L.praise : L.comfort)}${comboTxt}</h3>
+    ${!ok && right ? `<p><b>${L.answer}</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
+    ${ok ? '' : `<button class="btn ghost wide" id="copy" style="margin-bottom:10px">${L.copy}</button>`}
+    <button class="btn wide ${ok ? '' : 'red'}" id="cont">${L.cont}</button>`);
   document.getElementById('cont').onclick = () => { pos++; next(); };
+  const $copy = document.getElementById('copy');
+  if ($copy) $copy.onclick = () => copyText(L.ask(it.q, mine, right || shown, it.why).filter(Boolean).join('\n'))
+    .then(() => { $copy.textContent = L.copied; }).catch(() => {});
+}
+
+function copyText(text) {
+  return (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).catch(() => {
+    const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+    const ok = document.execCommand('copy'); t.remove(); if (!ok) throw new Error('copy failed');
+  });
 }
 
 function sheet(cls, html) {
@@ -220,9 +274,9 @@ function unitDone() {
   const last = S.done.filter(Boolean).length === DATA.units.length;
   if (last) return finish();
   S.unit++;
-  $app.innerHTML = `<div class="center"><div class="burst">⭐</div><h2>Unit complete!</h2>
-    <p class="mute">${esc(DATA.units[S.unit - 1].concept)} unlocked. ⭐ ${S.xp} XP so far.</p>
-    <button class="btn wide" id="go">Next unit</button></div>`;
+  $app.innerHTML = `<div class="center"><div class="burst">⭐</div><h2>${L.unitDone}</h2>
+    <p class="mute">${L.unlocked(esc(DATA.units[S.unit - 1].concept), S.xp)}</p>
+    <button class="btn wide" id="go">${L.nextUnit}</button></div>`;
   document.getElementById('go').onclick = home;
 }
 
@@ -231,13 +285,14 @@ async function finish() {
   const accuracy = first ? right / first : 0;
   let res = {};
   if (SERVER) { try { res = await api('/result', { level: DATA.level || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
+  const saved = SERVER && res.streak != null;
   const weak = [...new Set(S.answers.filter((a) => !a.firstTry).map((a) => a.concept))];
-  $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>Week cleared!</h1>
-    <div class="stats"><div class="stat">XP<b>${S.xp}</b></div><div class="stat">Accuracy<b>${Math.round(accuracy * 100)}%</b></div>
-    ${res.streak ? `<div class="stat">Week streak<b>🔥 ${res.streak}</b></div>` : ''}</div>
-    <p>${accuracy >= 0.9 ? 'Too easy? Next week goes up a level.' : accuracy < 0.6 ? 'Tough week. Next week eases off a little and brings these back.' : 'Solid. The misses come back next week as review.'}</p>
-    ${weak.length ? `<p class="mute">Coming back for review: ${weak.map(esc).join(', ')}</p>` : ''}
-    ${SERVER ? '<p class="mute">Saved. You can close this tab.</p>' : '<p class="mute">Opened as a file, so nothing was saved. Run <code>node play.js serve</code> to keep your streak.</p>'}</div>`;
+  $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>${L.cleared}</h1>
+    <div class="stats"><div class="stat">${L.xp}<b>${S.xp}</b></div><div class="stat">${L.acc}<b>${Math.round(accuracy * 100)}%</b></div>
+    ${res.streak ? `<div class="stat">${L.streak}<b>🔥 ${res.streak}</b></div>` : ''}</div>
+    <p>${accuracy >= 0.9 ? L.up : accuracy < 0.6 ? L.down : L.mid}</p>
+    ${weak.length ? `<p class="mute">${L.review} ${weak.map(esc).join(', ')}</p>` : ''}
+    <p class="mute">${saved ? L.saved : SERVER ? L.notSaved : L.file}</p></div>`;
 }
 
 document.addEventListener('keydown', (e) => {
@@ -250,7 +305,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-if (DATA) home(); else $app.innerHTML = '<h1>No levels yet</h1><p>Build one: <code>node play.js build levels.json</code></p>';
+if (DATA) home(); else $app.innerHTML = `<h1>${L.none}</h1><p>${L.build} <code>node scripts/play.js build levels.json</code></p>`;
 </script>
 </body>
 </html>

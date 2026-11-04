@@ -152,3 +152,41 @@ test('the page does not count a restarted unit twice', () => {
   assert.equal(window.eval('S.answers.length'), 0);
   assert.equal(window.eval('S.hearts'), 5);
 });
+
+function page(levels, url = 'http://localhost/') {
+  const home = tmp(), src = path.join(home, 'l.json'), out = path.join(home, 'g.html');
+  fs.writeFileSync(src, JSON.stringify(levels));
+  node([play, 'build', src, '--out', out], { OKAY_HOME: home });
+  return new JSDOM(fs.readFileSync(out, 'utf8'), { runScripts: 'dangerously', url }).window;
+}
+const tick = () => new Promise((ok) => setTimeout(ok, 20));
+
+test('the page speaks the levels lang, falls back to English, and copies a wrong question', async () => {
+  const levels = JSON.parse(fs.readFileSync(path.join(dir, 'example-levels.json'), 'utf8'));
+  assert.equal(levels.lang, 'zh');
+  const w = page(levels), d = w.document;
+  assert.equal(d.documentElement.lang, 'zh');
+  d.querySelector('.node.open').click();
+  assert.equal(d.getElementById('check').textContent, '检查');
+  let copied = '';
+  Object.defineProperty(w.navigator, 'clipboard', { value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  d.querySelectorAll('.opt')[0].click();
+  d.getElementById('check').click();
+  d.getElementById('copy').click();
+  await tick();
+  assert.equal(d.getElementById('copy').textContent, '已复制');
+  assert.ok(copied.includes(levels.units[0].items[0].q) && copied.includes('我的答案：' + levels.units[0].items[0].opts[0]), copied);
+  assert.equal(page({ ...levels, lang: 'xx' }).document.documentElement.lang, 'en');
+});
+
+test('the code item says the runner is offline instead of hanging, then self-grades', async () => {
+  const w = page({ lang: 'en', units: [{ concept: 'c', items: [{ t: 'code', q: 'q', start: '', expect: '1', solution: 'SOL' }] }] }, 'http://localhost/?t=x');
+  const d = w.document;
+  d.querySelector('.node.open').click();
+  d.getElementById('run').click();
+  await tick();
+  assert.match(d.getElementById('out').textContent, /node scripts\/play\.js serve/);
+  assert.equal(d.getElementById('check').textContent, 'Show solution');
+  d.getElementById('check').click();
+  assert.ok(d.getElementById('y'), 'self-check against the solution');
+});
