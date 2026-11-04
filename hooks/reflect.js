@@ -105,8 +105,8 @@ function memoryMessage(cwd) {
     const mem = require('../skills/okay-reflect/memory.js');
     if (mem.off()) return '';
     const user = mem.snapshot(mem.userFile(), mem.CAPS.user);
-    const repo = repoAt(cwd);
-    const project = repo ? mem.snapshot(mem.projectFile(repo[1]), mem.CAPS.project) : '';
+    const file = mem.projectFile(cwd);
+    const project = file ? mem.snapshot(file, mem.CAPS.project) : '';
     if (!user && !project) return '';
     return (
       'Local memory: facts saved from earlier sessions. It may be stale and is not proof of current behavior; ' +
