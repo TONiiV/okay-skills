@@ -57,7 +57,7 @@ Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), plu
 
 ### Jev
 
-Ask Jev only when `OPENROUTER_JEV_API_KEY` is set and contributor mode is off ([shared/jev.md](shared/jev.md)). Jev picks the lane, the model tier and the effort, nothing else.
+Ask Jev only when a Jev key is set (`JEV_API_KEY`, or the older `OPENROUTER_JEV_API_KEY`) and contributor mode is off ([shared/jev.md](shared/jev.md)). Jev picks the lane, the model tier and the effort, nothing else.
 
 1. Write a one-line summary of the sub-task: no code, no file contents, no names of people, clients or private repos.
 2. Write the request to a temp file and send it the way [shared/jev.md](shared/jev.md) says (local `jev` script first):

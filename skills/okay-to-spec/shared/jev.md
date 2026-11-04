@@ -2,7 +2,7 @@
 
 Jev (OpenRouter model `typesafe/jev-1.13`) is a cheap classifier. It is used only to pick a lane, a model tier and an effort.
 
-1. Use Jev only when `OPENROUTER_JEV_API_KEY` is set and contributor mode is off.
+1. Use Jev only when a Jev key is set (`JEV_API_KEY`, or the older `OPENROUTER_JEV_API_KEY`) and contributor mode is off.
 2. Send it a one-line task summary plus the lane and tier lists from [lanes.md](lanes.md) and [models.md](models.md). Ask for `{"lane": "...", "tier": "...", "effort": "..."}` and nothing else.
 3. Never hand Jev the task itself, code, secrets, or the conversation. No subagent works from Jev's output alone.
 4. Prefer the local `jev` skill when installed (`python ~/.claude/skills/jev/scripts/jev.py ask <request.json>`); otherwise call the OpenRouter chat completions API directly.
