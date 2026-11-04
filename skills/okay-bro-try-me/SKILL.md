@@ -87,7 +87,7 @@ node scripts/play.js build <levels.json>
 node scripts/play.js serve
 ```
 
-`build` appends up to 3 review items from last week's misses and writes `~/.okay/try-me/<date>.html` (`OKAY_HOME` overrides `~/.okay`). Run `serve` in the background: it binds 127.0.0.1, opens the browser, runs `code` items locally (5 s timeout), saves accuracy, XP, week streak and misses to `profile.json`, and exits after 2 hours idle.
+`build` validates the levels (units, item types, `mc` answer index, and so on) and exits 2 with `levels.json: unit <i> item <j>: <problem>` when one is not playable: fix that JSON and rerun `build`. It then appends up to 3 review items from last week's misses and writes `~/.okay/try-me/<date>.html` (`OKAY_HOME` overrides `~/.okay`). Run `serve` in the background: it binds 127.0.0.1, opens the browser, runs `code` items locally (5 s timeout), saves accuracy, XP, week streak and misses to `profile.json`, and exits after 2 hours idle.
 
 No Node (claude.ai): paste the levels JSON over `/*LEVELS*/null` in `game.html` and show it as an artifact; code items then fall back to show solution.
 

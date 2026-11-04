@@ -200,7 +200,6 @@ test('levels text never becomes markup', () => {
   const w = page({ lang: x, level: x, title: x, intro: x, units: [{ concept: x, story: x, items: [
     { t: 'mc', q: x, opts: [x, 'b'], a: 0, why: x },
     { t: 'order', q: x, steps: [x, 'b'], why: x },
-    { t: 'bogus', q: x, opts: [x], a: 0 },
   ] }] });
   const d = w.document;
   assert.equal(d.querySelectorAll('img').length, 0, 'home');
@@ -290,13 +289,13 @@ test('a wrong answer shakes the card; sound is optional, mutable and never throw
   assert.match(d.getElementById('sheet').className, /\bok\b/);
   assert.match(d.querySelector('.float').textContent, /\+\d+ XP/);
   const before = tones;
-  d.querySelector('.mute').click();
-  assert.equal(d.querySelector('.mute').textContent, '🔇');
+  d.querySelector('.snd').click();
+  assert.equal(d.querySelector('.snd').textContent, '🔇');
   d.getElementById('cont').click();
   d.querySelectorAll('.opt')[0].click();
   assert.equal(tones, before, 'muted stays silent');
   w.AudioContext = function () { throw new Error('blocked'); };
-  d.querySelector('.mute').click();   // unmute with a throwing AudioContext: still no throw
+  d.querySelector('.snd').click();   // unmute with a throwing AudioContext: still no throw
   d.getElementById('check').click();
 });
 
@@ -311,4 +310,81 @@ test('every item shows the unit scene and an optional hint', () => {
   d.getElementById('cont').click();
   assert.match(d.querySelector('details.scene summary').textContent, /Scene.*stale names/);
   assert.match(d.getElementById('card').textContent, /Think about change rate/);
+});
+
+test('muting leaves the stats line and an item hint intact', () => {
+  const d = page({ lang: 'en', units: [{ concept: 'c', items: [{ t: 'write', q: 'b?', hint: 'Think about change rate.' }] }] }).document;
+  d.querySelector('.snd').click();
+  assert.match(d.querySelector('p.mute').textContent, /Level 1/);
+  d.querySelector('.node.open').click();
+  d.querySelector('.snd').click();
+  assert.match(d.getElementById('card').textContent, /Think about change rate/);
+  assert.equal(d.querySelector('.snd').textContent, '🔊');
+});
+
+test('build rejects levels that cannot be played', () => {
+  const good = { t: 'mc', q: 'q', opts: ['a', 'b'], a: 0 };
+  const bads = [
+    [{ units: [] }, /non-empty "units"/],
+    [{ units: [{ concept: 'c', items: [] }] }, /unit 1: items/],
+    [{ units: [{ concept: 'c', items: [good, { ...good, a: '1' }] }] }, /unit 1 item 2: mc needs a/],
+    [{ units: [{ concept: 'c', items: [{ ...good, a: 2 }] }] }, /mc needs a/],
+    [{ units: [{ concept: 'c', items: [{ t: 'mc', q: 'q', a: 0 }] }] }, /mc needs opts/],
+    [{ units: [{ concept: 'c', items: [{ t: 'fill', q: 'q', a: [] }] }] }, /fill needs a/],
+    [{ units: [{ concept: 'c', items: [{ t: 'order', q: 'q', steps: ['one'] }] }] }, /order needs steps/],
+    [{ units: [{ concept: 'c', items: [{ t: 'code', q: 'q', lang: 'ruby', expect: '1' }] }] }, /lang/],
+    [{ units: [{ concept: 'c', items: [{ t: 'code', q: 'q' }] }] }, /expect/],
+    [{ units: [{ concept: 'c', items: [{ t: 'bogus', q: 'q' }] }] }, /unknown t/],
+    [{ units: [{ items: [good] }] }, /concept/],
+  ];
+  for (const [levels, msg] of bads) {
+    const home = tmp(), src = path.join(home, 'l.json');
+    fs.writeFileSync(src, JSON.stringify(levels));
+    const r = node([play, 'build', src, '--out', path.join(home, 'g.html')], { OKAY_HOME: home });
+    assert.equal(r.status, 2, JSON.stringify(levels));
+    assert.match(r.stderr, msg);
+    assert.ok(r.stderr.startsWith('levels.json'), r.stderr);
+  }
+});
+
+test('the appended review unit follows the levels lang', () => {
+  const home = tmp(), out = path.join(home, 'g.html');
+  fs.mkdirSync(path.join(home, 'try-me'), { recursive: true });
+  fs.writeFileSync(path.join(home, 'try-me', 'profile.json'), JSON.stringify({ review: [{ item: { t: 'mc', q: 'Q?', opts: ['a', 'b'], a: 0 }, hits: 0 }] }));
+  const unitOf = (src, o) => {
+    assert.equal(node([play, 'build', src, '--out', o], { OKAY_HOME: home }).status, 0);
+    const w = new JSDOM(fs.readFileSync(o, 'utf8'), { runScripts: 'dangerously', url: 'http://localhost/' }).window;
+    return w.eval('DATA.units[DATA.units.length - 1]');
+  };
+  assert.equal(unitOf(path.join(dir, 'example-levels.json'), out).concept, '复习');
+  const en = path.join(home, 'en.json');
+  fs.writeFileSync(en, JSON.stringify({ lang: 'en', units: [{ concept: 'c', items: [{ t: 'mc', q: 'q', opts: ['a', 'b'], a: 0 }] }] }));
+  assert.equal(unitOf(en, path.join(home, 'e.html')).concept, 'Review');
+});
+
+test('a run that returns after an edit is ignored', async () => {
+  const levels = { lang: 'en', units: [{ concept: 'c', items: [{ t: 'code', q: 'q', start: '', expect: '7' }] }] };
+  const w = page(levels, 'http://localhost/?t=x'), d = w.document;
+  let finish;
+  w.fetch = () => new Promise((ok) => { finish = () => ok({ json: () => Promise.resolve({ out: '42', err: '' }) }); });
+  d.querySelector('.node.open').click();
+  d.getElementById('run').click();
+  const ed = d.getElementById('ed');
+  ed.value = 'console.log(7)';
+  ed.dispatchEvent(new w.Event('input'));
+  finish();
+  await tick();
+  assert.equal(d.getElementById('check').disabled, true, 'the stale 42 must not enable Check');
+});
+
+test('python runs from a private dir, isolated from planted modules', (t) => {
+  const probe = spawnSync('python', ['-c', 'print(1)'], { encoding: 'utf8' });
+  if (probe.error || probe.status !== 0) return t.skip('no python on this machine');
+  const planted = path.join(os.tmpdir(), 'json.py');
+  if (fs.existsSync(planted)) return t.skip('a json.py already sits in the temp dir');
+  fs.writeFileSync(planted, 'print("PLANTED")');
+  return withServer(async ({ post }) => {
+    const r = await (await post('/run', { lang: 'python', code: 'import json\nprint(json.dumps(1))' })).json();
+    assert.equal(r.out.trim(), '1', r.err);
+  }).finally(() => fs.rmSync(planted, { force: true }));
 });

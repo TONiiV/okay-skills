@@ -21,11 +21,41 @@ const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(
 const flag = (k) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : undefined; };
 const die = (m) => { console.error(m); process.exit(2); };
 
+const strs = (v, n) => Array.isArray(v) && v.length >= n && v.every((x) => typeof x === 'string');
+// Returns the first problem with an item, or '' when it is playable.
+function itemError(it) {
+  if (!it || typeof it !== 'object') return 'item must be an object';
+  if (typeof it.q !== 'string' || !it.q) return 'q must be a non-empty string';
+  switch (it.t) {
+    case 'mc':
+      if (!strs(it.opts, 2)) return 'mc needs opts: an array of 2+ strings';
+      return Number.isInteger(it.a) && it.a >= 0 && it.a < it.opts.length ? '' : 'mc needs a: an integer index into opts';
+    case 'fill': return typeof it.a === 'string' || strs(it.a, 1) ? '' : 'fill needs a: a string or a non-empty array of strings';
+    case 'order': return strs(it.steps, 2) ? '' : 'order needs steps: an array of 2+ strings';
+    case 'write': return it.rubric == null || strs(it.rubric, 0) ? '' : 'write rubric must be an array of strings';
+    case 'code':
+      if (it.lang != null && it.lang !== 'js' && it.lang !== 'python') return 'code lang must be js or python';
+      return typeof it.expect === 'string' ? '' : 'code needs expect: a string (stdout)';
+    default: return 'unknown t "' + it.t + '" (mc, fill, order, write, code)';
+  }
+}
+function validate(data) {
+  if (!data || !Array.isArray(data.units) || !data.units.length) die('levels.json needs a non-empty "units" array');
+  data.units.forEach((u, i) => {
+    const at = (j, m) => die(`levels.json: unit ${i + 1}${j == null ? '' : ` item ${j + 1}`}: ${m}`);
+    if (!u || typeof u.concept !== 'string') at(null, 'concept must be a string');
+    if (!Array.isArray(u.items) || !u.items.length) at(null, 'items must be a non-empty array');
+    u.items.forEach((it, j) => { const e = itemError(it); if (e) at(j, e); });
+  });
+}
+const REVIEW = { en: ['Review', 'Last time these tripped you up. Again!'], zh: ['复习', '上次这些题绊住了你，再来一次！'] };
+
 function build(src, out) {
-  const data = JSON.parse(fs.readFileSync(src, 'utf8'));
-  if (!Array.isArray(data.units) || !data.units.length) die('levels.json needs a non-empty "units" array');
-  const review = arr(readProfile().review).filter((r) => r && r.item).slice(0, 3);
-  if (review.length) data.units.push({ concept: 'Review', story: 'Last time these tripped you up. Again!', review: true, items: review.map((r) => r.item) });
+  const data = JSON.parse(fs.readFileSync(src, 'utf8').replace(/^\uFEFF/, ''));
+  validate(data);
+  const review = arr(readProfile().review).filter((r) => r && !itemError(r.item)).slice(0, 3);
+  const [concept, story] = REVIEW[String(data.lang || 'en').slice(0, 2).toLowerCase()] || REVIEW.en;
+  if (review.length) data.units.push({ concept, story, review: true, items: review.map((r) => r.item) });
   const html = fs.readFileSync(path.join(__dirname, '..', 'game.html'), 'utf8')
     .replace('/*LEVELS*/null', () => JSON.stringify(data).replace(/</g, '\\u003c'));
   out = out || path.join(home, `${today()}.html`);
@@ -61,20 +91,27 @@ function saveResult(r) {
   return { streak: p.streak };
 }
 
+const env = { ...process.env, PYTHONIOENCODING: 'utf-8' };
+let pyCmd;   // first candidate that really runs Python (Windows Store alias stubs exist but print nothing)
+function python() {
+  if (pyCmd) return pyCmd;
+  for (const c of ['python3', 'python', 'py']) {
+    const r = spawnSync(c, ['-I', '-c', 'print(1)'], { encoding: 'utf8', timeout: 5000, env });
+    if (!r.error && r.status === 0 && r.stdout.trim() === '1') return (pyCmd = c);
+  }
+}
+
 function runCode({ lang, code }) {
-  const ext = lang === 'python' ? 'py' : 'js';
-  const file = path.join(os.tmpdir(), `try-me-${crypto.randomBytes(4).toString('hex')}.${ext}`);
-  fs.writeFileSync(file, String(code));
-  const cmds = ext === 'py' ? ['python3', 'python', 'py'] : [process.execPath];
+  const py = lang === 'python';
+  const cmd = py ? python() : process.execPath;
+  if (!cmd) return { out: '', err: 'no python interpreter found', unavailable: true };
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'try-me-'));   // private dir: nothing else lives next to the script
   try {
-    for (const cmd of cmds) {
-      const env = { ...process.env, PYTHONIOENCODING: 'utf-8' };
-      const r = spawnSync(cmd, [file], { encoding: 'utf8', timeout: 5000, maxBuffer: 1 << 20, env });
-      if (r.error && r.error.code === 'ENOENT') continue;
-      return { out: r.stdout || '', err: (r.stderr || '') + (r.error ? String(r.error.message) : '') };
-    }
-    return { out: '', err: `no ${lang} interpreter found`, unavailable: true };
-  } finally { fs.rmSync(file, { force: true }); }
+    const file = path.join(dir, py ? 'main.py' : 'main.js');
+    fs.writeFileSync(file, String(code));
+    const r = spawnSync(cmd, py ? ['-I', file] : [file], { encoding: 'utf8', timeout: 5000, maxBuffer: 1 << 20, env, cwd: dir });
+    return { out: r.stdout || '', err: (r.stderr || '') + (r.error ? String(r.error.message) : '') };
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
 
 function serve(file) {

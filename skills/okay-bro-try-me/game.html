@@ -49,7 +49,7 @@ pre.out{background:#0d1117;color:#c9d1d9;border-radius:12px;padding:10px;font:14
 .sheet h3{margin:0 0 4px;font-size:22px}.sheet.ok h3{color:var(--okd)}.sheet.bad h3{color:var(--badd)}
 .sheet p{margin:0 0 12px}
 .combo{display:inline-block;color:var(--gold);font-weight:800;animation:pulse .6s}
-.mute{padding:6px 10px;font-size:18px;text-transform:none}
+.snd{padding:6px 10px;font-size:18px;text-transform:none}
 .sheet.ok,.sheet.bad{animation:slide .25s}
 .float{position:absolute;right:20px;top:-6px;font-weight:800;color:var(--okd);animation:rise 1s forwards;pointer-events:none}
 .hearts.pop{display:inline-block;animation:pulse .45s;color:var(--badd)}
@@ -151,12 +151,12 @@ function sfx(name) {
     }
   } catch {}
 }
-const muteBtn = () => `<button class="btn ghost mute" aria-label="${L.sound}">${muted ? '🔇' : '🔊'}</button>`;
+const muteBtn = () => `<button class="btn ghost snd" aria-label="${L.sound}">${muted ? '🔇' : '🔊'}</button>`;
 function bindMute() {
-  $app.querySelectorAll('.mute').forEach((b) => b.onclick = () => {
+  $app.querySelectorAll('.snd').forEach((b) => b.onclick = () => {
     muted = !muted;
     try { localStorage.setItem('try-me-mute', muted ? '1' : '0'); } catch {}
-    $app.querySelectorAll('.mute').forEach((x) => x.textContent = muted ? '🔇' : '🔊');
+    $app.querySelectorAll('.snd').forEach((x) => x.textContent = muted ? '🔇' : '🔊');
     sfx('click');
   });
 }
@@ -262,18 +262,20 @@ const TYPES = {
       <div class="row"><button class="btn blue" id="run">▶ ${L.run} (${esc(it.lang || 'js')})</button></div><pre class="out" id="out" hidden></pre>`;
     const $ed = document.getElementById('ed'), $out = document.getElementById('out');
     $ed.onkeydown = (e) => { if (e.key === 'Tab') { e.preventDefault(); $ed.setRangeText('  ', $ed.selectionStart, $ed.selectionEnd, 'end'); dirty(); } };
-    let last = null, manual = false;
-    const dirty = () => { last = null; ready(!SERVER || manual); }; // an edit needs a fresh Run before Check
+    let last = null, manual = false, seq = 0;
+    const dirty = () => { seq++; last = null; $out.hidden = true; ready(!SERVER || manual); }; // an edit drops pending output and needs a fresh Run before Check
     $ed.oninput = dirty;
     document.getElementById('run').onclick = async () => {
       $out.hidden = false;
       if (!SERVER) { $out.textContent = L.needRunner; ready(true); return; }
       $out.textContent = L.running;
+      const mine = ++seq;
       try {
         const r = await api('/run', { lang: it.lang || 'js', code: $ed.value });
+        if (mine !== seq) return;
         if (r.unavailable) { manual = true; $out.textContent = L.noInterp; $check.textContent = L.showSol; }
         else { last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || L.noOut; }
-      } catch { manual = true; $out.textContent = L.offline; $check.textContent = L.showSol; }
+      } catch { if (mine !== seq) return; manual = true; $out.textContent = L.offline; $check.textContent = L.showSol; }
       ready(true);
     };
     ready(!SERVER);
