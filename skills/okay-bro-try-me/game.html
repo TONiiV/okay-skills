@@ -20,7 +20,7 @@ h1{font-size:26px;margin:8px 0}h2{font-size:22px;margin:12px 0}
 .wide{width:100%}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .bar{flex:1;height:16px;border-radius:8px;background:var(--line);overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--ok);border-radius:8px;transition:width .4s}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ok),#9be84f,var(--ok)) 0 0/200% 100%;border-radius:8px;transition:width .4s;animation:shine 2s linear infinite}
 .hearts{font-weight:800;color:var(--bad);white-space:nowrap}
 .path{display:flex;flex-direction:column;align-items:center;gap:22px;margin:28px 0}
 .node{width:76px;height:70px;border-radius:50%;border:0;font-size:30px;cursor:pointer;background:var(--line);box-shadow:0 6px 0 #c9c9c9;color:var(--mute)}
@@ -33,7 +33,8 @@ h1{font-size:26px;margin:8px 0}h2{font-size:22px;margin:12px 0}
 .q{font-size:20px;font-weight:800;margin:4px 0 16px;white-space:pre-wrap}
 .opts{display:grid;gap:10px}
 .opt{text-align:left;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;background:transparent;color:inherit;font:inherit;cursor:pointer}
-.opt.sel{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.opt{transition:transform .08s,border-width .08s}
+.opt.sel{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent);transform:translateY(3px);border-bottom-width:2px}
 .opt kbd{display:inline-block;min-width:24px;margin-right:8px;border:2px solid var(--line);border-radius:8px;text-align:center;font-size:13px;color:var(--mute)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:8px;border-bottom:2px solid var(--line);margin-bottom:12px}
 .chip{border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:8px 12px;background:var(--bg);color:inherit;font:inherit;cursor:pointer}
@@ -46,7 +47,21 @@ pre.out{background:#0d1117;color:#c9d1d9;border-radius:12px;padding:10px;font:14
 .sheet.ok{background:var(--okbg);border-color:transparent}.sheet.bad{background:var(--badbg);border-color:transparent}
 .sheet h3{margin:0 0 4px;font-size:22px}.sheet.ok h3{color:var(--okd)}.sheet.bad h3{color:var(--badd)}
 .sheet p{margin:0 0 12px}
-.combo{color:var(--gold);font-weight:800}
+.combo{display:inline-block;color:var(--gold);font-weight:800;animation:pulse .6s}
+.mute{padding:6px 10px;font-size:18px;text-transform:none}
+.sheet.ok,.sheet.bad{animation:slide .25s}
+.float{position:absolute;right:20px;top:-6px;font-weight:800;color:var(--okd);animation:rise 1s forwards;pointer-events:none}
+.hearts.pop{display:inline-block;animation:pulse .45s;color:var(--badd)}
+.shake{animation:shake .4s}
+.confetti{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.confetti i{position:absolute;top:-14px;width:8px;height:12px;border-radius:2px;animation:fall 2s ease-in forwards}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes pulse{50%{transform:scale(1.35)}}
+@keyframes slide{from{transform:translateY(100%)}}
+@keyframes rise{to{transform:translateY(-56px);opacity:0}}
+@keyframes shine{to{background-position:-200% 0}}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.shake,.hearts.pop,.float,.combo,.sheet.ok,.sheet.bad,.node.open,.burst,.bar i{animation:none}.confetti{display:none}.bar i,.opt{transition:none}}
 .stats{display:flex;gap:12px;justify-content:center;margin:20px 0}
 .stat{border:2px solid var(--gold);border-radius:16px;padding:10px 16px;min-width:110px;text-align:center}
 .stat b{display:block;font-size:26px}
@@ -82,6 +97,7 @@ const STR = {
     file: 'Opened as a file, so nothing was saved. Run <code>node scripts/play.js serve</code> to keep your streak.',
     copy: 'Copy question to ask in chat', copied: 'Copied',
     ask: (q, mine, right, why) => ['I got this wrong in a practice game:', q, mine && 'My answer: ' + mine, right && 'Correct answer: ' + right, why && 'Why: ' + why, 'Can you explain it to me?'],
+    sound: 'Sound',
     none: 'No levels yet', build: 'Build one:',
   },
   zh: {
@@ -102,12 +118,57 @@ const STR = {
     file: '以文件方式打开，成绩不会保存。运行 <code>node scripts/play.js serve</code> 来保留连续记录。',
     copy: '复制这道题，去聊天里问', copied: '已复制',
     ask: (q, mine, right, why) => ['这道题我在练习游戏里答错了：', q, mine && '我的答案：' + mine, right && '正确答案：' + right, why && '原因：' + why, '能给我讲讲吗？'],
+    sound: '声音',
     none: '还没有关卡', build: '先生成：',
   },
 };
 const LANG = String(DATA && DATA.lang || 'en').slice(0, 2).toLowerCase();
 const L = STR[LANG] || STR.en;
 document.documentElement.lang = STR[LANG] ? LANG : 'en';
+
+// Sounds are synthesized (no audio files). The AudioContext is created on the first gesture; without WebAudio everything is a no-op.
+let ctx, muted = false;
+try { muted = localStorage.getItem('try-me-mute') === '1'; } catch {}
+const NOTES = { // [freq, start, length, wave, volume]
+  click: [[900, 0, .04, 'square', .04]],
+  ok: [[660, 0, .12], [990, .1, .22]],
+  bad: [[160, 0, .28, 'sawtooth', .07]],
+  combo: [[523, 0, .1], [659, .08, .1], [784, .16, .1], [1047, .24, .24]],
+  fanfare: [[523, 0, .14], [659, .14, .14], [784, .28, .14], [1047, .42, .45]],
+};
+function sfx(name) {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (muted || !AC) return;
+  try {
+    ctx = ctx || new AC();
+    if (ctx.state === 'suspended') ctx.resume();
+    for (const [freq, at, len, wave = 'sine', vol = .15] of NOTES[name]) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime + at;
+      o.type = wave; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + len);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + len);
+    }
+  } catch {}
+}
+const muteBtn = () => `<button class="btn ghost mute" aria-label="${L.sound}">${muted ? '🔇' : '🔊'}</button>`;
+function bindMute() {
+  $app.querySelectorAll('.mute').forEach((b) => b.onclick = () => {
+    muted = !muted;
+    try { localStorage.setItem('try-me-mute', muted ? '1' : '0'); } catch {}
+    $app.querySelectorAll('.mute').forEach((x) => x.textContent = muted ? '🔇' : '🔊');
+    sfx('click');
+  });
+}
+function confetti() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const box = document.createElement('div'); box.className = 'confetti';
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('i');
+    p.style.cssText = `left:${Math.random() * 100}%;background:hsl(${Math.random() * 360},90%,60%);animation-delay:${Math.random() * .5}s;animation-duration:${1.4 + Math.random()}s`;
+    box.appendChild(p);
+  }
+  document.body.appendChild(box); setTimeout(() => box.remove(), 3200);
+}
 const $app = document.getElementById('app'), $sheet = document.getElementById('sheet');
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -121,7 +182,7 @@ let queue, pos, total, cur, check, graded, snap;
 function home() {
   $sheet.hidden = true;
   const units = DATA.units;
-  $app.innerHTML = `<h1>${esc(DATA.title || L.title)}</h1>
+  $app.innerHTML = `<div class="top" style="margin-bottom:0"><h1 style="flex:1">${esc(DATA.title || L.title)}</h1>${muteBtn()}</div>
     <p class="mute">${L.stats(Number(DATA.level) || 1, units.length, S.xp)}</p>
     ${DATA.intro ? `<div class="story">${esc(DATA.intro)}</div>` : ''}
     <div class="path">${units.map((u, i) => {
@@ -131,6 +192,7 @@ function home() {
         <b>${esc(u.concept)}</b></div>`;
     }).join('')}</div>`;
   $app.querySelectorAll('.node.open').forEach((b) => b.onclick = () => startUnit(+b.dataset.i));
+  bindMute();
 }
 
 function startUnit(i) {
@@ -152,12 +214,13 @@ function next() {
   const left = queue.length - pos;
   $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="${L.back}">✕</button>
     <div class="bar"><i style="width:${Math.round(100 * (total - Math.min(left, total)) / total)}%"></i></div>
-    <span class="hearts">♥ ${S.hearts}</span></div>
+    <span class="hearts">♥ ${S.hearts}</span>${muteBtn()}</div>
     ${pos === 0 && u.story ? `<div class="story">${esc(u.story)}</div>` : ''}
     ${cur.tries ? `<p class="mute">${L.retry}</p>` : ''}
-    <div class="q">${esc(it.q)}</div><div id="body"></div>
+    <div id="card"><div class="q">${esc(it.q)}</div><div id="body"></div></div>
     <div class="row"><button class="btn wide" id="check" disabled>${L.check}</button></div>`;
   document.getElementById('quit').onclick = home;
+  bindMute();
   const $check = document.getElementById('check'), $b = document.getElementById('body');
   const ready = (v) => $check.disabled = !v || graded;
   check = (Object.hasOwn(TYPES, it.t) ? TYPES[it.t] : TYPES.mc)(it, $b, ready, $check);
@@ -169,7 +232,7 @@ const TYPES = {
     let sel = -1;
     $b.innerHTML = `<div class="opts">${it.opts.map((o, i) => `<button class="opt" data-i="${i}"><kbd>${i + 1}</kbd>${esc(o)}</button>`).join('')}</div>`;
     const btns = [...$b.querySelectorAll('.opt')];
-    const choose = (i) => { sel = i; btns.forEach((b, j) => b.classList.toggle('sel', j === i)); ready(true); };
+    const choose = (i) => { sfx('click'); sel = i; btns.forEach((b, j) => b.classList.toggle('sel', j === i)); ready(true); };
     btns.forEach((b, i) => b.onclick = () => choose(i));
     keys = (k) => { const n = +k - 1; if (n >= 0 && n < btns.length) choose(n); };
     return () => grade(sel === it.a, it.opts[it.a], it.opts[sel]);
@@ -237,7 +300,7 @@ function grade(ok, right, mine, shown) {
   if (graded) return;
   graded = true; keys = null;
   const $c = document.getElementById('check'); if ($c) $c.disabled = true;
-  const it = cur.item, u = DATA.units[S.unit];
+  const it = cur.item, u = DATA.units[S.unit], xp0 = S.xp;
   if (!cur.tries && !S.answers.some((a) => a.item === it)) S.answers.push({ concept: u.concept, item: it, firstTry: ok });
   cur.tries++;
   if (ok) {
@@ -249,9 +312,16 @@ function grade(ok, right, mine, shown) {
     queue.push(cur);   // Duolingo-style: missed items come back at the end of the lesson
   }
   const $h = $app.querySelector('.hearts'); if ($h) $h.textContent = `♥ ${S.hearts}`;
+  const gained = S.xp - xp0;
+  if (ok) sfx(S.combo >= 3 ? 'combo' : 'ok');
+  else {
+    sfx('bad');
+    const $card = document.getElementById('card'); if ($card) $card.classList.add('shake');
+    if ($h) $h.classList.add('pop');
+  }
   const comboTxt = ok && S.combo >= 3 ? ` <span class="combo">${L.row(S.combo)}</span>` : '';
   const out = S.hearts === 0 && !ok ? `<p>${L.noHearts}</p>` : '';
-  sheet(ok ? 'ok' : 'bad', `<h3>${pick(ok ? L.praise : L.comfort)}${comboTxt}</h3>
+  sheet(ok ? 'ok' : 'bad', `${ok && gained > 0 ? `<span class="float">+${gained} ${L.xp}</span>` : ''}<h3>${pick(ok ? L.praise : L.comfort)}${comboTxt}</h3>
     ${!ok && right ? `<p><b>${L.answer}</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
     ${ok ? '' : `<button class="btn ghost wide" id="copy" style="margin-bottom:10px">${L.copy}</button>`}
     <button class="btn wide ${ok ? '' : 'red'}" id="cont">${L.cont}</button>`);
@@ -279,6 +349,7 @@ function unitDone() {
   const last = S.done.filter(Boolean).length === DATA.units.length;
   if (last) return finish();
   S.unit++;
+  sfx('fanfare'); confetti();
   $app.innerHTML = `<div class="center"><div class="burst">⭐</div><h2>${L.unitDone}</h2>
     <p class="mute">${L.unlocked(esc(DATA.units[S.unit - 1].concept), S.xp)}</p>
     <button class="btn wide" id="go">${L.nextUnit}</button></div>`;
@@ -291,6 +362,7 @@ async function finish() {
   let res = {};
   if (SERVER) { try { res = await api('/result', { level: Number(DATA.level) || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
   const saved = SERVER && res.streak != null;
+  sfx('fanfare'); confetti();
   const weak = [...new Set(S.answers.filter((a) => !a.firstTry).map((a) => a.concept))];
   $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>${L.cleared}</h1>
     <div class="stats"><div class="stat">${L.xp}<b>${S.xp}</b></div><div class="stat">${L.acc}<b>${Math.round(accuracy * 100)}%</b></div>

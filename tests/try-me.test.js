@@ -268,3 +268,34 @@ test('week.js tolerates a null profile, a BOM, empty errors and a root cwd', () 
   assert.ok(r.stdout.includes('## 2026-11-01 proj'), 'falls back to the project folder');
   assert.ok(r.stdout.includes('first run: true'));
 });
+
+test('a wrong answer shakes the card; sound is optional, mutable and never throws', () => {
+  const levels = { lang: 'en', units: [{ concept: 'c', items: [
+    { t: 'mc', q: 'a?', opts: ['x', 'y'], a: 0 }, { t: 'mc', q: 'b?', opts: ['x', 'y'], a: 0 }, { t: 'mc', q: 'c?', opts: ['x', 'y'], a: 0 }] }] };
+  const w = page(levels), d = w.document;   // no AudioContext in jsdom: everything must still work
+  d.querySelector('.node.open').click();
+  d.querySelectorAll('.opt')[1].click();
+  d.getElementById('check').click();
+  assert.ok(d.getElementById('card').classList.contains('shake'));
+  assert.ok(d.querySelector('.hearts').classList.contains('pop'));
+  d.getElementById('cont').click();
+
+  let tones = 0;
+  const ctx = { currentTime: 0, state: 'running', destination: {}, createOscillator: () => { tones++; return { frequency: {}, connect() {}, start() {}, stop() {} }; },
+    createGain: () => ({ gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {} }) };
+  w.AudioContext = function () { return ctx; };
+  d.querySelectorAll('.opt')[0].click();
+  assert.ok(tones > 0, 'tap makes a click');
+  d.getElementById('check').click();
+  assert.match(d.getElementById('sheet').className, /\bok\b/);
+  assert.match(d.querySelector('.float').textContent, /\+\d+ XP/);
+  const before = tones;
+  d.querySelector('.mute').click();
+  assert.equal(d.querySelector('.mute').textContent, '🔇');
+  d.getElementById('cont').click();
+  d.querySelectorAll('.opt')[0].click();
+  assert.equal(tones, before, 'muted stays silent');
+  w.AudioContext = function () { throw new Error('blocked'); };
+  d.querySelector('.mute').click();   // unmute with a throwing AudioContext: still no throw
+  d.getElementById('check').click();
+});
