@@ -45,10 +45,10 @@ Never put secrets, tokens, private names, customer or company details in a quest
 
 ## 4. Write the levels
 
-Write `levels.json` in a temp or scratch folder. Schema (all text in the user's language):
+Write `levels.json` in a temp or scratch folder. Set `lang` to the language the user writes most in the digest's prompts (`en`, `zh`; the game UI has strings for those, other codes fall back to English) and write all item text in it. Schema:
 
 ```json
-{"title": "Week 45: ...", "level": 2, "intro": "one line",
+{"lang": "en", "title": "Week 45: ...", "level": 2, "intro": "one line",
  "units": [{"concept": "...", "story": "...", "items": [ITEM, ...]}]}
 ```
 
@@ -59,6 +59,8 @@ Write `levels.json` in a temp or scratch folder. Schema (all text in the user's 
 | `order` | `q`, `steps` (correct order, shuffled for the player) | process |
 | `write` | `q`, `rubric` (2-3 points), `model` | explain, self-graded |
 | `code` | `q`, `lang` (`js` or `python`), `start`, `expect` (stdout), `solution` | do it |
+
+`code` items must print the same `expect` on any machine: no dependence on local ports, files, network, time or installed tools beyond the language runtime.
 
 Every item has `why`: one or two sentences that teach the concept, not just the fact.
 
