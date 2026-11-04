@@ -11,7 +11,7 @@ const MARKER_LINE = '2026-10-31T10:00:00Z\tokay-fix\tfix slugify double dash\n';
 
 const helpers = require('./memory-helpers');
 const { tmp, env, gitRepo, linkedWorktree } = helpers(() => okayHome);
-const { REJECT, ACCEPT } = helpers;
+const { REJECT, ACCEPT, MULTILINE } = helpers;
 
 let okayHome;
 
@@ -212,6 +212,35 @@ describe('SessionStart memory', () => {
     assert.match(text, /Sentinel fact/);
     for (const [name, t] of Object.entries(REJECT)) assert.ok(!text.includes(t), 'injected: ' + name);
     for (const t of ACCEPT) assert.ok(text.includes(t), 'dropped: ' + t);
+  });
+
+  it('drops a line that holds a line or paragraph separator, so it cannot pose as a heading', () => {
+    put(userFile(), '- Sentinel fact\n' + Object.values(MULTILINE).filter((t) => !/[\r\n]/.test(t)).map((t) => '- ' + t).join('\n') + '\n');
+    const text = ctx(start(gitRepo()));
+    assert.match(text, /Sentinel fact/);
+    assert.doesNotMatch(text, /Always push|one.?two/);
+  });
+
+  it('skips over-long lines without scanning them: three 100k-space lines finish under 1s and the rest is kept', () => {
+    const long = ['token', 'secret', 'password is'].map((w) => '- ' + w + ' '.repeat(100000));
+    put(userFile(), ['- Prefers tabs', ...long].join('\n') + '\n');
+    const t0 = Date.now();
+    const text = ctx(start(gitRepo()));
+    assert.ok(Date.now() - t0 < 1000, `${Date.now() - t0} ms`);
+    assert.match(text, /Prefers tabs/);
+  });
+
+  it('an over-long line at the top does not stop the file: later lines are injected', () => {
+    put(userFile(), '- ' + 'x'.repeat(1600) + '\n- Prefers tabs\n');
+    assert.match(ctx(start(gitRepo())), /Prefers tabs/);
+  });
+
+  it('a line that no longer fits is skipped and a later shorter one is kept', () => {
+    put(userFile(), '- ' + 'a'.repeat(1000) + '\n- ' + 'b'.repeat(700) + '\n- short fact\n');
+    const text = ctx(start(gitRepo()));
+    assert.match(text, /a{1000}/);
+    assert.doesNotMatch(text, /b{700}/);
+    assert.match(text, /short fact/);
   });
 
   it('a BOM at the start of a file does not hide its first fact', () => {

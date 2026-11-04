@@ -10,7 +10,7 @@ const memory = require(CLI);
 
 const helpers = require('./memory-helpers');
 const { tmp, env, gitRepo, linkedWorktree } = helpers(() => okayHome);
-const { REJECT, ACCEPT } = helpers;
+const { REJECT, ACCEPT, MULTILINE } = helpers;
 
 let okayHome;
 
@@ -180,6 +180,44 @@ describe('fact text', () => {
     assert.equal(cli(['patch', 'user', 'uses pnpm', '  ']).status, 1);
     assert.equal(cli(['patch', 'user', 'uses pnpm', '']).status, 1);
     assert.equal(read(userFile()), '- uses pnpm\n');
+  });
+});
+
+describe('one line, bounded time', () => {
+  for (const [name, text] of Object.entries(MULTILINE)) {
+    it('rejects ' + name + ' on write, in add and in patch', () => {
+      const r = cli(['add', 'user', text]);
+      assert.equal(r.status, 1, r.stdout);
+      assert.match(r.stderr, /one line/);
+      assert.ok(!fs.existsSync(userFile()));
+      cli(['add', 'user', 'Likes tabs']);
+      assert.equal(cli(['patch', 'user', 'tabs', text]).status, 1);
+      assert.equal(read(userFile()), '- Likes tabs\n');
+    });
+  }
+
+  it('rejects a line over the cap before any scan: a 30k-char fact is a cap error, not a threat error, and fast', () => {
+    // no whitespace run: node on Windows spawns a script with a long whitespace argument in quadratic time, whatever the script does
+    for (const w of ['token', 'secret', 'password=']) {
+      const t0 = Date.now();
+      const r = cli(['add', 'user', w + 'a'.repeat(30000)]);
+      assert.equal(r.status, 1, w);
+      assert.match(r.stderr, /1500-char cap/);
+      assert.ok(Date.now() - t0 < 1500, `${w}: ${Date.now() - t0} ms`);
+    }
+    assert.ok(!fs.existsSync(userFile()));
+  });
+
+  it('threat() is linear: 100k spaces after any keyword takes under 1s', () => {
+    const sp = ' '.repeat(100000);
+    const words = ['token', 'secret', 'password', 'api key', 'token:', 'token =', 'token is', 'ignore', 'forget your', 'you are now', 'system prompt', 'authorization:', 'printenv', 'curl', 'scp', '$', '%', 'eyJ'];
+    for (const w of words) {
+      for (const text of [w + sp, (w + ' ').repeat(Math.floor(100000 / (w.length + 1))), w.repeat(Math.floor(100000 / w.length))]) {
+        const t0 = Date.now();
+        memory.threat(text);
+        assert.ok(Date.now() - t0 < 1000, `${JSON.stringify(w)}: ${Date.now() - t0} ms`);
+      }
+    }
   });
 });
 

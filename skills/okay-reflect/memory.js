@@ -11,35 +11,57 @@ const { execFileSync } = require('node:child_process');
 
 const CAPS = { user: 1500, project: 2500 };
 
-// The one threat-scan list: secrets, exfiltration, prompt injection, invisible or bidi Unicode.
-// ponytail: regex heuristics, not a parser; they catch the common shapes. Cyrillic or Greek look-alikes are not folded; extend the list when a miss shows up.
+// The one threat-scan list: secrets, exfiltration, prompt injection, invisible or bidi Unicode, line breaks.
+// Hard guarantees: every pattern is linear (no nested or overlapping quantifiers; unbounded runs are single character classes), and callers cap the line length before scanning.
+// Best effort: the injection and exfiltration wordings. A miss is expected; extend the list when one shows up. Cyrillic or Greek look-alikes are not folded.
 // Invisible characters are matched as a class; the Hangul fillers are listed in case a Unicode version drops them from the property.
-const INVISIBLE = /[\p{Default_Ignorable_Code_Point}\u{61C}\u{200E}\u{200F}\u{202A}-\u{202E}\u{2066}-\u{2069}\u{115F}\u{1160}\u{3164}\u{FFA0}\u{2800}]/u;
-const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[ _-]?key|access[ _-]?key|private[ _-]?key)s?(?:[_-][a-z0-9]+)*["']?`;
-// "=" takes any 8+ char value; ":" and "is" need a digit and a letter, so "Prefers tokens: verbose_output_mode" passes.
-const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`\s*(?:=\s*["']?[^\s"']{8,}|(?::|\s+is)\s*["']?(?=[^\s"']*\d)(?=[^\s"']*[a-z])[^\s"']{8,})`, 'i');
-const ENV_SECRET = /\$\{?\w*(?:KEY|TOKEN|SECRET|PASSW)\w*|\$env:\w*(?:KEY|TOKEN|SECRET|PASSW)\w*|%\w*(?:KEY|TOKEN|SECRET|PASSW)\w*%/i;
+const DI = String.raw`\p{Default_Ignorable_Code_Point}`;
+const INVISIBLE = new RegExp(String.raw`[${DI}\u{61C}\u{200E}\u{200F}\u{202A}-\u{202E}\u{2066}-\u{2069}\u{115F}\u{1160}\u{3164}\u{FFA0}\u{2800}]`, 'u');
+// Emoji and Persian text need U+FE0F, U+200D and U+200C: FE0F after a visible character (not before another invisible one), ZWJ or ZWNJ (optionally after FE0F) between visible characters. Every other invisible character is rejected.
+const JOINERS = new RegExp(String.raw`(?<=[^${DI}\s])(?:️?[‌‍](?=[^${DI}\s])|️(?!${DI}))`, 'gu');
+const VERTICAL = /[\r\n\v\f\u0085\p{Zl}\p{Zp}]/u; // CR, LF, VT, FF, NEL, U+2028, U+2029
+const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[ _-]?key|access[ _-]?key|private[ _-]?key)s?(?:[_-][a-z0-9]{1,20}){0,4}["']?`;
+// "=" takes any 8+ char value; ":" and "is" need a digit and a letter (within the first 64 chars), so "Prefers tokens: verbose_output_mode" passes.
+const VALUE = String.raw`["']?(?=[^\s"']{0,64}\d)(?=[^\s"']{0,64}[a-z])[^\s"']{8,}`;
+const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`(?:\s*=\s*["']?[^\s"']{8,}|\s*:\s*${VALUE}|\s+is\s+${VALUE})`, 'i');
+const ENV_SECRET = /\$\{?\w*(?:KEY|TOKEN|SECRET|PASSW)|\$env:\w*(?:KEY|TOKEN|SECRET|PASSW)|%(?=\w*(?:KEY|TOKEN|SECRET|PASSW))\w+%/i;
+const AUTH_VAR = /authorization\s*:\s*["']?(?:(?:bearer|basic|token)\s+)?[$%]/i;
 const NET_TOOL = /\b(?:curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|nc|ncat|netcat)\b/i;
-const UPLOAD = /(?:^|\s)(?:-F\s*\S*=@|(?:-d|--data(?:-\w+)?)[\s=]*@|(?:-T|--upload-file|--post-file|--body-file|-InFile)[\s=]+\S)/i;
+const COPY_TOOL = /\b(?:scp|sftp|rsync)\b/i;
+const ENV_DUMP_PIPE = /\b(?:printenv|env)\s*\|\s*(?:nc|ncat|netcat|curl|wget)\b/i;
 const CRED_FILE = /(?:^|[\s/\\"'=@~(<>])(?:\.env(?!\.(?:example|sample|template)\b)(?!\w)|\.netrc\b|id_rsa|id_ed25519|id_ecdsa|\.ssh[/\\]|\.aws[/\\]credentials)/i;
 const READ_CMD = /\b(?:cat|less|more|head|tail|type|source|get-content|gc|xxd|base64|strings)\b/i;
 const NEGATED = /\b(?:never|don'?t|do not|avoid|must not|mustn'?t|shouldn'?t|not)\b/i;
+const JWT = /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\./;
 const FILLER = String.raw`(?:\w+\s+){0,4}?`;
+const INJECTION = new RegExp([
+  String.raw`\b(?:ignore|disregard|forget|override)\s+${FILLER}(?:previous|prior|above|earlier|preceding)\s+(?:\w+\s+)?(?:instructions|rules|prompts|messages|context|system prompt)\b`,
+  String.raw`\b(?:ignore|disregard|forget|override)\s+(?:everything|anything|all)\s+(?:above|before|earlier|prior|previously)\b`,
+  String.raw`\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:of\s+)?your\s+(?:\w+\s+)?(?:instructions|prompts|system prompt)\b`,
+  String.raw`\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:of\s+)?the\s+(?:instructions|prompts)\s+(?:above|before|earlier|prior)\b`,
+  String.raw`\byou are now\s+(?:in\s+)?(?:an?\s+)?(?:\w+\s+)?(?:unrestricted|unfiltered|uncensored|jailbroken|evil|dan|developer mode|god mode)\b`,
+  String.raw`\bnew instructions\s*:`,
+  String.raw`\bsystem prompt\s*:\s*(?:you|be|act|ignore|obey|from now)\b`,
+  String.raw`\b(?:reveal|print|show|leak)\s+your\s+system prompt\b`,
+  String.raw`\bdo not tell the user\b`,
+  String.raw`</?\s*(?:system|assistant)\s*>`,
+].join('|'), 'i');
 // Tests get the NFKC text (n) and the same text with "-" and "_" collapsed to spaces (inj).
 const THREATS = [
   ['secret assignment', (n) => SECRET_ASSIGN.test(n)],
-  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n)],
+  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n) || JWT.test(n)],
   ['private key block', (n) => /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(n)],
-  ['exfiltration command', (n) => NET_TOOL.test(n) && (ENV_SECRET.test(n) || UPLOAD.test(n))],
-  ['credential file exfiltration', (n) => CRED_FILE.test(n) && (NET_TOOL.test(n) || n.includes('|'))],
+  ['exfiltration command', (n) => (NET_TOOL.test(n) && (ENV_SECRET.test(n) || AUTH_VAR.test(n))) || ENV_DUMP_PIPE.test(n)],
+  ['credential file exfiltration', (n) => CRED_FILE.test(n) && (NET_TOOL.test(n) || COPY_TOOL.test(n) || n.includes('|'))],
   ['credential file read', (n) => CRED_FILE.test(n) && READ_CMD.test(n) && !NEGATED.test(n)],
-  ['prompt injection', (n, inj) => new RegExp(String.raw`\b(?:ignore|disregard|forget|override)\s+${FILLER}(?:previous|prior|above|earlier|all)\s+(?:\w+\s+)?(?:instructions|rules|prompts|messages|context|system prompt)\b|\b(?:ignore|disregard|forget|override)\s+(?:everything|anything|all)\s+(?:above|before|earlier|prior|previously)\b|\byou are now\b|\bnew instructions\s*:|\bsystem prompt\s*:|\b(?:reveal|print|show|leak)\s+(?:your\s+)?system prompt\b|\bdo not tell the user\b|</?\s*(?:system|assistant)\s*>`, 'i').test(inj)],
+  ['prompt injection', (n, inj) => INJECTION.test(inj)],
 ];
 
 function threat(text) {
-  if (INVISIBLE.test(text)) return 'invisible or bidi Unicode';
-  const n = text.normalize('NFKC');
-  if (INVISIBLE.test(n)) return 'invisible or bidi Unicode';
+  const s = text.replace(JOINERS, ''); // allowed joiners go first, so one inside a word cannot hide a phrase
+  if (VERTICAL.test(s)) return 'line break or separator';
+  if (INVISIBLE.test(s)) return 'invisible or bidi Unicode';
+  const n = s.normalize('NFKC');
   const inj = n.replace(/[-_]+/g, ' ');
   return THREATS.find(([, test]) => test(n, inj))?.[0] || null;
 }
@@ -67,7 +89,7 @@ function projectFile(cwd) {
   return path.join(memoryDir(), 'projects', base + '-' + hash + '.md');
 }
 
-// Frozen view of one file for injection: threat lines dropped, cut to the cap at a line boundary.
+// Frozen view of one file for injection: threat and over-long lines dropped, cut to the cap at a line boundary.
 function snapshot(file, cap) {
   let text;
   try {
@@ -75,28 +97,31 @@ function snapshot(file, cap) {
   } catch {
     return '';
   }
-  const lines = text.split(/\r?\n/).filter((l) => l.trim() && !threat(l));
   let out = '';
-  for (const l of lines) {
-    if (len(out) + len(l) > cap) break; // len(out) + len(l) is the body length with this line
-    out += l + '\n';
+  for (const l of text.split(/\r?\n/)) {
+    if (!l.trim()) continue;
+    const n = len(l);
+    if (n > cap || len(out) + n > cap) continue; // too long, or no room left: skip it, a later shorter line may still fit. Length is checked before any regex runs.
+    if (!threat(l)) out += l + '\n';
   }
   return out.trim();
 }
 
 // A write that does not grow the file passes even over the cap, so a hand-edited file can be merged down.
+const overCap = (cap, n) => new Error(`over the ${cap}-char cap (${n}); merge first: patch or remove existing facts, or shorten the fact, then retry`);
 function save(file, lines, cap, before) {
   const body = lines.join('\n');
-  if (len(body) > cap && len(body) > len(before.join('\n'))) throw new Error(`over the ${cap}-char cap (${len(body)}); merge first: patch or remove existing facts, then retry`);
+  if (len(body) > cap && len(body) > len(before.join('\n'))) throw overCap(cap, len(body));
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, body ? body + '\n' : '');
   fs.renameSync(tmp, file); // atomic replace
 }
 
-function check(text, lines) {
+function check(text, lines, cap) {
   if (!text.trim()) throw new Error('a fact must not be empty');
-  if (/[\r\n]/.test(text)) throw new Error('a fact must be one line');
+  if (len(text) + 2 > cap) throw overCap(cap, len(text) + 2); // the stored line is "- " + text; checked before any regex runs
+  if (VERTICAL.test(text)) throw new Error('a fact must be one line (no CR, LF, U+2028, U+2029 or other line separator)');
   const t = threat(text);
   if (t) throw new Error(`threat scan rejected the text (${t})`);
   if (lines.includes(`- ${text}`)) throw new Error('duplicate fact');
@@ -130,7 +155,7 @@ function run(argv) {
   }
   const before = lines.slice();
   if (cmd === 'add') {
-    check(a, lines);
+    check(a, lines, CAPS[target]);
     lines.push(`- ${a}`);
   } else {
     const i = matchOne(lines, a);
@@ -138,7 +163,7 @@ function run(argv) {
       lines.splice(i, 1);
     } else {
       const next = lines[i].slice(2).replace(a, () => b);
-      check(next, lines.filter((_, j) => j !== i));
+      check(next, lines.filter((_, j) => j !== i), CAPS[target]);
       lines[i] = `- ${next}`;
     }
   }
