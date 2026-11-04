@@ -30,6 +30,7 @@ h1{font-size:26px;margin:8px 0}h2{font-size:22px;margin:12px 0}
 .nodewrap{text-align:center}.nodewrap b{display:block;margin-top:8px;font-size:15px}
 @keyframes bob{50%{transform:translateY(-5px)}}
 .story{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:16px}
+.scene{padding:6px 14px;font-size:15px}.scene summary{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scene[open] summary{white-space:normal}
 .q{font-size:20px;font-weight:800;margin:4px 0 16px;white-space:pre-wrap}
 .opts{display:grid;gap:10px}
 .opt{text-align:left;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;background:transparent;color:inherit;font:inherit;cursor:pointer}
@@ -97,7 +98,7 @@ const STR = {
     file: 'Opened as a file, so nothing was saved. Run <code>node scripts/play.js serve</code> to keep your streak.',
     copy: 'Copy question to ask in chat', copied: 'Copied',
     ask: (q, mine, right, why) => ['I got this wrong in a practice game:', q, mine && 'My answer: ' + mine, right && 'Correct answer: ' + right, why && 'Why: ' + why, 'Can you explain it to me?'],
-    sound: 'Sound',
+    sound: 'Sound', scene: 'Scene',
     none: 'No levels yet', build: 'Build one:',
   },
   zh: {
@@ -118,7 +119,7 @@ const STR = {
     file: '以文件方式打开，成绩不会保存。运行 <code>node scripts/play.js serve</code> 来保留连续记录。',
     copy: '复制这道题，去聊天里问', copied: '已复制',
     ask: (q, mine, right, why) => ['这道题我在练习游戏里答错了：', q, mine && '我的答案：' + mine, right && '正确答案：' + right, why && '原因：' + why, '能给我讲讲吗？'],
-    sound: '声音',
+    sound: '声音', scene: '情景',
     none: '还没有关卡', build: '先生成：',
   },
 };
@@ -215,9 +216,9 @@ function next() {
   $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="${L.back}">✕</button>
     <div class="bar"><i style="width:${Math.round(100 * (total - Math.min(left, total)) / total)}%"></i></div>
     <span class="hearts">♥ ${S.hearts}</span>${muteBtn()}</div>
-    ${pos === 0 && u.story ? `<div class="story">${esc(u.story)}</div>` : ''}
+    ${u.story ? (pos === 0 ? `<div class="story">${esc(u.story)}</div>` : `<details class="story scene"><summary><b>${L.scene}</b> ${esc(u.story)}</summary></details>`) : ''}
     ${cur.tries ? `<p class="mute">${L.retry}</p>` : ''}
-    <div id="card"><div class="q">${esc(it.q)}</div><div id="body"></div></div>
+    <div id="card"><div class="q">${esc(it.q)}</div>${it.hint ? `<p class="mute">${esc(it.hint)}</p>` : ''}<div id="body"></div></div>
     <div class="row"><button class="btn wide" id="check" disabled>${L.check}</button></div>`;
   document.getElementById('quit').onclick = home;
   bindMute();

@@ -57,10 +57,12 @@ Write `levels.json` in a temp or scratch folder. Set `lang` to the language the 
 | `mc` | `q`, `opts` (3-4), `a` (index) | recognize |
 | `fill` | `q` with `___`, `a` (list of accepted answers) | recall |
 | `order` | `q`, `steps` (correct order, shuffled for the player) | process |
-| `write` | `q`, `rubric` (2-3 points), `model` | explain, self-graded |
+| `write` | `q`, `hint` (optional, one line on what to cover), `rubric` (2-3 points, hidden until submit), `model` | explain, self-graded |
 | `code` | `q`, `lang` (`js` or `python`), `start`, `expect` (stdout), `solution` | do it |
 
 `code` items must print the same `expect` on any machine: no dependence on local ports, files, network, time or installed tools beyond the language runtime.
+
+Every `q` stands alone: name the concrete thing (not "this design", "that bug"), so it reads right without the story; the game shows the unit story as a one-line strip on every item.
 
 Every item has `why`: one or two sentences that teach the concept, not just the fact.
 

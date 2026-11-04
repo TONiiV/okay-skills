@@ -299,3 +299,16 @@ test('a wrong answer shakes the card; sound is optional, mutable and never throw
   d.querySelector('.mute').click();   // unmute with a throwing AudioContext: still no throw
   d.getElementById('check').click();
 });
+
+test('every item shows the unit scene and an optional hint', () => {
+  const levels = { lang: 'en', units: [{ concept: 'c', story: 'The cache served stale names.', items: [
+    { t: 'mc', q: 'a?', opts: ['x', 'y'], a: 0 }, { t: 'write', q: 'b?', hint: 'Think about change rate.' }] }] };
+  const d = page(levels).document;
+  d.querySelector('.node.open').click();
+  assert.ok(d.querySelector('div.story') && !d.querySelector('details.scene'), 'full story on the first item');
+  d.querySelectorAll('.opt')[0].click();
+  d.getElementById('check').click();
+  d.getElementById('cont').click();
+  assert.match(d.querySelector('details.scene summary').textContent, /Scene.*stale names/);
+  assert.match(d.getElementById('card').textContent, /Think about change rate/);
+});
