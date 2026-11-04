@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bro, Try Me</title>
+<style>
+:root{--bg:#fff;--fg:#3c3c3c;--mute:#777;--line:#e5e5e5;--card:#f7f7f7;--ok:#58cc02;--okd:#46a302;--okbg:#d7ffb8;--bad:#ff4b4b;--badd:#ea2b2b;--badbg:#ffdfe0;--blue:#1cb0f6;--blued:#1899d6;--gold:#ffc800;--golds:#e5a500}
+@media (prefers-color-scheme:dark){:root{--bg:#131f24;--fg:#f1f7fb;--mute:#8aa0ab;--line:#37464f;--card:#1c2b33;--okbg:#1f3a12;--badbg:#3f1d1f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.5 "Nunito","Segoe UI",system-ui,sans-serif}
+main{max-width:680px;margin:0 auto;padding:16px 16px 180px}
+h1{font-size:26px;margin:8px 0}h2{font-size:22px;margin:12px 0}
+.mute{color:var(--mute)}
+.btn{display:inline-block;border:0;border-radius:14px;padding:13px 22px;font:inherit;font-weight:800;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;color:#fff;background:var(--ok);box-shadow:0 4px 0 var(--okd)}
+.btn:active{transform:translateY(4px);box-shadow:none}
+.btn:disabled{background:var(--line);box-shadow:0 4px 0 var(--line);color:var(--mute);cursor:default}
+.btn.blue{background:var(--blue);box-shadow:0 4px 0 var(--blued)}.btn.red{background:var(--bad);box-shadow:0 4px 0 var(--badd)}
+.btn.ghost{background:transparent;color:var(--blue);box-shadow:none;border:2px solid var(--line)}
+.wide{width:100%}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.bar{flex:1;height:16px;border-radius:8px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);border-radius:8px;transition:width .4s}
+.hearts{font-weight:800;color:var(--bad);white-space:nowrap}
+.path{display:flex;flex-direction:column;align-items:center;gap:22px;margin:28px 0}
+.node{width:76px;height:70px;border-radius:50%;border:0;font-size:30px;cursor:pointer;background:var(--line);box-shadow:0 6px 0 #c9c9c9;color:var(--mute)}
+.node.open{background:var(--ok);box-shadow:0 6px 0 var(--okd);color:#fff;animation:bob 1.6s infinite}
+.node.done{background:var(--gold);box-shadow:0 6px 0 var(--golds);color:#fff}
+.node:disabled{cursor:default}
+.nodewrap{text-align:center}.nodewrap b{display:block;margin-top:8px;font-size:15px}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.story{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:16px}
+.q{font-size:20px;font-weight:800;margin:4px 0 16px;white-space:pre-wrap}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.opt.sel{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 12%,transparent)}
+.opt kbd{display:inline-block;min-width:24px;margin-right:8px;border:2px solid var(--line);border-radius:8px;text-align:center;font-size:13px;color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:8px;border-bottom:2px solid var(--line);margin-bottom:12px}
+.chip{border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:8px 12px;background:var(--bg);color:inherit;font:inherit;cursor:pointer}
+input.fill,textarea{width:100%;font:inherit;color:inherit;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px}
+textarea.code{font:15px/1.45 ui-monospace,Consolas,monospace;min-height:200px;tab-size:2;white-space:pre}
+pre.out{background:#0d1117;color:#c9d1d9;border-radius:12px;padding:10px;font:14px ui-monospace,Consolas,monospace;white-space:pre-wrap;max-height:200px;overflow:auto}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.sheet{position:fixed;left:0;right:0;bottom:0;padding:16px;border-top:2px solid var(--line);background:var(--bg)}
+.sheet .in{max-width:680px;margin:0 auto}
+.sheet.ok{background:var(--okbg);border-color:transparent}.sheet.bad{background:var(--badbg);border-color:transparent}
+.sheet h3{margin:0 0 4px;font-size:22px}.sheet.ok h3{color:var(--okd)}.sheet.bad h3{color:var(--badd)}
+.sheet p{margin:0 0 12px}
+.combo{color:var(--gold);font-weight:800}
+.stats{display:flex;gap:12px;justify-content:center;margin:20px 0}
+.stat{border:2px solid var(--gold);border-radius:16px;padding:10px 16px;min-width:110px;text-align:center}
+.stat b{display:block;font-size:26px}
+.center{text-align:center}
+.burst{font-size:64px;animation:pop .6s}
+@keyframes pop{0%{transform:scale(.2)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+ul.rubric{padding-left:20px}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<div id="sheet" class="sheet" hidden><div class="in"></div></div>
+<script>
+const DATA = /*LEVELS*/null;
+const TOKEN = new URLSearchParams(location.search).get('t');
+const SERVER = location.protocol.startsWith('http') && TOKEN;
+const PRAISE = ['Nice!', 'Nailed it!', 'You got it!', 'Big brain!', 'Smooth!', 'Exactly!'];
+const COMFORT = ['Not quite.', 'Close!', 'Almost.', 'Good try.'];
+const $app = document.getElementById('app'), $sheet = document.getElementById('sheet');
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = (a) => a.map((v) => [Math.random(), v]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+const norm = (s) => String(s).trim().toLowerCase().replace(/\s+/g, ' ');
+const api = (p, body) => fetch(p, { method: 'POST', headers: { 'x-token': TOKEN, 'content-type': 'application/json' }, body: JSON.stringify(body) }).then((r) => r.json());
+
+const S = { unit: 0, hearts: 5, xp: 0, combo: 0, answers: [], done: [] };
+let queue, pos, total, cur, check;
+
+function home() {
+  $sheet.hidden = true;
+  const units = DATA.units;
+  $app.innerHTML = `<h1>${esc(DATA.title || 'This week, try me')}</h1>
+    <p class="mute">Level ${DATA.level || 1} · ${units.length} units · ⭐ ${S.xp} XP</p>
+    ${DATA.intro ? `<div class="story">${esc(DATA.intro)}</div>` : ''}
+    <div class="path">${units.map((u, i) => {
+      const st = S.done[i] ? 'done' : i === S.unit ? 'open' : '';
+      return `<div class="nodewrap" style="margin-left:${[0, 80, 0, -80][i % 4]}px">
+        <button class="node ${st}" data-i="${i}" ${st === 'open' ? '' : 'disabled'} aria-label="Unit ${i + 1}: ${esc(u.concept)}">${S.done[i] ? '★' : u.review ? '↻' : i + 1}</button>
+        <b>${esc(u.concept)}</b></div>`;
+    }).join('')}</div>`;
+  $app.querySelectorAll('.node.open').forEach((b) => b.onclick = () => startUnit(+b.dataset.i));
+}
+
+function startUnit(i) {
+  S.unit = i;
+  queue = DATA.units[i].items.map((item) => ({ item, tries: 0 }));
+  pos = 0; total = queue.length;
+  next();
+}
+
+function next() {
+  $sheet.hidden = true;
+  if (pos >= queue.length) return unitDone();
+  cur = queue[pos];
+  const u = DATA.units[S.unit], it = cur.item;
+  const left = queue.length - pos;
+  $app.innerHTML = `<div class="top"><button class="btn ghost" id="quit" aria-label="Back to path">✕</button>
+    <div class="bar"><i style="width:${Math.round(100 * (total - Math.min(left, total)) / total)}%"></i></div>
+    <span class="hearts">♥ ${S.hearts}</span></div>
+    ${pos === 0 && u.story ? `<div class="story">${esc(u.story)}</div>` : ''}
+    ${cur.tries ? '<p class="mute">↻ Previous mistake, try again</p>' : ''}
+    <div class="q">${esc(it.q)}</div><div id="body"></div>
+    <div class="row"><button class="btn wide" id="check" disabled>Check</button></div>`;
+  document.getElementById('quit').onclick = home;
+  const $check = document.getElementById('check'), $b = document.getElementById('body');
+  const ready = (v) => $check.disabled = !v;
+  check = (TYPES[it.t] || TYPES.mc)(it, $b, ready, $check);
+  $check.onclick = () => { if (!$check.disabled) check(); };
+}
+
+const TYPES = {
+  mc(it, $b, ready) {
+    let sel = -1;
+    $b.innerHTML = `<div class="opts">${it.opts.map((o, i) => `<button class="opt" data-i="${i}"><kbd>${i + 1}</kbd>${esc(o)}</button>`).join('')}</div>`;
+    const btns = [...$b.querySelectorAll('.opt')];
+    const choose = (i) => { sel = i; btns.forEach((b, j) => b.classList.toggle('sel', j === i)); ready(true); };
+    btns.forEach((b, i) => b.onclick = () => choose(i));
+    keys = (k) => { const n = +k - 1; if (n >= 0 && n < btns.length) choose(n); };
+    return () => grade(sel === it.a, it.opts[it.a]);
+  },
+  fill(it, $b, ready) {
+    $b.innerHTML = `<input class="fill" id="fill" autocomplete="off" placeholder="Type your answer">`;
+    const $i = document.getElementById('fill'); $i.focus();
+    $i.oninput = () => ready($i.value.trim());
+    const ok = [].concat(it.a);
+    return () => grade(ok.some((a) => norm(a) === norm($i.value)), ok[0]);
+  },
+  order(it, $b, ready) {
+    const pool = shuffle(it.steps.map((s, i) => ({ s, i }))), chosen = [];
+    const draw = () => {
+      $b.innerHTML = `<div class="chips" id="ans">${chosen.map((c, k) => `<button class="chip" data-k="${k}">${esc(c.s)}</button>`).join('')}</div>
+        <div class="chips" style="border:0">${pool.map((c, k) => `<button class="chip" data-p="${k}">${esc(c.s)}</button>`).join('')}</div>`;
+      $b.querySelectorAll('[data-p]').forEach((b) => b.onclick = () => { chosen.push(...pool.splice(+b.dataset.p, 1)); draw(); });
+      $b.querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { pool.push(...chosen.splice(+b.dataset.k, 1)); draw(); });
+      ready(!pool.length);
+    };
+    draw();
+    return () => grade(chosen.every((c, k) => c.i === k), it.steps.join(' → '));
+  },
+  code(it, $b, ready, $check) {
+    $b.innerHTML = `<textarea class="code" id="ed" spellcheck="false">${esc(it.start || '')}</textarea>
+      <div class="row"><button class="btn blue" id="run">▶ Run (${esc(it.lang || 'js')})</button></div><pre class="out" id="out" hidden></pre>`;
+    const $ed = document.getElementById('ed'), $out = document.getElementById('out');
+    $ed.onkeydown = (e) => { if (e.key === 'Tab') { e.preventDefault(); $ed.setRangeText('  ', $ed.selectionStart, $ed.selectionEnd, 'end'); } };
+    let last = null;
+    document.getElementById('run').onclick = async () => {
+      $out.hidden = false;
+      if (!SERVER) { $out.textContent = 'Running code needs the local runner:\n  node play.js serve\nYou can still check against the solution.'; ready(true); return; }
+      $out.textContent = 'running…';
+      const r = await api('/run', { lang: it.lang || 'js', code: $ed.value });
+      last = r.out; $out.textContent = (r.out || '') + (r.err ? '\n' + r.err : '') || '(no output)';
+      ready(true);
+    };
+    ready(!SERVER);
+    $check.textContent = SERVER ? 'Check' : 'Show solution';
+    return () => SERVER && it.expect != null
+      ? grade(last != null && norm(last) === norm(it.expect), it.solution || it.expect)
+      : selfGrade(it.solution ? `<pre class="out">${esc(it.solution)}</pre>` : '');
+  },
+  write(it, $b, ready) {
+    $b.innerHTML = `<textarea id="w" rows="6" placeholder="Your answer, in your own words"></textarea>`;
+    const $w = document.getElementById('w'); $w.focus();
+    $w.oninput = () => ready($w.value.trim().length > 3);
+    return () => selfGrade(`${it.rubric ? `<p>A strong answer:</p><ul class="rubric">${it.rubric.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}${it.model ? `<p><b>Example:</b> ${esc(it.model)}</p>` : ''}`);
+  },
+};
+let keys = null;
+
+function selfGrade(reveal) {
+  sheet('', `<h3>Compare yours</h3>${reveal}<div class="row"><button class="btn" id="y">I got it</button><button class="btn red" id="n">Not yet</button></div>`);
+  document.getElementById('y').onclick = () => grade(true, '', true);
+  document.getElementById('n').onclick = () => grade(false, '', true);
+}
+
+function grade(ok, right, self) {
+  keys = null;
+  const it = cur.item, u = DATA.units[S.unit];
+  if (!cur.tries) S.answers.push({ concept: u.concept, item: it, firstTry: ok });
+  cur.tries++;
+  if (ok) {
+    S.combo++;
+    if (S.hearts > 0) S.xp += cur.tries === 1 ? 10 + Math.min(S.combo - 1, 5) * 2 : 5;
+  } else {
+    S.combo = 0;
+    if (S.hearts > 0) S.hearts--;
+    queue.push(cur);   // Duolingo-style: missed items come back at the end of the lesson
+  }
+  const $h = $app.querySelector('.hearts'); if ($h) $h.textContent = `♥ ${S.hearts}`;
+  const comboTxt = ok && S.combo >= 3 ? ` <span class="combo">🔥 ${S.combo} in a row</span>` : '';
+  const out = S.hearts === 0 && !ok ? '<p><b>Out of hearts.</b> Practice mode: keep going, XP paused.</p>' : '';
+  sheet(ok ? 'ok' : 'bad', `<h3>${ok ? pick(PRAISE) : pick(COMFORT)}${comboTxt}</h3>
+    ${!ok && right && !self ? `<p><b>Answer:</b> ${esc(right)}</p>` : ''}${it.why ? `<p>${esc(it.why)}</p>` : ''}${out}
+    <button class="btn wide ${ok ? '' : 'red'}" id="cont">Continue</button>`);
+  document.getElementById('cont').onclick = () => { pos++; next(); };
+}
+
+function sheet(cls, html) {
+  $sheet.className = 'sheet ' + cls; $sheet.hidden = false;
+  $sheet.firstElementChild.innerHTML = html;
+  const b = $sheet.querySelector('#cont, #y'); if (b) b.focus();
+}
+
+function unitDone() {
+  S.done[S.unit] = true;
+  const last = S.done.filter(Boolean).length === DATA.units.length;
+  if (last) return finish();
+  S.unit++;
+  $app.innerHTML = `<div class="center"><div class="burst">⭐</div><h2>Unit complete!</h2>
+    <p class="mute">${esc(DATA.units[S.unit - 1].concept)} unlocked. ⭐ ${S.xp} XP so far.</p>
+    <button class="btn wide" id="go">Next unit</button></div>`;
+  document.getElementById('go').onclick = home;
+}
+
+async function finish() {
+  const first = S.answers.length, right = S.answers.filter((a) => a.firstTry).length;
+  const accuracy = first ? right / first : 0;
+  let res = {};
+  try { localStorage.setItem('try-me-last', JSON.stringify({ xp: S.xp, accuracy, at: Date.now() })); } catch {}
+  if (SERVER) { try { res = await api('/result', { level: DATA.level || 1, accuracy, xp: S.xp, answers: S.answers }); } catch {} }
+  const weak = [...new Set(S.answers.filter((a) => !a.firstTry).map((a) => a.concept))];
+  $app.innerHTML = `<div class="center"><div class="burst">🏆</div><h1>Week cleared!</h1>
+    <div class="stats"><div class="stat">XP<b>${S.xp}</b></div><div class="stat">Accuracy<b>${Math.round(accuracy * 100)}%</b></div>
+    ${res.streak ? `<div class="stat">Week streak<b>🔥 ${res.streak}</b></div>` : ''}</div>
+    <p>${accuracy >= 0.9 ? 'Too easy? Next week goes up a level.' : accuracy < 0.6 ? 'Tough week. Next week eases off a little and brings these back.' : 'Solid. The misses come back next week as review.'}</p>
+    ${weak.length ? `<p class="mute">Coming back for review: ${weak.map(esc).join(', ')}</p>` : ''}
+    ${SERVER ? '<p class="mute">Saved. You can close this tab.</p>' : '<p class="mute">Opened as a file, so nothing was saved. Run <code>node play.js serve</code> to keep your streak.</p>'}</div>`;
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('opt')) return; // native Enter already clicks it
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' && e.key !== 'Enter') return;
+  if (keys && /^[1-9]$/.test(e.key)) keys(e.key);
+  if (e.key === 'Enter') {
+    if (!$sheet.hidden) { const b = $sheet.querySelector('#cont'); if (b) { e.preventDefault(); b.click(); } return; }
+    const c = document.getElementById('check'); if (c && !c.disabled) { e.preventDefault(); c.click(); }
+  }
+});
+
+if (DATA) home(); else $app.innerHTML = '<h1>No levels yet</h1><p>Build one: <code>node play.js build levels.json</code></p>';
+</script>
+</body>
+</html>

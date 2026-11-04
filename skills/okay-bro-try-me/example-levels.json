@@ -1,0 +1,32 @@
+{
+  "title": "Week 45: the case of the silent API",
+  "level": 2,
+  "intro": "This week we chased a login page that spun forever, rethought where caching lives, and wrote a launch email that went to the wrong timezone. Three units, one per lesson.",
+  "units": [
+    {
+      "concept": "Check the address before the code",
+      "story": "The login spinner never stops. No error in the console, nothing in the server logs. We spent two hours reading auth code. The bug was one number.",
+      "items": [
+        {"t": "mc", "q": "The frontend calls the API and waits forever. The server log shows no request at all. Where do you look first?", "opts": ["The password hashing code", "The URL and port the frontend calls", "The database indexes", "The CSS of the spinner"], "a": 1, "why": "No request in the server log means the request never reached this server. Start with where it is sent, not what the server does with it."},
+        {"t": "fill", "q": "The API listens on 8080 but the frontend config says API_URL=http://localhost:___ . We found 3000. What should it be?", "a": ["8080"], "why": "A mismatched port fails silently when the other port has nothing listening, or worse, when another app answers."},
+        {"t": "order", "q": "Put the debugging steps in the order that would have saved us two hours.", "steps": ["Reproduce the hang", "Check the request leaves the browser", "Check it arrives at the server", "Only then read the handler code"], "why": "Follow the request from outside in. Each step halves where the bug can be."},
+        {"t": "code", "lang": "js", "q": "Write a one-line check that prints OPEN if something listens on the port, else CLOSED. Port 9 is almost always closed.", "start": "const net = require('node:net');\nconst s = net.connect(9, '127.0.0.1');\ns.on('connect', () => { console.log('OPEN'); s.end(); });\ns.on('error', () => console.log(/* ? */));\n", "expect": "CLOSED", "solution": "s.on('error', () => console.log('CLOSED'));", "why": "A ten-second port probe beats an hour of reading code."}
+      ]
+    },
+    {
+      "concept": "Caches go where the data changes least",
+      "story": "On the whiteboard, caching every API response looked clean. In practice, user profiles changed every few seconds and people saw stale names.",
+      "items": [
+        {"t": "mc", "q": "Which data is the safest to cache for an hour?", "opts": ["A user's unread message count", "The list of country codes", "A shopping cart", "A live score"], "a": 1, "why": "Cache what rarely changes. Country codes change once a decade; a cart changes every click."},
+        {"t": "write", "q": "In two sentences: why did the design look right on paper but fail in practice?", "rubric": ["Names that the data changes faster than the cache expires", "Says the change rate was only visible with real usage"], "model": "The diagram treated all responses alike, but profile data changed faster than the cache lived. We only saw the change rate once real users edited their profiles."}
+      ]
+    },
+    {
+      "concept": "Times need a timezone",
+      "story": "Not code this time: the launch email said 'live at 9:00'. Half the readers were six hours away.",
+      "items": [
+        {"t": "mc", "q": "Which line can nobody misread?", "opts": ["Live at 9:00", "Live at 9:00 tomorrow", "Live at 09:00 UTC (16:00 Bangkok, 10:00 Berlin)", "Live in the morning"], "a": 2, "why": "A time without a zone is a guess. Give the zone, and the reader's local time when you know it."}
+      ]
+    }
+  ]
+}

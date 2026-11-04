@@ -6,7 +6,7 @@ The repo also holds `paper-tree`, an unrelated skill (see [paper-tree](#paper-tr
 
 ## Skills
 
-Fourteen `okay-*` skills. Start with `okay-dev`; every other skill can also be called directly (`/okay-fix ...`, `/okay-perf ...`).
+Fifteen `okay-*` skills. Start with `okay-dev`; every other skill can also be called directly (`/okay-fix ...`, `/okay-perf ...`).
 
 | Skill | What it does |
 |---|---|
@@ -24,6 +24,7 @@ Fourteen `okay-*` skills. Start with `okay-dev`; every other skill can also be c
 | `okay-to-tickets` | Fork. Split a spec into tracer-bullet tickets with blocking edges |
 | `okay-tdd` | Fork. Red-green loop at pre-agreed seams |
 | `okay-prototype` | Fork. 1-3 throwaway runnable samples and a trial-feedback record before the spec |
+| `okay-bro-try-me` | Weekly learning game: the week's lessons and pitfalls become a Duolingo-style level path with local code challenges |
 
 Shared rules (output style, commit/PR, model table, Monid, contributor mode, Jev) live once in `shared/` and are copied into each skill by `npm run build`, so each skill works when uploaded alone.
 
@@ -163,6 +164,7 @@ The pack is MIT licensed. It forks and borrows from the projects below; each ski
 | [anthropics/skills](https://github.com/anthropics/skills) `frontend-design`, Copyright Anthropic, PBC | Apache-2.0 | Called by `okay-design` when installed; the commit-to-a-direction idea |
 | [pbakaus/impeccable](https://github.com/pbakaus/impeccable), Copyright Paul Bakaus | Apache-2.0 | Called by `okay-design` when installed; the P0-P3 scale and two-part critique |
 | [elayadesign/ai-design-skills](https://github.com/elayadesign/ai-design-skills) `landing-page-design`, Copyright (c) 2026 Elaya | MIT | Called by `okay-design` when installed; the single batched intake |
+| [duolingo/halflife-regression](https://github.com/duolingo/halflife-regression), Copyright (c) 2016 Duolingo | MIT | Spaced review of missed items in `okay-bro-try-me` (ideas only; no code redistributed) |
 | [alibaba/skill-up](https://github.com/alibaba/skill-up) | Apache-2.0 | Evidence-backed failure attribution in `okay-reflect` (ideas only; no code or text redistributed) |
 | Trace2Skill ([arXiv:2603.25158](https://arxiv.org/abs/2603.25158)) | Paper | Skill updates only for recurring, attributable failures |
 | [gstack](https://github.com/garrytan/gstack) by Garry Tan | Idea credited | Review depth that scales with diff size and risk |
