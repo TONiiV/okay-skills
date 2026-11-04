@@ -12,18 +12,39 @@ const { execFileSync } = require('node:child_process');
 const CAPS = { user: 1500, project: 2500 };
 
 // The one threat-scan list: secrets, exfiltration, prompt injection, invisible or bidi Unicode.
-// ponytail: regex heuristics, not a parser; they catch the common shapes. Extend the list when a miss shows up.
+// ponytail: regex heuristics, not a parser; they catch the common shapes. Cyrillic or Greek look-alikes are not folded; extend the list when a miss shows up.
+// Invisible characters are matched as a class; the Hangul fillers are listed in case a Unicode version drops them from the property.
+const INVISIBLE = /[\p{Default_Ignorable_Code_Point}\u{61C}\u{200E}\u{200F}\u{202A}-\u{202E}\u{2066}-\u{2069}\u{115F}\u{1160}\u{3164}\u{FFA0}\u{2800}]/u;
+const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[ _-]?key|access[ _-]?key|private[ _-]?key)s?(?:[_-][a-z0-9]+)*["']?`;
+// "=" takes any 8+ char value; ":" and "is" need a digit and a letter, so "Prefers tokens: verbose_output_mode" passes.
+const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`\s*(?:=\s*["']?[^\s"']{8,}|(?::|\s+is)\s*["']?(?=[^\s"']*\d)(?=[^\s"']*[a-z])[^\s"']{8,})`, 'i');
+const ENV_SECRET = /\$\{?\w*(?:KEY|TOKEN|SECRET|PASSW)\w*|\$env:\w*(?:KEY|TOKEN|SECRET|PASSW)\w*|%\w*(?:KEY|TOKEN|SECRET|PASSW)\w*%/i;
+const NET_TOOL = /\b(?:curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|nc|ncat|netcat)\b/i;
+const UPLOAD = /(?:^|\s)(?:-F\s*\S*=@|(?:-d|--data(?:-\w+)?)[\s=]*@|(?:-T|--upload-file|--post-file|--body-file|-InFile)[\s=]+\S)/i;
+const CRED_FILE = /(?:^|[\s/\\"'=@~(<>])(?:\.env(?!\.(?:example|sample|template)\b)(?!\w)|\.netrc\b|id_rsa|id_ed25519|id_ecdsa|\.ssh[/\\]|\.aws[/\\]credentials)/i;
+const READ_CMD = /\b(?:cat|less|more|head|tail|type|source|get-content|gc|xxd|base64|strings)\b/i;
+const NEGATED = /\b(?:never|don'?t|do not|avoid|must not|mustn'?t|shouldn'?t|not)\b/i;
+const FILLER = String.raw`(?:\w+\s+){0,4}?`;
+// Tests get the NFKC text (n) and the same text with "-" and "_" collapsed to spaces (inj).
 const THREATS = [
-  ['secret assignment', /(api[_-]?key|secret|token|passw(or)?d)\w*\s*[:=]\s*\S{8,}/i],
-  ['secret key prefix', /\b(sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/],
-  ['private key block', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
-  ['exfiltration command', /\b(curl|wget)\b[^\n]*\$\{?\w*(KEY|TOKEN|SECRET|PASSW)/i],
-  ['credential file read', /\b(cat|less|more|head|tail|type|source)\s+[^\n]*\.(env|netrc)\b/i],
-  ['prompt injection', /\b(ignore|disregard|forget)\b(\s+\w+){0,3}?\s+(previous|prior|above|earlier|preceding)\b|\byou are now\b|\b(reveal|print|show)\s+(your\s+)?system prompt\b|\bdo not tell the user\b|<\/?(system|assistant)>/i],
-  ['invisible or bidi Unicode', /[\u00AD\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u2069\uFEFF\u{E0000}-\u{E007F}]/u],
+  ['secret assignment', (n) => SECRET_ASSIGN.test(n)],
+  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n)],
+  ['private key block', (n) => /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(n)],
+  ['exfiltration command', (n) => NET_TOOL.test(n) && (ENV_SECRET.test(n) || UPLOAD.test(n))],
+  ['credential file exfiltration', (n) => CRED_FILE.test(n) && (NET_TOOL.test(n) || n.includes('|'))],
+  ['credential file read', (n) => CRED_FILE.test(n) && READ_CMD.test(n) && !NEGATED.test(n)],
+  ['prompt injection', (n, inj) => new RegExp(String.raw`\b(?:ignore|disregard|forget|override)\s+${FILLER}(?:previous|prior|above|earlier|all)\s+(?:\w+\s+)?(?:instructions|rules|prompts|messages|context|system prompt)\b|\b(?:ignore|disregard|forget|override)\s+(?:everything|anything|all)\s+(?:above|before|earlier|prior|previously)\b|\byou are now\b|\bnew instructions\s*:|\bsystem prompt\s*:|\b(?:reveal|print|show|leak)\s+(?:your\s+)?system prompt\b|\bdo not tell the user\b|</?\s*(?:system|assistant)\s*>`, 'i').test(inj)],
 ];
 
-const threat = (text) => THREATS.find(([, re]) => re.test(text))?.[0] || null;
+function threat(text) {
+  if (INVISIBLE.test(text)) return 'invisible or bidi Unicode';
+  const n = text.normalize('NFKC');
+  if (INVISIBLE.test(n)) return 'invisible or bidi Unicode';
+  const inj = n.replace(/[-_]+/g, ' ');
+  return THREATS.find(([, test]) => test(n, inj))?.[0] || null;
+}
+const len = (s) => [...s].length; // caps count code points, not UTF-16 units
+const readLines = (file) => fs.readFileSync(file, 'utf8').replace(/^\u{FEFF}/u, ''); // a hand-edited file may start with a BOM
 const off = () => (process.env.OKAY_MEMORY || '').trim().toLowerCase() === 'off';
 const memoryDir = () => path.join(process.env.OKAY_HOME || path.join(os.homedir(), '.okay'), 'memory');
 const userFile = () => path.join(memoryDir(), 'USER.md');
@@ -50,14 +71,14 @@ function projectFile(cwd) {
 function snapshot(file, cap) {
   let text;
   try {
-    text = fs.readFileSync(file, 'utf8');
+    text = readLines(file);
   } catch {
     return '';
   }
   const lines = text.split(/\r?\n/).filter((l) => l.trim() && !threat(l));
   let out = '';
   for (const l of lines) {
-    if (out.length + l.length > cap) break; // out.length + l.length is the body length with this line
+    if (len(out) + len(l) > cap) break; // len(out) + len(l) is the body length with this line
     out += l + '\n';
   }
   return out.trim();
@@ -66,7 +87,7 @@ function snapshot(file, cap) {
 // A write that does not grow the file passes even over the cap, so a hand-edited file can be merged down.
 function save(file, lines, cap, before) {
   const body = lines.join('\n');
-  if (body.length > cap && body.length > before.join('\n').length) throw new Error(`over the ${cap}-char cap (${body.length}); merge first: patch or remove existing facts, then retry`);
+  if (len(body) > cap && len(body) > len(before.join('\n'))) throw new Error(`over the ${cap}-char cap (${len(body)}); merge first: patch or remove existing facts, then retry`);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, body ? body + '\n' : '');
@@ -103,7 +124,7 @@ function run(argv) {
   }
   let lines = [];
   try {
-    lines = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(Boolean);
+    lines = readLines(file).split(/\r?\n/).filter(Boolean);
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
   }
@@ -134,4 +155,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { CAPS, off, userFile, projectFile, snapshot };
+module.exports = { CAPS, off, userFile, projectFile, snapshot, threat };

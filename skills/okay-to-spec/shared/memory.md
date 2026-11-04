@@ -11,7 +11,7 @@ Root: `${OKAY_HOME:-~/.okay}/memory/`.
 | `USER.md` | Facts about the user that hold in every repo | 1,500 chars |
 | `projects/<slug>.md` | Facts about one repo; `<slug>` is the repo folder name plus a hash of its common git dir, so a repo and its linked worktrees share one file | 2,500 chars |
 
-One fact per `- ` bullet line. Outside a git repo only `USER.md` exists. The files are plain markdown; the user may edit them.
+One fact per `- ` bullet line. Outside a git repo only `USER.md` exists. The files are plain markdown; the user may edit them (a leading UTF-8 BOM is ignored).
 
 ## Gates
 
@@ -35,9 +35,9 @@ node memory.js remove <user|project> "<substring>"
 
 - Every write is atomic (temp file, then rename).
 - `patch` and `remove` match one fact by substring. No match or several matches is an error.
-- A write that makes the file longer than the cap is rejected with a "merge first" error: patch or remove existing facts, then retry. The cap counts the bullets and the newlines between facts. A write that does not make the file longer always passes, so a file that is already over the cap can be merged down.
+- A write that makes the file longer than the cap is rejected with a "merge first" error: patch or remove existing facts, then retry. The cap counts Unicode code points (an emoji is one), including the bullets and the newlines between facts. A write that does not make the file longer always passes, so a file that is already over the cap can be merged down.
 - An exact duplicate is rejected. A fact must be one non-empty line. `patch` and `remove` match the fact text after the `- ` bullet.
-- The threat scan rejects secrets, exfiltration commands, prompt-injection phrases and invisible or bidirectional Unicode. The same list drops matching lines when the hook injects memory.
+- The threat scan rejects secrets (assignments such as `password is ...`, `api key: ...`, `TOKEN=...`, known key prefixes), exfiltration (a network tool such as curl, wget or Invoke-WebRequest with a secret env reference or a file upload, or with a credential file such as `.env`, `.netrc` or `~/.ssh/`), imperative prompt-injection phrases and any invisible or bidirectional Unicode. It normalises first (NFKC, `-` and `_` read as spaces), and ordinary facts that only mention tokens, keys or `.env.example` pass. The same list drops matching lines when the hook injects memory.
 - `OKAY_MEMORY=off` makes the CLI refuse writes and turns injection off.
 - Exit code 0 on success, 1 on a rejected write, 2 on bad usage. The reason is on stderr.
 
