@@ -24,8 +24,9 @@ const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[
 // "=" takes any 8+ char value; ":" and "is" need a digit and a letter (within the first 64 chars), so "Prefers tokens: verbose_output_mode" passes.
 const VALUE = String.raw`["']?(?=[^\s"']{0,64}\d)(?=[^\s"']{0,64}[a-z])[^\s"']{8,}`;
 const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`(?:\s*=\s*["']?[^\s"']{8,}|\s*:\s*${VALUE}|\s+is\s+${VALUE})`, 'i');
-// A whole variable name that ends in a secret word (GITHUB_TOKEN, APIKEY) or holds one between underscores (MY_SECRET_X). KEYCLOAK_URL and TOKEN_TTL do not match.
-const VN = String.raw`(?:\w*(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD)(?!\w)|\w*_(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD)_)`;
+// A whole variable name that ends in a secret word, plural or numbered (GITHUB_TOKEN, APIKEY, API_KEYS, GH_TOKEN2) or holds one between underscores (MY_SECRET_X). KEYCLOAK_URL and TOKEN_TTL do not match.
+const SW = 'KEY|TOKEN|SECRET|PASSWORD|PASSWD';
+const VN = String.raw`(?:\w*(?:${SW})S?\d*(?!\w)|\w*_(?:${SW})S?\d*_)`;
 const ENV_SECRET = new RegExp(String.raw`\$\{?${VN}|\$env:${VN}|%${VN}\w*%`, 'i');
 const AUTH_VAR = /authorization\s*:\s*["']?(?:(?:bearer|basic|token)\s+)?[$%]/i;
 const NET_TOOL = /\b(?:curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|nc|ncat|netcat)\b/i;
