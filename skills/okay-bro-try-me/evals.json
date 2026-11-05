@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pos-0",
+    "kind": "positive",
+    "description": "Explicit slash invocation",
+    "prompt": "/okay-bro-try-me",
+    "expectations": ["okay-bro-try-me runs"]
+  },
+  {
+    "id": "pos-1",
+    "kind": "positive",
+    "description": "Chinese request to quiz the user on this week's lessons",
+    "prompt": "这周我们一起踩了不少坑，出几道题考考我吧",
+    "expectations": ["okay-bro-try-me runs"]
+  },
+  {
+    "id": "pos-2",
+    "kind": "positive",
+    "description": "English request to gamify the week's learnings",
+    "prompt": "Make me a little game out of what we learned this week so it sticks",
+    "expectations": ["okay-bro-try-me runs"]
+  },
+  {
+    "id": "pos-3",
+    "kind": "positive",
+    "description": "Weekly scheduled run firing",
+    "prompt": "Weekly scheduled task: run okay-bro-try-me for the last 7 days",
+    "expectations": ["okay-bro-try-me runs"]
+  },
+  {
+    "id": "neg-0",
+    "kind": "negative",
+    "description": "Code review of a PR belongs to okay-review",
+    "prompt": "Review PR 41 for bugs before I merge it",
+    "expectations": ["okay-bro-try-me does not run"]
+  },
+  {
+    "id": "neg-1",
+    "kind": "negative",
+    "description": "Skill retro after a delivered task belongs to okay-reflect",
+    "prompt": "PR 已经开了，复盘一下这次任务里 okay-fix 有没有问题",
+    "expectations": ["okay-bro-try-me does not run"]
+  },
+  {
+    "id": "neg-2",
+    "kind": "negative",
+    "description": "A generic quiz on an unrelated topic is not a weekly review",
+    "prompt": "Write 10 trivia questions about the Roman Empire for my pub quiz",
+    "expectations": ["okay-bro-try-me does not run"]
+  },
+  {
+    "id": "beh-0",
+    "kind": "behavioural",
+    "description": "Runs the scripts instead of reading transcripts or the template",
+    "prompt": "/okay-bro-try-me",
+    "expectations": [
+      "Runs scripts/week.js to get the digest instead of reading transcript files directly",
+      "Does not read game.html or the scripts' source",
+      "Writes a levels JSON whose units have concept, story and items with a why",
+      "Runs scripts/play.js build and then serve"
+    ]
+  },
+  {
+    "id": "beh-1",
+    "kind": "behavioural",
+    "description": "First run asks format and schedule once",
+    "prompt": "/okay-bro-try-me (week.js printed: first run: true; prefs: {}; suggested level: 2)",
+    "expectations": [
+      "Asks one question round covering the game format (default Duolingo-style levels) and a weekly schedule",
+      "Saves the answers with play.js prefs",
+      "Does not propose a cloud routine for the weekly run"
+    ]
+  }
+]
