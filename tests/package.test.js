@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const zlib = require('node:zlib');
 const { spawnSync } = require('node:child_process');
+const { neededShared } = require('../scripts/build.js');
 
 const root = path.join(__dirname, '..');
 const skills = fs.readdirSync(path.join(root, 'skills')).filter((n) => n.startsWith('okay-'));
@@ -47,7 +48,7 @@ test('npm run package writes one zip per okay-* skill, skill folder as root', ()
     const names = Object.keys(files);
     assert.deepStrictEqual(names, [...names].sort(), `${name}.zip entries are sorted`);
     for (const entry of names) assert.ok(entry.startsWith(`${name}/`), `${entry} is under ${name}/`);
-    assert.ok(files[`${name}/shared/lanes.md`], `${name}.zip carries its shared/ copy`);
+    for (const f of neededShared(path.join(root, 'skills', name))) assert.ok(files[`${name}/shared/${f}`], `${name}.zip carries shared/${f}`);
   }
 });
 
