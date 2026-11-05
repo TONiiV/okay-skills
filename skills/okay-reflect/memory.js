@@ -1,0 +1,191 @@
+#!/usr/bin/env node
+// Local fact memory for the okay-* pack. Zero dependencies, so it works when the skill is uploaded alone.
+// Store: $OKAY_HOME/memory/USER.md (cap 1500 chars) and $OKAY_HOME/memory/projects/<slug>.md (cap 2500; one file per repo, shared by its linked worktrees), default OKAY_HOME ~/.okay.
+// One fact per "- " bullet line. Usage: see shared/memory.md.
+// Also required by hooks/reflect.js, so the threat list below is the only definition.
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const crypto = require('node:crypto');
+const { execFileSync } = require('node:child_process');
+
+const CAPS = { user: 1500, project: 2500 };
+
+// The one threat-scan list: secrets, exfiltration, prompt injection, invisible or bidi Unicode, line breaks.
+// Hard guarantees: every pattern is linear (no nested or overlapping quantifiers; unbounded runs are single character classes), and callers cap the line length before scanning.
+// Best effort: the injection and exfiltration wordings. A miss is expected; extend the list when one shows up. Cyrillic or Greek look-alikes are not folded.
+// Invisible characters are matched as a class; the Hangul fillers are listed in case a Unicode version drops them from the property.
+const DI = String.raw`\p{Default_Ignorable_Code_Point}`;
+const INVISIBLE = new RegExp(String.raw`[${DI}\u{61C}\u{200E}\u{200F}\u{202A}-\u{202E}\u{2066}-\u{2069}\u{115F}\u{1160}\u{3164}\u{FFA0}\u{2800}]`, 'u');
+// Emoji and Persian text need U+FE0F, U+200D and U+200C: FE0F after a visible character (not before another invisible one), ZWJ or ZWNJ (optionally after FE0F) between visible characters. Every other invisible character is rejected.
+const JOINERS = new RegExp(String.raw`(?<=[^${DI}\s])(?:️?[‌‍](?=[^${DI}\s])|️(?!${DI}))`, 'gu');
+const VERTICAL = /(?!\t)[\p{Cc}\p{Zl}\p{Zp}]/u; // every control character except TAB (CR, LF, VT, FF, NEL, U+001C..U+001E, ESC, NUL, BS, DEL), U+2028, U+2029
+const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[ _-]?key|access[ _-]?key|private[ _-]?key)s?(?:[_-][a-z0-9]{1,20}){0,4}["']?`;
+// "=" takes any 8+ char value; ":" and "is" need a digit and a letter (within the first 64 chars), so "Prefers tokens: verbose_output_mode" passes.
+const VALUE = String.raw`["']?(?=[^\s"']{0,64}\d)(?=[^\s"']{0,64}[a-z])[^\s"']{8,}`;
+const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`(?:\s*=\s*["']?[^\s"']{8,}|\s*:\s*${VALUE}|\s+is\s+${VALUE})`, 'i');
+// A whole variable name that ends in a secret word, plural or numbered (GITHUB_TOKEN, APIKEY, API_KEYS, GH_TOKEN2) or holds one between underscores (MY_SECRET_X). KEYCLOAK_URL and TOKEN_TTL do not match.
+const SW = 'KEY|TOKEN|SECRET|PASSWORD|PASSWD';
+const VN = String.raw`(?:\w*(?:${SW})S?\d*(?!\w)|\w*_(?:${SW})S?\d*_)`;
+const ENV_SECRET = new RegExp(String.raw`\$\{?${VN}|\$env:${VN}|%${VN}\w*%`, 'i');
+const AUTH_VAR = /authorization\s*:\s*["']?(?:(?:bearer|basic|token)\s+)?[$%]/i;
+const NET_TOOL = /\b(?:curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|nc|ncat|netcat)\b/i;
+const COPY_TOOL = /\b(?:scp|sftp|rsync)\b/i;
+const ENV_DUMP_PIPE = /\b(?:printenv|env)\s*\|\s*(?:nc|ncat|netcat|curl|wget)\b/i;
+const CRED_FILE = /(?:^|[\s/\\"'=@~(<>])(?:\.env(?!\.(?:example|sample|template)\b)(?!\w)|\.netrc\b|id_rsa|id_ed25519|id_ecdsa|\.ssh[/\\]|\.aws[/\\]credentials)/i;
+const READ_CMD = /\b(?:cat|less|more|head|tail|type|source|get-content|gc|xxd|base64|strings)\b/i;
+const NEGATED = /\b(?:never|don'?t|do not|avoid|must not|mustn'?t|shouldn'?t|not)\b/i;
+const JWT = /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\./;
+const FILLER = String.raw`(?:\w+\s+){0,4}?`;
+const INJECTION = new RegExp([
+  String.raw`\b(?:ignore|disregard|forget|override)\s+${FILLER}(?:previous|prior|above|earlier|preceding)\s+(?:\w+\s+)?(?:instructions|rules|prompts|messages|context|system prompt)\b`,
+  String.raw`\b(?:ignore|disregard|forget|override)\s+(?:everything|anything|all)\s+(?:above|before|earlier|prior|previously)\b`,
+  String.raw`\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:of\s+)?your\s+(?:\w+\s+)?(?:instructions|prompts|system prompt)\b`,
+  String.raw`\b(?:ignore|disregard|forget)\s+(?:all\s+)?(?:of\s+)?the\s+(?:instructions|prompts)\s+(?:above|before|earlier|prior)\b`,
+  String.raw`\byou are now\s+(?:in\s+)?(?:an?\s+)?(?:\w+\s+)?(?:unrestricted|unfiltered|uncensored|jailbroken|evil|dan|developer mode|god mode)\b`,
+  String.raw`\bnew instructions\s*:`,
+  String.raw`\bsystem prompt\s*:\s*(?:you|be|act|ignore|obey|from now)\b`,
+  String.raw`\b(?:reveal|print|show|leak)\s+your\s+system prompt\b`,
+  String.raw`\bdo not tell the user\b`,
+  String.raw`</?\s*(?:system|assistant)\s*>`,
+].join('|'), 'i');
+// Tests get the NFKC text (n) and the same text with "-" and "_" collapsed to spaces (inj).
+const THREATS = [
+  ['secret assignment', (n) => SECRET_ASSIGN.test(n)],
+  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|(?:sk|rk)_live_[A-Za-z0-9]{16,}|glpat-[A-Za-z0-9_-]{16,}|npm_[A-Za-z0-9]{16,}|hf_[A-Za-z0-9]{16,}|ASIA[0-9A-Z]{16}|SG\.[A-Za-z0-9_-]{16,}|shpat_[A-Za-z0-9]{16,}|dop_v1_[A-Za-z0-9]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n) || JWT.test(n)],
+  ['private key block', (n) => /-----BEGIN [A-Z ]*PRIVATE KEY[A-Z ]*-----/.test(n)],
+  ['exfiltration command', (n) => (NET_TOOL.test(n) && (ENV_SECRET.test(n) || AUTH_VAR.test(n))) || ENV_DUMP_PIPE.test(n)],
+  ['credential file exfiltration', (n) => CRED_FILE.test(n) && (NET_TOOL.test(n) || COPY_TOOL.test(n) || n.includes('|'))],
+  ['credential file read', (n) => CRED_FILE.test(n) && READ_CMD.test(n) && !NEGATED.test(n)],
+  ['prompt injection', (n, inj) => INJECTION.test(inj)],
+];
+
+function threat(text) {
+  const s = text.replace(JOINERS, ''); // allowed joiners go first, so one inside a word cannot hide a phrase
+  if (VERTICAL.test(s)) return 'line break or separator';
+  if (INVISIBLE.test(s)) return 'invisible or bidi Unicode';
+  const n = s.normalize('NFKC');
+  const inj = n.replace(/[-_]+/g, ' ');
+  return THREATS.find(([, test]) => test(n, inj))?.[0] || null;
+}
+const len = (s) => [...s].length; // caps count code points, not UTF-16 units
+const readLines = (file) => fs.readFileSync(file, 'utf8').replace(/^\u{FEFF}/u, ''); // a hand-edited file may start with a BOM
+const off = () => (process.env.OKAY_MEMORY || '').trim().toLowerCase() === 'off';
+const memoryDir = () => path.join(process.env.OKAY_HOME || path.join(os.homedir(), '.okay'), 'memory');
+const userFile = () => path.join(memoryDir(), 'USER.md');
+
+// Project file for the repo at cwd, or null outside git. Keyed on the common git dir, so a repo and all its linked worktrees share one file.
+function projectFile(cwd) {
+  let common;
+  try {
+    common = execFileSync('git', ['rev-parse', '--git-common-dir'], {
+      cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 5000,
+    }).trim();
+  } catch {
+    return null;
+  }
+  if (!common) return null;
+  const real = fs.realpathSync.native(path.resolve(cwd, common)); // relative to cwd in the main work tree
+  const hash = crypto.createHash('sha1').update(real).digest('hex').slice(0, 8);
+  const name = path.basename(real) === '.git' ? path.basename(path.dirname(real)) : path.basename(real);
+  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'repo';
+  return path.join(memoryDir(), 'projects', base + '-' + hash + '.md');
+}
+
+// Frozen view of one file for injection: threat and over-long lines dropped, cut to the cap at a line boundary.
+function snapshot(file, cap) {
+  let text;
+  try {
+    text = readLines(file);
+  } catch {
+    return '';
+  }
+  let out = '';
+  let used = 0; // running length, so the scan stays linear
+  for (const l of text.split(/\r?\n/)) {
+    if (used >= cap) break; // full
+    if (!l.trim()) continue;
+    const n = len(l);
+    if (used + n > cap) continue; // no room left: skip it, a later shorter line may still fit. Length is checked before any regex runs.
+    if (!threat(l)) {
+      out += l + '\n';
+      used += n + 1;
+    }
+  }
+  return out.trim();
+}
+
+// A write that does not grow the file passes even over the cap, so a hand-edited file can be merged down.
+const overCap = (cap, n) => new Error(`over the ${cap}-char cap (${n}); merge first: patch or remove existing facts, or shorten the fact, then retry`);
+function save(file, lines, cap, before) {
+  const body = lines.join('\n');
+  if (len(body) > cap && len(body) > len(before.join('\n'))) throw overCap(cap, len(body));
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, body ? body + '\n' : '');
+  fs.renameSync(tmp, file); // atomic replace
+}
+
+function check(text, lines, cap) {
+  if (!text.trim()) throw new Error('a fact must not be empty');
+  if (len(text) + 2 > cap) throw overCap(cap, len(text) + 2); // the stored line is "- " + text; checked before any regex runs
+  if (VERTICAL.test(text)) throw new Error('a fact must be one line (no CR, LF, U+2028, U+2029, other line separator or control character except TAB)');
+  const t = threat(text);
+  if (t) throw new Error(`threat scan rejected the text (${t})`);
+  if (lines.includes(`- ${text}`)) throw new Error('duplicate fact');
+}
+
+function matchOne(lines, needle) {
+  if (!needle.trim()) throw new Error('the substring must not be empty');
+  const hits = lines.map((l, i) => (l.startsWith('- ') && l.slice(2).includes(needle) ? i : -1)).filter((i) => i >= 0);
+  if (!hits.length) throw new Error(`no fact contains "${needle}"`);
+  if (hits.length > 1) throw new Error(`ambiguous: ${hits.length} facts contain "${needle}"; use a longer substring`);
+  return hits[0];
+}
+
+function run(argv) {
+  const [cmd, target, a, b] = argv;
+  const usage = () => {
+    throw Object.assign(new Error('usage: memory.js add <user|project> <fact> | patch <user|project> <old> <new> | remove <user|project> <substring>'), { code: 2 });
+  };
+  if (!['add', 'patch', 'remove'].includes(cmd) || !Object.hasOwn(CAPS, target) || !a || (cmd === 'patch' && b === undefined)) usage();
+  if (off()) throw new Error('OKAY_MEMORY=off: memory writes are disabled');
+  let file = userFile();
+  if (target === 'project') {
+    file = projectFile(process.cwd());
+    if (!file) throw new Error('the project target needs a git repo');
+  }
+  let lines = [];
+  try {
+    lines = readLines(file).split(/\r?\n/).filter(Boolean);
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
+  const before = lines.slice();
+  if (cmd === 'add') {
+    check(a, lines, CAPS[target]);
+    lines.push(`- ${a}`);
+  } else {
+    const i = matchOne(lines, a);
+    if (cmd === 'remove') {
+      lines.splice(i, 1);
+    } else {
+      const next = lines[i].slice(2).replace(a, () => b);
+      check(next, lines.filter((_, j) => j !== i), CAPS[target]);
+      lines[i] = `- ${next}`;
+    }
+  }
+  save(file, lines, CAPS[target], before);
+  return `ok: ${cmd} ${target} (${file})`;
+}
+
+if (require.main === module) {
+  try {
+    console.log(run(process.argv.slice(2)));
+  } catch (e) {
+    console.error(`memory: ${e.message}`);
+    process.exit(e.code === 2 ? 2 : 1);
+  }
+}
+
+module.exports = { CAPS, off, userFile, projectFile, snapshot, threat };

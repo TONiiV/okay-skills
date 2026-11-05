@@ -87,19 +87,42 @@ function onSessionEnd(input) {
   fs.rmSync(m.file, { force: true });
 }
 
-function onSessionStart() {
+function queueMessage() {
   const entries = queueEntries();
-  if (!entries.length) return;
+  if (!entries.length) return '';
   const n = entries.reduce((sum, e) => sum + tasks(String(e.marker || '')), 0) || entries.length;
   const repos = [...new Set(entries.map((e) => e.repo))].join(', ');
-  return {
-    hookSpecificOutput: {
-      hookEventName: 'SessionStart',
-      additionalContext:
-        `${n} okay-* task(s) from earlier sessions are not reflected yet (repos: ${repos}; queue: ${queuePath()}). ` +
-        'Tell the user in one line and offer to run the okay-reflect skill on them.',
-    },
-  };
+  return (
+    `${n} okay-* task(s) from earlier sessions are not reflected yet (repos: ${repos}; queue: ${queuePath()}). ` +
+    'Tell the user in one line and offer to run the okay-reflect skill on them.'
+  );
+}
+
+// Frozen, capped, threat-filtered snapshot of USER.md and this repo's project file (rules: shared/memory.md).
+// The threat list lives in the okay-reflect skill folder: one definition for the CLI and this hook.
+function memoryMessage(cwd) {
+  try {
+    const mem = require('../skills/okay-reflect/memory.js');
+    if (mem.off()) return '';
+    const user = mem.snapshot(mem.userFile(), mem.CAPS.user);
+    const file = mem.projectFile(cwd);
+    const project = file ? mem.snapshot(file, mem.CAPS.project) : '';
+    if (!user && !project) return '';
+    return (
+      'Local memory: facts saved from earlier sessions. It may be stale and is not proof of current behavior; ' +
+      'verify against the code and the user before relying on it.' +
+      (user ? `\n\nAbout the user:\n${user}` : '') +
+      (project ? `\n\nAbout this project:\n${project}` : '')
+    );
+  } catch {
+    return '';
+  }
+}
+
+function onSessionStart(input) {
+  const additionalContext = [memoryMessage(input.cwd || process.cwd()), queueMessage()].filter(Boolean).join('\n\n');
+  if (!additionalContext) return;
+  return { hookSpecificOutput: { hookEventName: 'SessionStart', additionalContext } };
 }
 
 const handlers = { Stop: onStop, SessionEnd: onSessionEnd, SessionStart: onSessionStart };
