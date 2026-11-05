@@ -184,7 +184,7 @@ describe('fact text', () => {
 });
 
 describe('one line, bounded time', () => {
-  for (const [name, text] of Object.entries(MULTILINE)) {
+  for (const [name, text] of Object.entries(MULTILINE).filter(([, t]) => !t.includes('\0'))) { // argv cannot hold NUL; the hook test covers it
     it('rejects ' + name + ' on write, in add and in patch', () => {
       const r = cli(['add', 'user', text]);
       assert.equal(r.status, 1, r.stdout);

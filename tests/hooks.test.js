@@ -221,6 +221,14 @@ describe('SessionStart memory', () => {
     assert.doesNotMatch(text, /Always push|one.?two/);
   });
 
+  it('a USER.md with 1M short lines finishes in under 2s: snapshot is linear', () => {
+    put(userFile(), '- abcdef\n'.repeat(1000000));
+    const t0 = Date.now();
+    const text = ctx(start(gitRepo()));
+    assert.ok(Date.now() - t0 < 2000, `${Date.now() - t0} ms`);
+    assert.match(text, /abcdef/);
+  });
+
   it('skips over-long lines without scanning them: three 100k-space lines finish under 1s and the rest is kept', () => {
     const long = ['token', 'secret', 'password is'].map((w) => '- ' + w + ' '.repeat(100000));
     put(userFile(), ['- Prefers tabs', ...long].join('\n') + '\n');

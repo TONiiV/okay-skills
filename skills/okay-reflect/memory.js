@@ -19,12 +19,14 @@ const DI = String.raw`\p{Default_Ignorable_Code_Point}`;
 const INVISIBLE = new RegExp(String.raw`[${DI}\u{61C}\u{200E}\u{200F}\u{202A}-\u{202E}\u{2066}-\u{2069}\u{115F}\u{1160}\u{3164}\u{FFA0}\u{2800}]`, 'u');
 // Emoji and Persian text need U+FE0F, U+200D and U+200C: FE0F after a visible character (not before another invisible one), ZWJ or ZWNJ (optionally after FE0F) between visible characters. Every other invisible character is rejected.
 const JOINERS = new RegExp(String.raw`(?<=[^${DI}\s])(?:️?[‌‍](?=[^${DI}\s])|️(?!${DI}))`, 'gu');
-const VERTICAL = /[\r\n\v\f\u0085\p{Zl}\p{Zp}]/u; // CR, LF, VT, FF, NEL, U+2028, U+2029
+const VERTICAL = /(?!\t)[\p{Cc}\p{Zl}\p{Zp}]/u; // every control character except TAB (CR, LF, VT, FF, NEL, U+001C..U+001E, ESC, NUL, BS, DEL), U+2028, U+2029
 const SECRET_WORD = String.raw`(?<![a-z0-9])(?:password|passwd|secret|token|api[ _-]?key|access[ _-]?key|private[ _-]?key)s?(?:[_-][a-z0-9]{1,20}){0,4}["']?`;
 // "=" takes any 8+ char value; ":" and "is" need a digit and a letter (within the first 64 chars), so "Prefers tokens: verbose_output_mode" passes.
 const VALUE = String.raw`["']?(?=[^\s"']{0,64}\d)(?=[^\s"']{0,64}[a-z])[^\s"']{8,}`;
 const SECRET_ASSIGN = new RegExp(SECRET_WORD + String.raw`(?:\s*=\s*["']?[^\s"']{8,}|\s*:\s*${VALUE}|\s+is\s+${VALUE})`, 'i');
-const ENV_SECRET = /\$\{?\w*(?:KEY|TOKEN|SECRET|PASSW)|\$env:\w*(?:KEY|TOKEN|SECRET|PASSW)|%(?=\w*(?:KEY|TOKEN|SECRET|PASSW))\w+%/i;
+// A whole variable name that ends in a secret word (GITHUB_TOKEN, APIKEY) or holds one between underscores (MY_SECRET_X). KEYCLOAK_URL and TOKEN_TTL do not match.
+const VN = String.raw`(?:\w*(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD)(?!\w)|\w*_(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD)_)`;
+const ENV_SECRET = new RegExp(String.raw`\$\{?${VN}|\$env:${VN}|%${VN}\w*%`, 'i');
 const AUTH_VAR = /authorization\s*:\s*["']?(?:(?:bearer|basic|token)\s+)?[$%]/i;
 const NET_TOOL = /\b(?:curl|wget|invoke-webrequest|invoke-restmethod|iwr|irm|nc|ncat|netcat)\b/i;
 const COPY_TOOL = /\b(?:scp|sftp|rsync)\b/i;
@@ -49,8 +51,8 @@ const INJECTION = new RegExp([
 // Tests get the NFKC text (n) and the same text with "-" and "_" collapsed to spaces (inj).
 const THREATS = [
   ['secret assignment', (n) => SECRET_ASSIGN.test(n)],
-  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n) || JWT.test(n)],
-  ['private key block', (n) => /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(n)],
+  ['secret key prefix', (n) => /\b(?:sk-[A-Za-z0-9_-]{16,}|(?:sk|rk)_live_[A-Za-z0-9]{16,}|glpat-[A-Za-z0-9_-]{16,}|npm_[A-Za-z0-9]{16,}|hf_[A-Za-z0-9]{16,}|ASIA[0-9A-Z]{16}|SG\.[A-Za-z0-9_-]{16,}|shpat_[A-Za-z0-9]{16,}|dop_v1_[A-Za-z0-9]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|github_pat_\w{20,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[0-9A-Za-z_-]{30,})/.test(n) || JWT.test(n)],
+  ['private key block', (n) => /-----BEGIN [A-Z ]*PRIVATE KEY[A-Z ]*-----/.test(n)],
   ['exfiltration command', (n) => (NET_TOOL.test(n) && (ENV_SECRET.test(n) || AUTH_VAR.test(n))) || ENV_DUMP_PIPE.test(n)],
   ['credential file exfiltration', (n) => CRED_FILE.test(n) && (NET_TOOL.test(n) || COPY_TOOL.test(n) || n.includes('|'))],
   ['credential file read', (n) => CRED_FILE.test(n) && READ_CMD.test(n) && !NEGATED.test(n)],
@@ -98,11 +100,16 @@ function snapshot(file, cap) {
     return '';
   }
   let out = '';
+  let used = 0; // running length, so the scan stays linear
   for (const l of text.split(/\r?\n/)) {
+    if (used >= cap) break; // full
     if (!l.trim()) continue;
     const n = len(l);
-    if (n > cap || len(out) + n > cap) continue; // too long, or no room left: skip it, a later shorter line may still fit. Length is checked before any regex runs.
-    if (!threat(l)) out += l + '\n';
+    if (used + n > cap) continue; // no room left: skip it, a later shorter line may still fit. Length is checked before any regex runs.
+    if (!threat(l)) {
+      out += l + '\n';
+      used += n + 1;
+    }
   }
   return out.trim();
 }
@@ -121,7 +128,7 @@ function save(file, lines, cap, before) {
 function check(text, lines, cap) {
   if (!text.trim()) throw new Error('a fact must not be empty');
   if (len(text) + 2 > cap) throw overCap(cap, len(text) + 2); // the stored line is "- " + text; checked before any regex runs
-  if (VERTICAL.test(text)) throw new Error('a fact must be one line (no CR, LF, U+2028, U+2029 or other line separator)');
+  if (VERTICAL.test(text)) throw new Error('a fact must be one line (no CR, LF, U+2028, U+2029, other line separator or control character except TAB)');
   const t = threat(text);
   if (t) throw new Error(`threat scan rejected the text (${t})`);
   if (lines.includes(`- ${text}`)) throw new Error('duplicate fact');
