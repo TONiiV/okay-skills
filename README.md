@@ -27,6 +27,18 @@ Fourteen `okay-*` skills. Start with `okay-dev`; every other skill can also be c
 
 Shared rules (output style, commit/PR, model table, Monid, contributor mode, Jev) live once in `shared/` and are copied into each skill by `npm run build`, so each skill works when uploaded alone.
 
+## Quick install (any harness)
+
+One command installs every skill into the harnesses it finds on your machine (Claude Code, Codex, Cursor, Gemini CLI, OpenCode and more), through the [`skills`](https://github.com/vercel-labs/skills) CLI. Needs Node.
+
+```bash
+npx skills add TONiiV/okay-skills --skill '*' --global --yes
+```
+
+Install all of them: `okay-dev` calls the others by name. To pick one harness, add `--agent claude-code` (or `codex`, `cursor`, ...); drop `--global` to install into the current project only. Update later with `npx skills update`.
+
+This path installs the skills only. The reflection hooks and the marketplace update flow come with the Claude Code plugin below.
+
 ## Install on a machine (Claude Code)
 
 ```bash

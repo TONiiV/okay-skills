@@ -57,7 +57,7 @@ Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), plu
 
 ### Jev
 
-Ask Jev only when `OPENROUTER_JEV_API_KEY` is set and contributor mode is off ([shared/jev.md](shared/jev.md)). Jev picks the lane and the model tier, nothing else.
+Ask Jev only when a Jev key is set (`JEV_API_KEY`, or the older `OPENROUTER_JEV_API_KEY`) and contributor mode is off ([shared/jev.md](shared/jev.md)). Jev picks the lane, the model tier and the effort, nothing else.
 
 1. Write a one-line summary of the sub-task: no code, no file contents, no names of people, clients or private repos.
 2. Write the request to a temp file and send it the way [shared/jev.md](shared/jev.md) says (local `jev` script first):
@@ -69,7 +69,9 @@ Ask Jev only when `OPENROUTER_JEV_API_KEY` is set and contributor mode is off ([
        "lane": {"type": "choice", "instructions": "Which lane fits `task`?",
                 "criteria": {"L1": "small fix inside the L1 threshold", "L2": "planned: an existing issue, spec or ticket", "L3": "new feature with no agreed plan", "L4": "architecture, no code", "L5": "UI/UX work", "perf": "a performance claim or regression"}},
        "tier": {"type": "choice", "instructions": "Smallest model tier that implements `task` well?",
-                "criteria": {"haiku": "lookups, mechanical edits", "sonnet": "normal fixes and tickets", "opus": "architecture, cross-module work"}}
+                "criteria": {"haiku": "lookups, mechanical edits", "sonnet": "normal fixes and tickets", "opus": "architecture, cross-module work"}},
+       "effort": {"type": "choice", "instructions": "How hard should the model think to do `task` well?",
+                  "criteria": {"low": "known path, one file", "medium": "lookups, small edits", "high": "normal implementation or review", "max": "hard root cause, architecture, contested design"}}
      }
    }
    ```
@@ -81,7 +83,7 @@ Tell the user the routing in one line per sub-task before dispatching: `1. <sub-
 
 ## 4. Dispatch
 
-Dispatch sub-tasks with no blocking edge in parallel, in one message. Each agent gets: the sub-task in the user's words, the conversation context it needs, the files it owns (and an instruction not to touch others), the skill to run, and the model and effort from [shared/models.md](shared/models.md).
+Dispatch sub-tasks with no blocking edge in parallel, in one message. Each agent gets: the sub-task in the user's words, the conversation context it needs, the files it owns (and an instruction not to touch others), the skill to run, and the model and effort from [shared/models.md](shared/models.md), mapped to the vendor and effort knob the current harness offers.
 
 | Lane | Runs |
 |---|---|

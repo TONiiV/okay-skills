@@ -167,7 +167,7 @@
     "id": "beh-contributor",
     "kind": "behavioural",
     "description": "Contributor mode: no Jev, no issues, local spec, MR, no merge",
-    "prompt": "Add a retry option to the uploader (this repo matches a pattern under Contributor repos in ~/.claude/okay.local.md, and OPENROUTER_JEV_API_KEY is set)",
+    "prompt": "Add a retry option to the uploader (this repo matches a pattern under Contributor repos in ~/.claude/okay.local.md, and JEV_API_KEY is set)",
     "expectations": [
       "Detects contributor mode from ~/.claude/okay.local.md",
       "Does not call Jev and classifies the lane itself",
@@ -182,7 +182,7 @@
     "id": "beh-jev",
     "kind": "behavioural",
     "description": "Jev classifies with a one-line summary; low confidence falls back to self",
-    "prompt": "Add pagination to the admin users list (OPENROUTER_JEV_API_KEY is set, not contributor mode; Jev answers lane L2 with confidence 0.41)",
+    "prompt": "Add pagination to the admin users list (JEV_API_KEY is set, not contributor mode; Jev answers lane L2 with confidence 0.41)",
     "expectations": [
       "Calls the jev script with lane and tier choice questions and a one-line summary as state",
       "Sends no code, file contents or full conversation to Jev",
