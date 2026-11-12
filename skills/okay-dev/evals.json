@@ -252,6 +252,18 @@
     ]
   },
   {
+    "id": "lesson-6",
+    "kind": "behavioural",
+    "description": "L3 with the prototype skipped at the user request",
+    "prompt": "Add a --since DATE filter to the report command. No prototype needed, go straight to a PR.",
+    "expectations": [
+      "Announces the lane and says the prototype is skipped at the user request",
+      "Does not run okay-prototype and creates no prototype/ branch",
+      "Still grills the open decisions before implementing",
+      "Implements on a normal feature branch and runs the review loop on the PR"
+    ]
+  },
+  {
     "id": "beh-review-loop",
     "kind": "behavioural",
     "description": "Review loop: fixer between rounds, escalation after round 3",

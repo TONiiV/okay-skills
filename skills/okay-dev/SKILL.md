@@ -121,6 +121,8 @@ Planned work is not re-planned: `skip: grill`, `skip: prototype`, `skip: spec`, 
 5. **okay-to-tickets.** Every ticket S or M; blocking edges set.
 6. **Throughput checkpoint**, then the ticket loop.
 
+The user says no prototype (before or during the flow): steps 1-2 become `skip: user asked`, per the opt-out in [shared/lanes.md](shared/lanes.md), and the flow continues at step 3 on a normal feature branch. Step 4 then checks that the spec says "prototype skipped at the user's request"; it names no sample and links no `prototype/<name>`.
+
 ### Throughput checkpoint
 
 Write it as three task items before any implementation. An item that does not apply stays as `n/a: <reason>`.

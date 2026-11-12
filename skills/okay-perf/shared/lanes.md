@@ -38,6 +38,7 @@ New product, L3 and L4 never start from an assumed spec. L1 and L2 (already plan
 - Samples are throwaway code: variants behind one switcher where possible, runnable with one command or URL, kept on a `prototype/<name>` branch and linked from the spec. A `prototype/<name>` branch is never merged.
 - L4 samples are spikes, also throwaway code on `prototype/<name>`, that exercise the risky assumption; measure it when it is a performance or scale question.
 - The spec may inline decision-rich snippets from the chosen sample (state machine, schema, type shape).
+- The user can skip the prototype, before or during the flow. This applies to L3 and new product only; L4 spikes are not optional. Then drop steps 2-4 (samples, trial, feedback): grill the open decisions, then the spec, the tickets and the implementation go on as usual, on a normal feature branch off the base. The spec says the prototype was skipped at the user's request instead of naming a sample, and the routing line says the same. Samples already built stay on `prototype/<name>`. Why: a flow with no way out forces the branch, the review and the PR to be redone (lesson: okay-lessons#6).
 
 ## Escalation
 
