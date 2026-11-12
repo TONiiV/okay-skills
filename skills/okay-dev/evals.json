@@ -165,6 +165,18 @@
     ]
   },
   {
+    "id": "lesson-12",
+    "kind": "behavioural",
+    "description": "A ticket worktree gets its dependencies installed before work starts",
+    "prompt": "Implement issue #34 (it has acceptance criteria and touches 3 files). The repo uses pnpm and CI runs a prettier check.",
+    "expectations": [
+      "Creates a worktree for the ticket",
+      "Runs the dependency install (pnpm install) inside that worktree before implementing",
+      "Stops and reports if the install fails",
+      "Does not run the formatter or any other tool from or against the main checkout"
+    ]
+  },
+  {
     "id": "beh-compound",
     "kind": "behavioural",
     "description": "Compound prompt is split and routed per sub-task, parallel by file ownership",
