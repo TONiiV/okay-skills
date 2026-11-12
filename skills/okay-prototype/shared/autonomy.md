@@ -21,10 +21,10 @@ No grant: every gate in the pack stays. Questions are asked, the throughput chec
 2. The throughput checkpoint is shown, not waited on. The grant covers the pushes and PRs of its scope.
 3. An L2+ merge goes ahead when ALL hold. One fails: do not merge; fix what a fixer can fix, else park the PR.
    - A reviewer's latest `APPROVED (round <n>) at <sha>` names the current PR head ([review.md](review.md)).
-   - The merge gate in [git.md](git.md) passes: the head contains the base tip, and the required checks finished green.
-   - No blocking finding is open, in a review comment or in a review thread.
+   - The merge gate in [git.md](git.md) passes: the head contains the base tip, and every check on the head finished green, required or not. Nobody looks at the PR before this merge, so a red check that the repo does not mark as required still stops it.
+   - No blocking finding is open, in a review comment or in a review thread. A thread or review from a person that asks for a change is open until that person resolves it or approves; an agent may answer it, never close or dismiss it.
    - The lane is not L4.
-   - The merge can run the way [git.md](git.md) allows (allow rule, or its fallback).
+   - The merge can run by a path [git.md](git.md) allows: the CLI with its allow rule, or, where the CLI cannot run, the fallback with its three conditions.
 4. Nothing else. Review depth, round caps, the L1 threshold, the commit and PR rules and who may post an approval are the same with and without a grant. A grant never skips, loosens or disables a check.
 
 ## Always pause
@@ -67,4 +67,4 @@ Only the PM thread writes the file; agents return their decisions in their reply
 
 Log forks, defaults applied, merges, parks, dismissed bot findings and re-run checks. Not every command.
 
-The final report under a grant has this order: defaults applied to user-only calls, each with how to change it; PRs merged (link and merge commit); PRs parked and why; the path of the trail.
+The final report under a grant has this order: defaults applied to user-only calls, each with how to change it; PRs merged (link and merge commit); PRs parked and why; the path of the trail. In a cloud session, or wherever the checkout will not outlive the session, paste the whole trail into the report as well.

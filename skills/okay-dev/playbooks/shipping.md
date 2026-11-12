@@ -17,16 +17,16 @@ Walk up from the lowest unmerged PR. Stop at the first PR that is not merge-read
 
 - Only this contiguous run from the root lands.
 - An approved PR above an unapproved one waits: it cannot land without the code under it.
-- A PR that neither holds nor needs the code below it can be retargeted to the base and land alone. Its head changes, so it needs a fresh approval first.
+- A PR that neither holds nor needs the code below it can be retargeted to the base and land alone. A retarget keeps the head and changes the diff, so the old approval no longer covers what will merge: it needs a fresh review against the new base first.
 
 ## 3. Land one PR at a time
 
 Always the lowest unmerged PR of the run:
 
-1. Its base must be the repo's base branch. A PR whose base is still its parent's branch would merge into that branch. Retarget first: `gh pr edit <n> --base <base>`.
+1. Its base must be the repo's base branch. A PR whose base is still its parent's branch would merge into that branch. Retarget first: `gh pr edit <n> --base <base>`, then get a fresh review of the diff against the new base before it lands.
 2. Merge the base into its branch when the head does not contain the base tip. This is always the case after the PR below was squash-merged. Push, wait for CI, get the re-check and the new approval at the new head.
 3. Run the merge gate and the merge command from [../shared/git.md](../shared/git.md), pinned to the approved SHA.
-4. Read the PR back: `gh pr view <n> --json state,mergedAt,baseRefName`. It must read merged, with the base branch as its base. A queued merge or an armed auto-merge is not a merge.
+4. Read the PR back: `gh pr view <n> --json state,mergedAt,baseRefName` (where the CLI cannot run, the REST form in [../shared/git.md](../shared/git.md)). It must read merged, with the base branch as its base. A queued merge or an armed auto-merge is not a merge.
 5. Under a grant, add the trail line with `undo: git revert <merge commit>`.
 
 Never arm auto-merge on a PR whose approval does not cover its current head: it lands whatever head is ready.

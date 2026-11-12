@@ -24,7 +24,7 @@ The PM thread owns the queue, the verdicts and the merges. It never writes or re
 ## 3. A fresh review on every head change
 
 - Every new head needs its own review by a fresh agent through okay-review. Green CI is not a review, and an owner's report is not evidence.
-- A head that changed only by merging the base in gets the re-check of `git diff <approved sha>..<new head>` from [../shared/review.md](../shared/review.md). It is posted as the next round. It counts toward the 3-round cap only when it raises a blocking finding.
+- A head that changed only by merging the base in gets the re-check of `git diff <approved sha>..<new head>` from [../shared/review.md](../shared/review.md). It keeps the round number of the approval it renews when it finds nothing blocking. A blocking finding makes it the next round, and past round 3 that is `ESCALATE`: park the PR.
 - `ESCALATE`, or no approval after round 3: park that PR, write the escalation message from SKILL.md into the final report, and continue the others.
 
 ## 4. Merge
@@ -33,7 +33,7 @@ The PM merges, one PR at a time, in queue order, because each merge moves the ba
 
 1. Check every condition in [../shared/autonomy.md](../shared/autonomy.md) on the current head. One fails: do not merge.
 2. Merge with the commands in [../shared/git.md](../shared/git.md), pinned to the approved SHA.
-3. Read the PR back (`gh pr view <n> --json state,mergedAt,mergeCommit`). A queued merge or an armed auto-merge is not a merge.
+3. Read the PR back (`gh pr view <n> --json state,mergedAt,mergeCommit`; where the CLI cannot run, the REST form in [../shared/git.md](../shared/git.md)). A queued merge or an armed auto-merge is not a merge.
 4. Add a trail line: PR, merge commit, the approval it relied on, and `undo: git revert <merge commit>`.
 5. The next PR is now behind the base: its owner merges the base in, CI runs, a fresh re-check posts the new approval. Then step 1 again.
 
