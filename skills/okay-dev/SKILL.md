@@ -151,7 +151,7 @@ Follow the merge policy in [shared/git.md](shared/git.md). L1 merges happen insi
 
 ## 6. Deliver
 
-Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state. Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
+Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state, then the non-blocking review findings left open as follow-ups (read them from the review comments). Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
 
 ## Contributor mode
 
