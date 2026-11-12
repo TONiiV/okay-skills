@@ -11,6 +11,7 @@ Turn an architecture question into a decision the user has tried, an ADR where o
 - Output and language: [shared/output-style.md](shared/output-style.md)
 - Lanes and prototype-first flow: [shared/lanes.md](shared/lanes.md)
 - Models: [shared/models.md](shared/models.md)
+- Engineering principles (read before designing): [shared/principles.md](shared/principles.md)
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Repo doc layout: [shared/docs-layout.md](shared/docs-layout.md)
 - Commit, PR, merge: [shared/git.md](shared/git.md)

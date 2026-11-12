@@ -5,6 +5,7 @@ okay-tdd is a fork of the `tdd` skill from [mattpocock/skills](https://github.co
 | Source | Used for |
 |---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) `tdd`, Copyright (c) Matt Pocock | Seams, anti-patterns, rules of the loop, `tests.md` and `mocking.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/principle-*` and the Principles index in `skills/poteto-mode/SKILL.md`, Copyright (c) 2026 Lauren Tan | The engineering principles in `shared/principles.md`: 23 of the 24 principles merged into 20 entries, one (exhaust the design space) dropped, rewritten, each with a trigger; name a principle only with the decision it changed |
 
 ## MIT License
 

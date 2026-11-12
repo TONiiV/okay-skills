@@ -12,6 +12,7 @@ Route every dev request to the right lane and run it to delivery. You are the PM
 - Models and effort: [shared/models.md](shared/models.md)
 - Jev: [shared/jev.md](shared/jev.md)
 - Review contract: [shared/review.md](shared/review.md)
+- Engineering principles (every implementer and fixer reads them first): [shared/principles.md](shared/principles.md)
 - Commit, PR, merge policy: [shared/git.md](shared/git.md)
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
@@ -84,6 +85,8 @@ Tell the user the routing in one line per sub-task before dispatching: `1. <sub-
 ## 4. Dispatch
 
 Dispatch sub-tasks with no blocking edge in parallel, in one message. Each agent gets: the sub-task in the user's words, the conversation context it needs, the files it owns (and an instruction not to touch others), the skill to run, and the model and effort from [shared/models.md](shared/models.md), mapped to the vendor and effort knob the current harness offers.
+
+Dispatch implementer and fixer agents as `okay-agent` when the harness offers it (`okay-skills:okay-agent` in Claude Code); otherwise a general-purpose agent told to read, in this order, the skill's `SKILL.md`, then [shared/principles.md](shared/principles.md), before any work. Every brief carries the absolute path of the skill folder to read from.
 
 Owned files include every test that imports or mocks a module the sub-task changes. Find them before you dispatch, for example `git grep -l <module basename> -- '*.test.*' '*.spec.*'` (or the repo's test glob), and list them in the brief. Why: "touch no other files" otherwise leaves the agent with a failing test it does not own (lesson: okay-lessons#9).
 
