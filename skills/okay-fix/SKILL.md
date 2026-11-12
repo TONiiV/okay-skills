@@ -12,6 +12,7 @@ Fix one small bug end to end. Rules shared with the rest of the pack live in `sh
 - L1 threshold and escalation: [shared/lanes.md](shared/lanes.md)
 - Models: [shared/models.md](shared/models.md)
 - Review contract: [shared/review.md](shared/review.md)
+- Engineering principles (read before writing or reviewing code): [shared/principles.md](shared/principles.md)
 - Commit, PR, merge: [shared/git.md](shared/git.md)
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)

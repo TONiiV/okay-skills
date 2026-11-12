@@ -9,6 +9,7 @@ okay-design is original text. It names, and calls when installed, the skills bel
 | [elayadesign/ai-design-skills](https://github.com/elayadesign/ai-design-skills) `landing-page-design`, Copyright (c) 2026 Elaya | MIT | Invoked when installed for landing and marketing pages; the single batched intake that states an assumption when a question goes unanswered |
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/poteto-mode/playbooks/prototype.md`, Copyright (c) 2026 Lauren Tan | MIT | The prototype playbook: throwaway code, speed over polish, variants behind one switcher, observe the result instead of asserting it |
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/principle-*` and the Principles index in `skills/poteto-mode/SKILL.md`, Copyright (c) 2026 Lauren Tan | MIT | The engineering principles in `shared/principles.md`: 23 of the 24 principles merged into 20 entries, one (exhaust the design space) dropped, rewritten, each with a trigger; name a principle only with the decision it changed |
 
 `shoot.js` and `a11y-probe.js` are original to this pack.
 
