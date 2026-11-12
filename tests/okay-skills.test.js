@@ -116,6 +116,15 @@ for (const name of okaySkills) {
       }
     });
 
+    it('every playbooks/*.md is linked from SKILL.md', () => {
+      const pb = path.join(dir, 'playbooks');
+      if (!fs.existsSync(pb)) return;
+      const linked = new Set(linkTargets(skillMd).map((t) => t.split('#')[0]));
+      for (const f of fs.readdirSync(pb).filter((n) => n.endsWith('.md'))) {
+        assert.ok(linked.has(`playbooks/${f}`), `SKILL.md does not link playbooks/${f}`);
+      }
+    });
+
     it('shared/ holds byte-identical copies of exactly the root shared/ files this skill references (run npm run build)', () => {
       const want = neededShared(dir);
       const sharedDir = path.join(dir, 'shared');

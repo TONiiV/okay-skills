@@ -7,6 +7,8 @@ okay-dev adapts ideas from the following MIT-licensed works. The text here is co
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) feature playbook (`skills/poteto-mode/playbooks/feature.md`), Copyright (c) 2026 Lauren Tan | Throughput checkpoint (blocking first steps, independent workstreams, shared mutable state; inapplicable items kept as `n/a`) |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) `planning-and-task-breakdown`, Copyright (c) 2025 Addy Osmani | Task size table (XS to XL, split L and larger) in `shared/lanes.md` |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) playbooks (`skills/poteto-mode/playbooks/autonomous-run.md`, `autopilot-full.md`, `autopilot-stack.md`, `orchestrate.md`, `babysit.md`, `shipping.md`), Copyright (c) 2026 Lauren Tan | `playbooks/autopilot.md` (exit condition, one owner per PR, review on every head, stack variant without merging), `playbooks/babysit.md` (modes, conflicts then threads then CI, sceptical triage of bot comments), `playbooks/shipping.md` (green is not safe, the contiguous verified run from the root, land bottom-up) |
 
 ## MIT License
 

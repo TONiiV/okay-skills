@@ -14,6 +14,7 @@ Review one change in a fresh agent and post the result. You report; you never fi
 - Commit, PR, merge: [shared/git.md](shared/git.md)
 - Tracker and code host: [shared/tracker.md](shared/tracker.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
+- Autonomy grant: [shared/autonomy.md](shared/autonomy.md). It changes nothing in a review: same depth, same proof, same verdict words. A caller under a grant merges on your `APPROVED` line alone, so never approve a head you did not read.
 
 Reviewer prompts, the smell baseline and the specialist briefs are in [briefs.md](briefs.md).
 

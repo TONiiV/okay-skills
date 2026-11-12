@@ -8,6 +8,7 @@ okay-perf adapts ideas from the following works. The text here is condensed and 
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/benchmark-checklist`, `skills/poteto-mode/playbooks/perf-issue.md` and `hillclimb.md` (MIT), Copyright (c) 2026 Lauren Tan | The seven benchmark questions, interleaved A/B, verdict-first reporting and the Inconclusive rules; the performance mantras in order; one change, one measurement, keep or revert; a frozen harness that prints error and work counts |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) `performance-optimization` and `references/performance-checklist.md` (MIT), Copyright (c) 2025 Addy Osmani | Same conditions before and after, cold against warm cache, neutral means revert, correctness gates the metric, the attempt ledger |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 

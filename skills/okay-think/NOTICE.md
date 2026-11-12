@@ -8,6 +8,7 @@ okay-think adapts ideas from the following MIT-licensed works. The text here is 
 | [mattpocock/skills](https://github.com/mattpocock/skills) `wayfinder`, Copyright (c) Matt Pocock | Map and decision tickets, ticket types, fog of war, out of scope, one ticket per session, claim-by-assignment; adapted to `shared/tracker.md` |
 | [mattpocock/skills](https://github.com/mattpocock/skills) `grilling`, `domain-modeling`, `prototype`, `to-spec`, Copyright (c) Matt Pocock | Called by name through their `okay-*` forks; the three-part ADR test |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 

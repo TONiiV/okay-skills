@@ -9,6 +9,7 @@ okay-review adapts ideas from the following MIT-licensed works. The text here is
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) `doubt-driven-development` and `code-review-and-quality`, Copyright (c) 2025 Addy Osmani | Pass artifact and contract, never the claim; adversarial framing; the mutation check |
 | [gstack](https://github.com/garrytan/gstack) by Garry Tan | Review depth that scales with diff size and risk, specialist passes |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 

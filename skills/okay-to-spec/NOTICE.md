@@ -5,6 +5,7 @@ okay-to-spec is a fork of the `to-spec` skill from [mattpocock/skills](https://g
 | Source | Used for |
 |---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) `to-spec`, Copyright (c) Matt Pocock | Spec template and synthesis-without-interview flow |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 
