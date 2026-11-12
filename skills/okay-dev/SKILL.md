@@ -141,6 +141,20 @@ Per ticket, in its own worktree (folder per [shared/git.md](shared/git.md); `git
    - `ESCALATE`, or still not approved after round 3: stop this ticket. Tell the user the open findings and the PR link; the loop does not continue without them.
 4. After each wave of merged tickets on Linear, post the project status update ([shared/tracker.md](shared/tracker.md)).
 
+### Escalation message
+
+The message step 3 sends on `ESCALATE`, or when round 3 ends without an approval, is for a reader who did not read the review and now has to decide. Start with the PR link, then one block per open blocking finding:
+
+1. What a user would see: the setup, the action, the wrong result. Plain words; a field name, a migration number or a finding id appears only with what it is.
+2. When it triggers, and how likely that is.
+3. The options, with one recommendation.
+
+The reviewer's one-line finding and its `[R<n>-<k>]` id come last in the block, as a reference (lesson: okay-lessons#19).
+
+### An agent that stops without a result
+
+An implementer, fixer or reviewer that was cancelled or returned nothing: read its last commands before anything else. One of them could have changed state outside its worktree (closed a process, installed something, written user data): tell the user what ran and wait. Otherwise check `git status`, the branch and the PR comments, then dispatch the step again with a fresh agent (lesson: okay-lessons#11).
+
 ## 5. Merge
 
 Follow the merge policy in [shared/git.md](shared/git.md). L1 merges happen inside okay-fix; okay-dev merges L2+ PRs only.

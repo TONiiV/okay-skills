@@ -98,6 +98,19 @@
     ]
   },
   {
+    "id": "lesson-19",
+    "kind": "behavioural",
+    "description": "Escalation is written for a reader who did not read the review",
+    "prompt": "okay-review round 3 on PR #52 returned ESCALATE with one open finding: [R3-1] blocking: migration 0042 backfills plan_tier before the null check. Where are we and what do you need from me?",
+    "expectations": [
+      "Stops the ticket loop and gives the PR link first",
+      "Describes the finding as what a user would see: setup, action and wrong result, in plain words",
+      "Says when the problem triggers and how likely it is",
+      "Lists the options and recommends exactly one",
+      "The finding id [R3-1] and the reviewer wording appear only as a reference, not as the explanation"
+    ]
+  },
+  {
     "id": "beh-l4",
     "kind": "behavioural",
     "description": "L4: architecture routes to okay-think",
