@@ -142,6 +142,40 @@ for (const name of okaySkills) {
   });
 }
 
+describe('shared/principles.md', () => {
+  const users = ['okay-dev', 'okay-fix', 'okay-review', 'okay-think', 'okay-design', 'okay-perf', 'okay-tdd', 'okay-prototype'];
+  for (const name of users) {
+    it(`skills/${name}/SKILL.md links it`, () => {
+      const text = fs.readFileSync(path.join(SKILLS, name, 'SKILL.md'), 'utf-8');
+      assert.ok(linkTargets(text).includes('shared/principles.md'));
+    });
+  }
+});
+
+describe('agents/', () => {
+  const AGENTS = path.join(ROOT, 'agents');
+  const files = fs.readdirSync(AGENTS);
+
+  it('holds only agent files (every .md there is loaded as an agent)', () => {
+    for (const f of files) assert.ok(f.endsWith('.md') && f !== 'NOTICE.md', `agents/${f}`);
+    assert.ok(files.includes('okay-agent.md'));
+  });
+
+  for (const f of files) {
+    it(`${f} has name equal to the file name and a description`, () => {
+      const fm = frontmatter(fs.readFileSync(path.join(AGENTS, f), 'utf-8'));
+      assert.ok(fm, 'needs a --- frontmatter block');
+      assert.equal(fm.name, path.basename(f, '.md'));
+      assert.ok(fm.description, 'description missing');
+    });
+  }
+
+  it('okay-agent reads the skill and the principles before any work', () => {
+    const text = fs.readFileSync(path.join(AGENTS, 'okay-agent.md'), 'utf-8');
+    assert.ok(text.includes('SKILL.md') && text.includes('shared/principles.md') && text.includes('shared/git.md'));
+  });
+});
+
 describe('okay-design style-seed.js', () => {
   const { execFileSync } = require('node:child_process');
   const SEED = path.join(SKILLS, 'okay-design', 'style-seed.js');

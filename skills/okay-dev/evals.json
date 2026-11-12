@@ -200,5 +200,18 @@
       "Stops after round 3 and escalates the open findings and the PR link to the user",
       "Does not merge the PR"
     ]
+  },
+  {
+    "id": "beh-delegate",
+    "kind": "behavioural",
+    "description": "Implementer is dispatched as okay-agent with the skill folder path and reads the principles first",
+    "prompt": "Implement issue #42: add CSV export to the reports page (lane L2, the spec is in the issue, start now)",
+    "expectations": [
+      "Dispatches the implementer as okay-agent, or as a general-purpose agent with the same reading order when okay-agent is not offered",
+      "The brief carries the absolute path of the skill folder the delegate reads from",
+      "The brief tells the delegate to read the skill's SKILL.md and shared/principles.md in full before any work",
+      "The brief lists the files the delegate owns and tells it not to touch others",
+      "Does not write the implementation in the main thread"
+    ]
   }
 ]

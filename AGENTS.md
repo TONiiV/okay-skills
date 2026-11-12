@@ -12,6 +12,7 @@ Tracker: github
 | `.claude-plugin/marketplace.json` | Marketplace with one plugin, source `./` |
 | `skills/<name>/` | One folder per skill. Auto-discovered; never list skills by hand. |
 | `shared/` | Single source of rules shared by every okay-* skill |
+| `agents/` | Plugin subagents, one `<name>.md` each with `name` and `description` frontmatter. Auto-discovered; no manifest entry. `okay-agent` is the delegate okay-* skills dispatch. Credits go in the NOTICE.md of the skill that dispatches it. |
 | `scripts/build.js` | Copies into each `skills/okay-*/shared/` only the `shared/` files that skill references, plus the files those link to |
 | `scripts/eval-rates.js` | Runs the evals through `claude plugin eval` and checks rates against `eval-targets.json` |
 | `eval-targets.json` | Per-skill eval rate targets: a `default` set, overrides under `skills` |

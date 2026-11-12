@@ -8,7 +8,7 @@ license: MIT
 
 A prototype is **throwaway code that answers a question**. The question decides the shape. It runs before the spec: a new product, a new feature, or an architecture choice never starts from an assumed spec. The output is not the code but the **trial-feedback record** that `okay-to-spec` consumes.
 
-Shared rules: [shared/git.md](shared/git.md), [shared/tracker.md](shared/tracker.md), [shared/contributor-mode.md](shared/contributor-mode.md).
+Shared rules: [shared/git.md](shared/git.md), [shared/tracker.md](shared/tracker.md), [shared/contributor-mode.md](shared/contributor-mode.md), [shared/principles.md](shared/principles.md) (read before writing a sample).
 
 ## Flow
 
