@@ -45,6 +45,18 @@
     ]
   },
   {
+    "id": "lesson-5",
+    "kind": "behavioural",
+    "description": "Recommended answers carry a reason and a cost and need no outside context",
+    "prompt": "Grill me on my plan to replace our nightly cron scripts with an event-driven worker pool.",
+    "expectations": [
+      "Every question has a recommended answer with a reason",
+      "Every recommended answer states its cost or main limit",
+      "A coined or technical term is defined the first time it appears, with a concrete example",
+      "Asks the whole frontier in one round and waits for the answers"
+    ]
+  },
+  {
     "id": "beh-0",
     "kind": "behavioural",
     "description": "Round shape: whole frontier, recommended answers, facts looked up",

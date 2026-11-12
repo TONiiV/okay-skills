@@ -15,14 +15,16 @@ Format a round like so:
 ```
 ❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
-➡️ <your recommended answer>
+➡️ <your recommended answer> - <why> - cost: <its main limit, or what is given up>
 
 ---
 
 ❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
-➡️ <your recommended answer>
+➡️ <your recommended answer> - <why> - cost: <its main limit, or what is given up>
 ```
+
+The ➡️ line must make sense without your sources: a reader who has not seen the report or the code can follow it. Define a coined term the first time it appears, with one concrete example, and always state the cost (lesson: okay-lessons#5).
 
 Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
