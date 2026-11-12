@@ -121,6 +121,17 @@
     ]
   },
   {
+    "id": "lesson-1",
+    "kind": "behavioural",
+    "description": "Tracker preflight before a wayfinder map is created on GitHub issues",
+    "prompt": "/okay-think plan the split of our monolith into services. It is too big for one session, so track the decisions as GitHub issues in this repo.",
+    "expectations": [
+      "Checks that the repo accepts issues (has_issues) before creating a label or an issue",
+      "If issues are disabled, falls back to the next reachable tracker and says so in one line",
+      "Does not leave the map only in untracked local files in a cloud session without pasting its text in the reply"
+    ]
+  },
+  {
     "id": "beh-4",
     "kind": "behavioural",
     "description": "Contributor mode leaves no footprint",
