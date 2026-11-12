@@ -8,6 +8,8 @@ Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin
 
 Look in the project root for an existing worktree folder (`.worktrees/`, `worktrees/`, or `.claude/worktrees/`) and use it. None: create `.worktrees/`. Put every worktree at `<folder>/<branch>`. Before adding one, make sure the folder is git-ignored: `git check-ignore -q <folder>/` (keep the trailing slash; without it a folder that does not exist yet reads as not ignored). If not, add `<folder>/` to `.gitignore` and commit that line on its own. Work only inside your own worktree.
 
+Right after adding a worktree, run the repo's dependency install inside it (the package manager its lockfile names, or the setup command the repo documents) and stop if that fails. Never run a tool from, or against, the user's main checkout to get around a missing install. Why: a fresh worktree has no installed dependencies, so formatters, linters and type checkers fail or get skipped (lesson: okay-lessons#12).
+
 ## Commits
 
 - One line. No body. No trailers (no Co-Authored-By).
@@ -28,7 +30,10 @@ Look in the project root for an existing worktree folder (`.worktrees/`, `worktr
 - Merge only when the PR head equals the SHA in the latest `APPROVED (round <n>) at <sha>` comment ([review.md](review.md)). A newer head needs a fresh check first. Pass that SHA to the merge so a late push makes it fail: `--match-head-commit <sha>` (`glab`: `--sha <sha>`).
 - Squash merges pass an explicit subject and an empty body, which drops the Co-authored-by and Claude-Session trailers the default body collects: `gh pr merge --squash --match-head-commit <sha> --subject "<PR title> (#<n>)" --body ""`.
 - L1 with the allow rule: merge once the PR has the approval above and CI is green. Use `gh pr merge --auto` with the flags above (or `glab mr merge --auto-merge --squash --sha <sha>`). If auto-merge is disabled on the repo, wait with `gh pr checks --watch`, then merge. If the repo has no CI checks at all, run the full test suite locally, paste the result in the PR, and merge only if it passes.
-- L2+: merge only after the user explicitly approves in the conversation, and only with the allow rule above.
+- L2+: merge only after the user explicitly approves in the conversation, and only with the allow rule above. Before each merge, and again before each PR of a back-to-back batch:
+  - The head contains the current base tip: `git fetch origin && git merge-base --is-ancestor <base> <head sha>`. If it does not, merge the base into the branch, push, and wait for CI and a fresh approval on the new head ([review.md](review.md)).
+  - The required checks finished green, in the same command line as the merge: `gh pr checks <n> --required --watch --fail-fast && gh pr merge <n> ...` (drop `--required` when the repo marks no check as required). Never join the two with `;`, and never merge on a pending check.
+  - Why: an approval and a green CI run count only for the base they ran on. "Mergeable" means no textual conflict, and an earlier merge in the same batch moves the base (lesson: okay-lessons#16).
 - Pushing needs the user's OK unless the lane's merge policy already covers it (L1 with the allow rule does). One batch-level OK at the throughput checkpoint covers the pushes and PRs of every ticket in that batch; do not ask again per push.
 - Contributor mode never merges; maintainers do.
 

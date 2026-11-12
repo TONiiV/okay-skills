@@ -88,6 +88,8 @@ Dispatch sub-tasks with no blocking edge in parallel, in one message. Each agent
 
 Dispatch implementer and fixer agents as `okay-agent` when the harness offers it (`okay-skills:okay-agent` in Claude Code); otherwise a general-purpose agent told to read, in this order, the skill's `SKILL.md`, then [shared/principles.md](shared/principles.md), before any work. Every brief carries the absolute path of the skill folder to read from.
 
+Owned files include every test that imports or mocks a module the sub-task changes. Find them before you dispatch, for example `git grep -l <module basename> -- '*.test.*' '*.spec.*'` (or the repo's test glob), and list them in the brief. Why: "touch no other files" otherwise leaves the agent with a failing test it does not own (lesson: okay-lessons#9).
+
 | Lane | Runs |
 |---|---|
 | L1 | okay-fix. A lone L1 task may run in the main thread; inside a compound prompt, dispatch a sonnet high agent per L1 sub-task. |
@@ -122,6 +124,8 @@ Planned work is not re-planned: `skip: grill`, `skip: prototype`, `skip: spec`, 
 5. **okay-to-tickets.** Every ticket S or M; blocking edges set.
 6. **Throughput checkpoint**, then the ticket loop.
 
+The user says no prototype (before or during the flow): steps 1-2 become `skip: user asked`, per the opt-out in [shared/lanes.md](shared/lanes.md), and the flow continues at step 3 on a normal feature branch. Step 4 then checks that the spec says "prototype skipped at the user's request"; it names no sample and links no `prototype/<name>`.
+
 ### Throughput checkpoint
 
 Write it as three task items before any implementation. An item that does not apply stays as `n/a: <reason>`.
@@ -140,9 +144,27 @@ Per ticket, in its own worktree (folder per [shared/git.md](shared/git.md); `git
 2. **Review round.** Call okay-review with the PR, the contract links (request, spec, ticket), the lane and the round number. It does one round and returns the verdict. Never pass it the implementer's summary.
 3. **Verdict.**
    - `APPROVED`: go to Merge.
-   - `CHANGES REQUESTED`: dispatch a separate fresh fixer agent (sonnet high; never the implementer, never the reviewer) with the PR, the open `[R<n>-<k>]` findings and the contract. It pushes fixes and answers each finding in one PR comment. Then call okay-review again with round + 1.
+   - `CHANGES REQUESTED`: dispatch a separate fresh fixer agent (sonnet high; never the implementer, never the reviewer) with the PR, the open blocking `[R<n>-<k>]` findings, the contract and the rules below. It pushes fixes and answers each finding in one PR comment. Then call okay-review again with round + 1.
+     - Only blocking findings go to the fixer; non-blocking ones go into the delivery as follow-ups. Why: every extra fix can add a new blocker, and the loop has 3 rounds (lesson: okay-lessons#13).
+     - Before it pushes, the fixer runs the type checker or build for the packages it touched and the affected tests, and pastes the output in its reply. Base already red: it compares its error set with the base and reports the difference; a red base is never a reason to skip. Why: a test runner that strips types passes on code that does not compile (lesson: okay-lessons#18).
+     - A proof run never touches the real host. When the code closes processes, installs software, or writes user data, the fixer stubs the lookup and the destructive call and checks that the target is under a scratch directory before it runs (lesson: okay-lessons#10).
+     - After it pushes, the fixer makes the PR body match the new head: it updates Change, and re-runs or removes each Evidence line (lesson: okay-lessons#15).
    - `ESCALATE`, or still not approved after round 3: stop this ticket. Tell the user the open findings and the PR link; the loop does not continue without them.
 4. After each wave of merged tickets on Linear, post the project status update ([shared/tracker.md](shared/tracker.md)).
+
+### Escalation message
+
+The message step 3 sends on `ESCALATE`, or when round 3 ends without an approval, is for a reader who did not read the review and now has to decide. Start with the PR link, then one block per open blocking finding:
+
+1. What a user would see: the setup, the action, the wrong result. Plain words; a field name, a migration number or a finding id appears only with what it is.
+2. When it triggers, and how likely that is.
+3. The options, with one recommendation.
+
+The reviewer's one-line finding and its `[R<n>-<k>]` id come last in the block, as a reference (lesson: okay-lessons#19).
+
+### An agent that stops without a result
+
+An implementer, fixer or reviewer that was cancelled or returned nothing: read its last commands before anything else. One of them could have changed state outside its worktree (closed a process, installed something, written user data): tell the user what ran and wait. Otherwise check `git status`, the branch and the PR comments, then dispatch the step again with a fresh agent (lesson: okay-lessons#11).
 
 ## 5. Merge
 
@@ -150,7 +172,7 @@ Follow the merge policy in [shared/git.md](shared/git.md). L1 merges happen insi
 
 ## 6. Deliver
 
-Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state. Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
+Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state, then the non-blocking review findings left open as follow-ups (read them from the review comments). Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
 
 ## Contributor mode
 

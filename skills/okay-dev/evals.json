@@ -67,6 +67,20 @@
     ]
   },
   {
+    "id": "lesson-18",
+    "kind": "behavioural",
+    "description": "Fix round: the fixer gets blocking findings only and must check its change compiles",
+    "prompt": "PR #41 for issue #34 came back from okay-review round 1 with CHANGES REQUESTED: [R1-1] blocking: parseRange throws on an empty string; [R1-2] non-blocking: rename the variable tmp. The typecheck on main is already red. Continue the loop.",
+    "expectations": [
+      "Dispatches a separate fresh fixer agent, not the implementer and not the reviewer",
+      "The fixer brief holds only the blocking finding [R1-1]; [R1-2] is kept as a follow-up for the delivery",
+      "The fixer brief requires the type checker or build for the touched packages and the affected tests before pushing, with the output in its reply",
+      "The red base is compared against (error-set difference), not used as a reason to skip the check",
+      "The fixer is told to update the PR body Change and Evidence to match the pushed head",
+      "Calls okay-review again with round 2"
+    ]
+  },
+  {
     "id": "beh-l2",
     "kind": "behavioural",
     "description": "L2: planned ticket skips grill and spec and stops at approval",
@@ -98,6 +112,19 @@
     ]
   },
   {
+    "id": "lesson-19",
+    "kind": "behavioural",
+    "description": "Escalation is written for a reader who did not read the review",
+    "prompt": "okay-review round 3 on PR #52 returned ESCALATE with one open finding: [R3-1] blocking: migration 0042 backfills plan_tier before the null check. Where are we and what do you need from me?",
+    "expectations": [
+      "Stops the ticket loop and gives the PR link first",
+      "Describes the finding as what a user would see: setup, action and wrong result, in plain words",
+      "Says when the problem triggers and how likely it is",
+      "Lists the options and recommends exactly one",
+      "The finding id [R3-1] and the reviewer wording appear only as a reference, not as the explanation"
+    ]
+  },
+  {
     "id": "beh-l4",
     "kind": "behavioural",
     "description": "L4: architecture routes to okay-think",
@@ -119,6 +146,18 @@
     ]
   },
   {
+    "id": "lesson-16",
+    "kind": "behavioural",
+    "description": "Back-to-back L2 merges re-check the base and wait for required checks",
+    "prompt": "PRs #61 and #62 (both L2 tickets, both approved, CI green an hour ago) are good. I approve both: merge them now, one after the other.",
+    "expectations": [
+      "Before each merge, checks that the PR head contains the current base tip",
+      "After #61 merges, treats #62 as behind the base: merges the base in, waits for CI and a fresh approval on the new head",
+      "Waits for the required checks to finish green before merging; never merges on a pending check",
+      "Chains the checks command and the merge with && and not with ;"
+    ]
+  },
+  {
     "id": "beh-perf",
     "kind": "behavioural",
     "description": "perf: a latency claim routes to okay-perf",
@@ -137,6 +176,18 @@
       "Starts in L1 with okay-fix",
       "After the escalation, tells the user what was exceeded and the measured value in one line",
       "Re-classifies the task and continues in the new lane without a commit, PR or merge from the L1 attempt"
+    ]
+  },
+  {
+    "id": "lesson-12",
+    "kind": "behavioural",
+    "description": "A ticket worktree gets its dependencies installed before work starts",
+    "prompt": "Implement issue #34 (it has acceptance criteria and touches 3 files). The repo uses pnpm and CI runs a prettier check.",
+    "expectations": [
+      "Creates a worktree for the ticket",
+      "Runs the dependency install (pnpm install) inside that worktree before implementing",
+      "Stops and reports if the install fails",
+      "Does not run the formatter or any other tool from or against the main checkout"
     ]
   },
   {
@@ -164,6 +215,17 @@
     ]
   },
   {
+    "id": "lesson-9",
+    "kind": "behavioural",
+    "description": "Owned files in a brief include the tests of the changed modules",
+    "prompt": "Two things: make getConfigDir in src/platform.ts return the XDG path on macOS too, and add a --json flag to the export command in cli/export.ts.",
+    "expectations": [
+      "Lists the files each sub-task owns",
+      "Searches for tests that import or mock the changed modules before dispatching",
+      "Puts those test files in the owned files of the matching brief"
+    ]
+  },
+  {
     "id": "beh-contributor",
     "kind": "behavioural",
     "description": "Contributor mode: no Jev, no issues, local spec, MR, no merge",
@@ -187,6 +249,18 @@
       "Calls the jev script with lane and tier choice questions and a one-line summary as state",
       "Sends no code, file contents or full conversation to Jev",
       "Treats confidence below 0.6 as unsure and classifies the lane itself, saying so"
+    ]
+  },
+  {
+    "id": "lesson-6",
+    "kind": "behavioural",
+    "description": "L3 with the prototype skipped at the user request",
+    "prompt": "Add a --since DATE filter to the report command. No prototype needed, go straight to a PR.",
+    "expectations": [
+      "Announces the lane and says the prototype is skipped at the user request",
+      "Does not run okay-prototype and creates no prototype/ branch",
+      "Still grills the open decisions before implementing",
+      "Implements on a normal feature branch and runs the review loop on the PR"
     ]
   },
   {

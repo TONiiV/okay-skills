@@ -59,9 +59,13 @@ Create it first. A step you skip stays on it as `skip: <reason>`.
 
 Read before you ask: `CONTEXT.md`, the ADRs in the area, `AGENTS.md`, `CONSTRAINTS.md` when present, and the code the design touches. Dispatch haiku sub-agents for lookups. Write down the constraints the design must honour (callers you cannot break, existing types, invariants, budgets). Naming a file is not grounding: trace the real data flow.
 
+Look at the remote before you tell the user that a PR, a branch or earlier work does not exist: list origin's open PRs (`gh api "repos/$(git remote get-url origin | sed -E 's#\.git$##' | awk -F'[/:]' '{print $(NF-1)"/"$NF}')/pulls?state=open"`, or the code host's MCP `list_pull_requests` with origin's owner and repo; never `{owner}/{repo}`, which `gh` fills from `upstream` when that remote exists) and run `git ls-remote --heads origin`. A fresh clone shows only part of its own remote. Write the result in the grounding notes (lesson: okay-lessons#3).
+
 Input-driven system (a simulation, a game loop, an event log, a message queue): ask whether replaying the same inputs must give the same state. If yes, the design must say where seeds, the clock, floating point, and iteration order come from; write that down as a constraint. Not yet known: it is a decision for step 4.
 
 ## 3. Size gate
+
+First name the destination: one `okay-grilling` round on the goal, the scope, and the end-to-end workflow the user wants (who starts it, what comes out at the end). A tool the user names is a candidate, not a constraint, until they say it is fixed. The size gate and step 4 take the destination as input. Why: decisions grilled on component internals are reversed when the goal turns out to be different (lesson: okay-lessons#4).
 
 Decide now whether one session can hold this. It cannot when either of these holds:
 

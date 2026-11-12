@@ -56,6 +56,17 @@
     "expectations": ["okay-think does not run"]
   },
   {
+    "id": "lesson-3",
+    "kind": "behavioural",
+    "description": "Grounding checks origin PRs and remote branches before asking for a link",
+    "prompt": "/okay-think design how the sync engine should resolve conflicts. There is already a PR somewhere with a first attempt, build on that.",
+    "expectations": [
+      "Lists the open PRs on origin and the remote branches during grounding",
+      "Does not say the PR cannot be found after searching only the local clone",
+      "Does not ask the user for a link it could look up"
+    ]
+  },
+  {
     "id": "beh-0",
     "kind": "behavioural",
     "description": "Full flow on a design with a risky scale assumption",
@@ -86,6 +97,18 @@
     ]
   },
   {
+    "id": "lesson-4",
+    "kind": "behavioural",
+    "description": "Goal, scope and end-to-end workflow are settled before component decisions",
+    "prompt": "/okay-think 我想做一个公司内部用的 agent 平台，可能用 Linear 管任务，我现在思路比较乱，帮我想想架构",
+    "expectations": [
+      "The first grilling round asks about the goal, the scope and the end-to-end workflow",
+      "Does not grill component internals before the destination is settled",
+      "Treats Linear as a candidate and asks whether it is a fixed constraint",
+      "Applies the size gate only after the destination is named"
+    ]
+  },
+  {
     "id": "beh-2",
     "kind": "behavioural",
     "description": "ADR gate: a cheap-to-reverse choice gets no ADR",
@@ -106,6 +129,17 @@
       "Uses a fresh opus sub-agent as the judge and states judge: opus (codex unavailable)",
       "Does not block or ask the user to install Codex",
       "The judge is read-only and gets the candidates without the author lenses or any recommendation"
+    ]
+  },
+  {
+    "id": "lesson-1",
+    "kind": "behavioural",
+    "description": "Tracker preflight before a wayfinder map is created on GitHub issues",
+    "prompt": "/okay-think plan the split of our monolith into services. It is too big for one session, so track the decisions as GitHub issues in this repo.",
+    "expectations": [
+      "Checks that the repo accepts issues (has_issues) before creating a label or an issue",
+      "If issues are disabled, falls back to the next reachable tracker and says so in one line",
+      "Does not leave the map only in untracked local files in a cloud session without pasting its text in the reply"
     ]
   },
   {
@@ -133,6 +167,18 @@
       "Removes one guard and re-runs to show the model can fail before trusting a green result",
       "Keeps the model under docs/models/<system>/ with one re-run command in its header, repeated in the spec and as one AGENTS.md line, and opens the step 12 PR with it",
       "Adds no dependency to the project's manifest and writes no production source file"
+    ]
+  },
+  {
+    "id": "lesson-2",
+    "kind": "behavioural",
+    "description": "A research claim that was not fetched cannot close the ticket",
+    "prompt": "/okay-think work the map \"Billing webhooks\": resolve the research ticket \"Which signature scheme do the provider webhooks use?\". The provider docs return 403 from this machine.",
+    "expectations": [
+      "The research sub-agent brief carries the blocked-source rule and the NOT FETCHED marking",
+      "Retries the blocked source through Monid, or reports the exact URL as blocked",
+      "Does not state the signature scheme from memory as a fetched fact",
+      "Does not close the ticket while a claim is marked NOT FETCHED or from memory"
     ]
   },
   {

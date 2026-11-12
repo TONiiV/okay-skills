@@ -74,11 +74,11 @@ Resolving a ticket clears fog: graduate what is now specifiable into new tickets
 
 ## Chart the map (one session)
 
-1. Name the destination: `okay-grilling` + `okay-domain-modeling`, until the destination and its scope are settled.
+1. Name the destination: start from the one settled in SKILL.md step 3 and refine it with `okay-grilling` + `okay-domain-modeling` until the destination and its scope are settled.
 2. Map the frontier: grill again, breadth-first, to surface the open decisions and the first steps takeable now. If no fog appears (small enough for one session), there is no map: tell the user and continue the normal flow.
 3. Create the map with Destination and Notes filled, Decisions empty, fog sketched.
 4. Create the tickets you can specify now, then wire blocking edges in a second pass (ids first).
-5. Start each `research` ticket as a sub-agent in parallel; capture findings on a throwaway `research/<name>` note linked from the ticket.
+5. Start each `research` ticket as a sub-agent in parallel; capture findings on a throwaway `research/<name>` note linked from the ticket. Each brief carries the rule in [shared/monid.md](shared/monid.md) word for word, plus: a source you cannot fetch is listed by its exact URL and the claim is marked `NOT FETCHED`; never fill the gap from memory (lesson: okay-lessons#2).
 6. Stop. Charting resolves nothing by hand. Deliver the map link per [shared/delivery.md](shared/delivery.md).
 
 ## Work through the map (one ticket per session)
@@ -88,7 +88,7 @@ Resolving a ticket clears fog: graduate what is now specifiable into new tickets
 1. Load the map (the low-resolution view, not every ticket body).
 2. Claim the ticket before any work, so concurrent sessions skip it.
 3. Resolve it with the skill its type names; zoom into related closed tickets only as needed. Never resolve more than one ticket per session, except `research` tickets.
-4. Post the resolution comment, close the ticket, append a one-line pointer to **Decisions so far**.
+4. Post the resolution comment, close the ticket, append a one-line pointer to **Decisions so far**. A resolution that still holds `NOT FETCHED`, `from memory` or `re-verify` (grep it) does not close the ticket: fetch the source through [shared/monid.md](shared/monid.md), or leave the ticket open and tell the user what is missing.
 5. Create newly surfaced tickets (create, then wire), graduate fog, rule out-of-scope items out, and update or delete tickets the answer invalidated. Other sessions may be editing the tracker, so re-read before editing the map body.
 
 When the frontier is empty and **Not yet specified** is clear, the way is visible: continue at SKILL.md step 9, now with every settled decision on the map as input.

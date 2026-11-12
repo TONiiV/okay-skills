@@ -4,7 +4,7 @@ Paste a brief verbatim into the fresh agent's prompt, followed by `ARTIFACT:` (t
 
 ## Proof rule (appended to every brief)
 
-Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run. A finding whose class can recur in another file names the guard that would stop it: a lint rule, a type, or a test, and where it would live.
+Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run. A finding whose class can recur in another file names the guard that would stop it: a lint rule, a type, or a test, and where it would live. A proof run never touches the real host: when the code under review closes processes, installs or removes software, or writes or deletes user data, stub the lookup and the destructive call, check that the resolved target is under a scratch directory, and only then run. You cannot isolate it: do not run it; give the quoted lines and say the run was not safe (lesson: okay-lessons#10).
 
 ## Standards axis
 
@@ -54,7 +54,7 @@ No runnable tests or no executable change (docs, config only): report "skip: <re
 ## Security pass
 
 ```
-Review the ARTIFACT for security: authn/authz bypass, injection, secrets in code or logs, unsafe deserialisation, missing validation at trust boundaries, data deletion without guard, payment amounts trusted from the client. Prove each issue with a failing test, a request, or a script against the real code. Nothing unrun survives.
+Review the ARTIFACT for security: authn/authz bypass, injection, secrets in code or logs, unsafe deserialisation, missing validation at trust boundaries, data deletion without guard, payment amounts trusted from the client. Prove each issue with a failing test, a request, or a script against the real code, isolated as the proof rule says. Nothing unrun survives, except an issue the proof rule says is not safe to run.
 ```
 
 ## Simplification pass
@@ -67,7 +67,7 @@ Review the ARTIFACT for avoidable complexity: code that could be deleted, an exi
 
 ```
 Adversarial review. Find what is wrong with this ARTIFACT given the CONTRACT. Assume the author is overconfident. Look for unstated assumptions, unhandled edge cases, hidden coupling or shared state, ways the contract can be violated, conventions it may break, failure modes under unexpected input.
-Break it: prove each finding with a run against the real code (failing test, repro script, command output). Report the exact command, the output it printed, and the output the contract requires. Do not validate, do not summarise. Find issues, or state that you found none after trying.
+Break it: prove each finding with a run against the real code (failing test, repro script, command output), isolated as the proof rule says. Report the exact command, the output it printed, and the output the contract requires. Do not validate, do not summarise. Find issues, or state that you found none after trying.
 ```
 
 Pass ARTIFACT and CONTRACT only. A pass spawned in the author's session is still a fresh agent with no session context.
