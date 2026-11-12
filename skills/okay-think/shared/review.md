@@ -12,6 +12,7 @@
 - Only proven findings: each one quotes the line, or shows a command that was run and its output, or a reproduction. No speculation.
 - Mutation check: invert one condition the change adds and run the tests. A suite that stays green is a finding.
 - Each finding is tagged `[R<round>-<n>] blocking|non-blocking`, e.g. `[R1-2] blocking: off-by-one in pageCount (quote + failing input)`.
+- A documented repo standard that conflicts with a pack rule (for example the repo asks for a tool credit in the PR body and the pack forbids one): the finding keeps its tag, and the caller asks the user once which rule wins. The answer joins the contract for the next round. Neither the reviewer nor the caller settles it alone (lesson: okay-lessons#8).
 
 ## Approval
 
