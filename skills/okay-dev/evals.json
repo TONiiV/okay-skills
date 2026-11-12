@@ -119,6 +119,18 @@
     ]
   },
   {
+    "id": "lesson-16",
+    "kind": "behavioural",
+    "description": "Back-to-back L2 merges re-check the base and wait for required checks",
+    "prompt": "PRs #61 and #62 (both L2 tickets, both approved, CI green an hour ago) are good. I approve both: merge them now, one after the other.",
+    "expectations": [
+      "Before each merge, checks that the PR head contains the current base tip",
+      "After #61 merges, treats #62 as behind the base: merges the base in, waits for CI and a fresh approval on the new head",
+      "Waits for the required checks to finish green before merging; never merges on a pending check",
+      "Chains the checks command and the merge with && and not with ;"
+    ]
+  },
+  {
     "id": "beh-perf",
     "kind": "behavioural",
     "description": "perf: a latency claim routes to okay-perf",
