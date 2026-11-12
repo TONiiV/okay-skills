@@ -56,6 +56,17 @@
     "expectations": ["okay-think does not run"]
   },
   {
+    "id": "lesson-3",
+    "kind": "behavioural",
+    "description": "Grounding checks origin PRs and remote branches before asking for a link",
+    "prompt": "/okay-think design how the sync engine should resolve conflicts. There is already a PR somewhere with a first attempt, build on that.",
+    "expectations": [
+      "Lists the open PRs on origin and the remote branches during grounding",
+      "Does not say the PR cannot be found after searching only the local clone",
+      "Does not ask the user for a link it could look up"
+    ]
+  },
+  {
     "id": "beh-0",
     "kind": "behavioural",
     "description": "Full flow on a design with a risky scale assumption",
