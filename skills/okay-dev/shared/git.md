@@ -8,6 +8,8 @@ Base ref: `$(git symbolic-ref --short -q refs/remotes/origin/HEAD || echo origin
 
 Look in the project root for an existing worktree folder (`.worktrees/`, `worktrees/`, or `.claude/worktrees/`) and use it. None: create `.worktrees/`. Put every worktree at `<folder>/<branch>`. Before adding one, make sure the folder is git-ignored: `git check-ignore -q <folder>/` (keep the trailing slash; without it a folder that does not exist yet reads as not ignored). If not, add `<folder>/` to `.gitignore` and commit that line on its own. Work only inside your own worktree.
 
+Right after adding a worktree, run the repo's dependency install inside it (the package manager its lockfile names, or the setup command the repo documents) and stop if that fails. Never run a tool from, or against, the user's main checkout to get around a missing install. Why: a fresh worktree has no installed dependencies, so formatters, linters and type checkers fail or get skipped (lesson: okay-lessons#12).
+
 ## Commits
 
 - One line. No body. No trailers (no Co-Authored-By).
