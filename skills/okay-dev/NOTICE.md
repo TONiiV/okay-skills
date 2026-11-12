@@ -5,6 +5,7 @@ okay-dev adapts ideas from the following MIT-licensed works. The text here is co
 | Source | Used for |
 |---|---|
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) feature playbook (`skills/poteto-mode/playbooks/feature.md`), Copyright (c) 2026 Lauren Tan | Throughput checkpoint (blocking first steps, independent workstreams, shared mutable state; inapplicable items kept as `n/a`) |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) playbooks `investigation.md`, `refactoring.md`, `session-pickup.md`, `pause-safely.md`, `multi-phase-plan.md` (under `skills/poteto-mode/playbooks/`) and the `how` and `why` skills, Copyright (c) 2026 Lauren Tan | The five files under `playbooks/`: read-only cited answers and history as the source for why; pin the behaviour, subtract first, migrate callers then delete; resume from the trail without redoing it; stop at a safe boundary with a resume note; one PR per verifiable phase |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) `planning-and-task-breakdown`, Copyright (c) 2025 Addy Osmani | Task size table (XS to XL, split L and larger) in `shared/lanes.md` |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
 

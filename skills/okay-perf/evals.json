@@ -88,5 +88,19 @@
       "The report names the guard and lists both budgets with their CI check; the 300 ms latency budget with no check is marked as a gap, not silently left out",
       "Does not add a guard or a check for the latency budget the claim does not touch"
     ]
+  },
+  {
+    "id": "beh-trace-forensics",
+    "kind": "behavioural",
+    "description": "A captured profile is read as data and yields a candidate, not a verdict",
+    "prompt": "/okay-perf here is a 40 MB .cpuprofile from a slow report export (export.cpuprofile). Tell me what it shows. I have no before capture.",
+    "expectations": [
+      "Follows the trace-forensics playbook: reads the capture as a fixed dataset and does not commit it or paste raw content from it",
+      "States what the capture measures (sampling, CPU or wall time, duration, build, symbols) and what is missing",
+      "Parses the file into a queryable form, in a subagent or script, instead of reading it whole",
+      "Names the hot path with numbers (share of samples) and maps it to a file, symbol and line, or says the symbols are missing",
+      "Marks the finding as the strongest hypothesis the artifact supports because there is no paired capture",
+      "Makes no speed-up or regression claim from the capture alone, and offers the measured okay-perf flow as the next step"
+    ]
   }
 ]

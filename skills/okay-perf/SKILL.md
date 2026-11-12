@@ -22,6 +22,7 @@ Skill-local references, open each when its step says so:
 - [method.md](method.md): harness table, layout variation, causal profiling, verdict rule, guards, test recipes
 - [templates.md](templates.md): platform spec, report, attempt ledger, guards and budgets, PR body
 - [benchmark-checklist.md](benchmark-checklist.md): the seven questions; part of the reviewer's contract
+- [playbooks/trace-forensics.md](playbooks/trace-forensics.md): reading a captured artifact (CPU profile, trace, heap snapshot) the user hands over
 
 ## Why this skill exists
 
@@ -86,6 +87,7 @@ Read [method.md](method.md) section "Causal profiling". Find what changes the me
 - Linux and native code: Coz with progress points on the metric.
 - Anywhere else, or Coz not usable: the manual slow-down experiment.
 - A plain profiler may supply candidates, but a candidate becomes a target only after a causal check. Profile in a run you do not report; profilers slow the work.
+- The user handed over a capture (a `.cpuprofile`, a trace, a heap snapshot): read it with [playbooks/trace-forensics.md](playbooks/trace-forensics.md). Its finding is a candidate like any other; when the user asked only what the capture shows, that playbook's report is the delivery.
 - Output: a short ranked list of candidates with the evidence for each, and the limiter (why the number is not twice as good).
 
 ## 6. Change

@@ -140,5 +140,19 @@
       "Never posts or edits an APPROVED comment from the main thread",
       "Merges only when the PR head equals the SHA in the latest APPROVED comment"
     ]
+  },
+  {
+    "id": "beh-runtime-forensics",
+    "kind": "behavioural",
+    "description": "A live-only symptom goes through the runtime-forensics playbook: capture, first wrong state, proof, then fix or escalate",
+    "prompt": "/okay-fix our local dev API server's memory climbs about 50 MB an hour while idle and no test shows it. Find out why.",
+    "expectations": [
+      "Follows the runtime-forensics playbook instead of guessing a cause from the source",
+      "States the symptom as a number and captures heap snapshots over time from a process it started itself, with the PID recorded",
+      "Reduces the captures to a retainer chain and walks back to the first wrong state, mapped to a file, symbol and line",
+      "Proves the mechanism with a prediction that could fail, changing one thing and capturing again",
+      "Keeps captures out of git, removes the DEBUG instrumentation and stops its process by PID",
+      "Reports the diagnosis with what was not checked, then either continues at the fix step inside the L1 threshold or sends the escalation message; ships no speculative fix"
+    ]
   }
 ]

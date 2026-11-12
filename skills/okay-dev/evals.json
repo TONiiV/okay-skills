@@ -35,6 +35,24 @@
     "expectations": ["okay-dev runs"]
   },
   {
+    "id": "pos-5",
+    "kind": "positive",
+    "description": "Read-only question about this codebase",
+    "prompt": "How does the session refresh flow work in this repo? Walk me through it, no changes.",
+    "expectations": [
+      "okay-dev runs"
+    ]
+  },
+  {
+    "id": "pos-6",
+    "kind": "positive",
+    "description": "Resume in-flight work",
+    "prompt": "Pick up where we left off on the import ticket",
+    "expectations": [
+      "okay-dev runs"
+    ]
+  },
+  {
     "id": "neg-0",
     "kind": "negative",
     "description": "Explicit call to another okay-* skill skips routing",
@@ -44,7 +62,7 @@
   {
     "id": "neg-1",
     "kind": "negative",
-    "description": "A question that changes no code",
+    "description": "A general question that needs no repository",
     "prompt": "What does this regex match: ^\\d{3}-\\d{4}$ ?",
     "expectations": ["okay-dev does not run"]
   },
@@ -238,6 +256,71 @@
       "Ends in an MR whose description has Problem / Cause / Fix / Evidence",
       "Does not merge",
       "Keeps any lesson in local memory only"
+    ]
+  },
+  {
+    "id": "beh-investigation",
+    "kind": "behavioural",
+    "description": "Read-only question runs the investigation playbook: cited claims, run what can be run, no branch or PR",
+    "prompt": "Are we sure the upload retry backs off exponentially? And why was the cap set to 5 attempts? Don't change anything.",
+    "expectations": [
+      "Routes the request to the investigation playbook and says so in the routing line, with no lane flow, no worktree, no branch, no commit and no PR",
+      "Answers on the first line, and every claim cites a file and line, a command with its output, or a commit, issue or PR",
+      "Tests the backoff claim by running something (a test or a call with a fixture) and shows the command and output, instead of arguing from the source alone",
+      "Takes the reason for the cap from git history, the PR or issue, or a decision record, and marks a reason no source states as inferred",
+      "Ends with a section on what was not checked and with next steps; offers a change as a next step without starting it"
+    ]
+  },
+  {
+    "id": "beh-refactoring",
+    "kind": "behavioural",
+    "description": "Refactoring pins behaviour first and keeps a bug found on the way out of the change",
+    "prompt": "Refactor the invoice module: totals are computed in three places, pull them into one function. No behaviour change. (While reading, the agent notices that one of the three copies rounds half-cents down while the other two round up.)",
+    "expectations": [
+      "Routes to the refactoring playbook on the L2 flow and sizes the change with the task-size table",
+      "Runs the existing tests green and adds characterisation tests for the uncovered seams before moving code, committed first on their own",
+      "Keeps the rounding difference as it is, pinned by a test, and records it as a separate task instead of fixing it in this change",
+      "Moves every caller to the new function and deletes the old copies in the same change, with no shim and no old and new path side by side",
+      "Hands okay-review a contract that says the change is behaviour-preserving, and runs the normal review loop"
+    ]
+  },
+  {
+    "id": "beh-pickup",
+    "kind": "behavioural",
+    "description": "Session pickup reads durable state and separates verified from claimed",
+    "prompt": "Pick up where the last session left off on the CSV import ticket. Its summary said: all tests pass and the PR is approved. (PR #41 exists; its latest review comment starts with CHANGES REQUESTED (round 2) at 9f3c2aa, and the branch has one commit after that SHA.)",
+    "expectations": [
+      "Reads git state, worktrees, the PR comments and review lines, the tracker ticket and any .scratch handoff note before acting",
+      "Does not accept the summary's approval claim: reports that the latest review line is CHANGES REQUESTED (round 2) and that the head moved past the reviewed SHA",
+      "Restates the goal and the plan, and lists what is verified and what is only claimed",
+      "Names the resume point in the ticket loop and continues there in the existing worktree and branch, without opening a second branch or PR",
+      "Does not merge, and asks again before pushing rather than relying on an OK from the earlier session"
+    ]
+  },
+  {
+    "id": "beh-pause",
+    "kind": "behavioural",
+    "description": "Pause leaves no half-applied state, hides nothing, and writes a handoff note",
+    "prompt": "I have to stop for today, pause here and I will pick it up tomorrow. (Mid ticket loop: an implementer agent is running, a dev server you started is up, the worktree has uncommitted edits, and the branch has not been pushed and no push was approved.)",
+    "expectations": [
+      "Stops the implementer agent and the dev server it started, the server by its recorded PID and not by a name pattern",
+      "Does not stash; commits the uncommitted edits as one wip commit on the task branch and names its SHA in the reply, or leaves them and lists them, never silently",
+      "Does not push, open a PR or merge, and says the branch is local only",
+      "Writes .scratch/<feature>/handoff.md, untracked, with the goal, what is done and verified, what is in flight, the next step, open questions and the exact resume commands",
+      "Replies with where the work stopped and the first resume command as the next step, and does not write the reflection marker"
+    ]
+  },
+  {
+    "id": "beh-multi-phase",
+    "kind": "behavioural",
+    "description": "Multi-phase plan: phases that each end in a check, one PR per phase, plan before code",
+    "prompt": "We need to move every caller from the old SettingsStore to the new one and then delete the old class. About 30 files across 4 packages. Plan it as a series of PRs.",
+    "expectations": [
+      "Routes to the multi-phase plan playbook and writes no production code before the user's go",
+      "Names the end state and cuts phases that each end in a runnable check and leave the base branch working when merged alone, with the deletion as the last phase",
+      "Orders phases by real blocking edges and lets phases with no edge run in parallel",
+      "Plans one PR per phase or ticket, each S or M, and stacks a PR only on the PR it builds on",
+      "Publishes the plan through okay-to-spec and okay-to-tickets with the edges as blocking edges, shows the phase table, and stops to ask for the go"
     ]
   },
   {

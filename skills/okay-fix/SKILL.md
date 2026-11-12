@@ -52,6 +52,8 @@ Input-driven system (a simulation, a game loop, an event log, a message queue): 
 
 Otherwise, try in order: a failing test at the nearest seam, a CLI call with a fixture, a curl against a dev server, a headless browser script, a throwaway harness, a bisect script. Run it, show the command and its red output with secrets replaced by `<REDACTED>`. Shrink the repro until every remaining part is load-bearing.
 
+The symptom shows only in a running process (a leak, CPU that spins while idle, a glitch, a hang) and nothing above reproduces it: follow [playbooks/runtime-forensics.md](playbooks/runtime-forensics.md). It captures the live process, finds the first wrong state, and hands back a proof run that serves as the loop.
+
 Cannot build a loop: stop, list what you tried, and ask the user for access, a redacted artifact, or permission to instrument. Do not guess a fix.
 
 ## 3. Root cause

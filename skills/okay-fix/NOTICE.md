@@ -5,6 +5,7 @@ okay-fix adapts ideas from the following MIT-licensed works. The text here is co
 | Source | Used for |
 |---|---|
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) bug-fix playbook (`skills/poteto-mode/playbooks/bug-fix.md`), Copyright (c) 2026 Lauren Tan | Evidence-only fixes, reproduce on the real surface, failing repro before the fix |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) runtime-forensics playbook (`skills/poteto-mode/playbooks/runtime-forensics.md`), Copyright (c) 2026 Lauren Tan | `playbooks/runtime-forensics.md`: capture the live signal, reduce it to the smoking gun, prove the mechanism, map it to source, diagnosis before fix |
 | [mattpocock/skills](https://github.com/mattpocock/skills) `diagnosing-bugs`, Copyright (c) Matt Pocock | Feedback-loop first, ranked falsifiable hypotheses, tagged debug logs, correct-seam regression tests |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
 

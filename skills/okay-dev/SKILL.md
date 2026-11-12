@@ -1,6 +1,6 @@
 ---
 name: okay-dev
-description: "Default entry point for any software development request without a slash command: build, add, implement, change, refactor or ship code, a feature, a ticket, or a new product. Router and PM of the okay-* pack: classifies each request into a lane, splits a compound prompt into parallel sub-tasks by file ownership, dispatches each to the right skill and model, and drives it to a PR/MR, an issue, or explicit next steps. Branches: a small bug goes to okay-fix; an existing issue, spec or ticket link runs the L2 implement/review loop; a new feature or a new product runs prototype-first (grill, samples, trial feedback, spec, tickets, TDD, review loop); architecture goes to okay-think; UI/UX goes to okay-design; speed or latency goes to okay-perf. Honors contributor mode. Not for questions that change no code, and not when the user already named another okay-* skill."
+description: "Default entry point for any software development request without a slash command: build, add, implement, change, refactor or ship code, a feature, a ticket, or a new product. Also takes a read-only question about this codebase (how it works, why it was built this way, are we sure), resuming or pausing in-flight work, and a plan across phases or stacked PRs. Router and PM of the okay-* pack: classifies each request into a lane or playbook, splits a compound prompt into parallel sub-tasks by file ownership, dispatches each to the right skill and model, and drives it to a PR/MR, an issue, a cited answer, or explicit next steps. Branches: a small bug goes to okay-fix; an existing issue, spec or ticket link runs the L2 implement/review loop; a new feature or new product runs prototype-first; architecture goes to okay-think; UI/UX to okay-design; speed or latency to okay-perf. Honors contributor mode. Not for general questions that need no repository, and not when the user already named another okay-* skill."
 license: MIT
 ---
 
@@ -49,9 +49,15 @@ A single-outcome prompt is one sub-task: `skip: single task`.
 
 ## 3. Classify
 
-Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), plus one extra route:
+Give each sub-task exactly one lane from [shared/lanes.md](shared/lanes.md), or one of the extra routes below. Check the playbook routes first: each has its own file, the routing line names the playbook instead of a lane, and Jev is not asked.
 
 - **New product** has its own row in [shared/lanes.md](shared/lanes.md): run it through the L3 flow below, which is prototype-first.
+- **Investigation**: a question about this codebase that asks for no change (how does it work, why was it built this way, are we sure). Follow [playbooks/investigation.md](playbooks/investigation.md): read-only, no branch, no PR; the delivery is a cited answer. A general question that needs no repository is not a dev request: answer it directly.
+- **Refactoring**: the structure changes and the behaviour must not. Follow [playbooks/refactoring.md](playbooks/refactoring.md); it runs on the L2 flow.
+- **Session pickup**: continue, resume or take over work that is already in flight. Follow [playbooks/session-pickup.md](playbooks/session-pickup.md), then go on in the lane it names.
+- **Pause**: the user asks to stop for now, or the session is about to end. Follow [playbooks/pause-safely.md](playbooks/pause-safely.md).
+- **Multi-phase plan**: one outcome that needs several PRs landing in order (a migration, a rollout). Follow [playbooks/multi-phase-plan.md](playbooks/multi-phase-plan.md); the plan is the delivery, and its phases then run as L2 batches.
+- **Forensics**: the cause is unknown and has to be read from a process or a capture. A live symptom (leak, idle CPU spin, glitch, hang) goes to okay-fix and its runtime-forensics playbook. A captured artifact (CPU profile, trace, heap snapshot) goes to okay-perf and its trace-forensics playbook. Both end in a diagnosis; classify again once the cause is known.
 - An issue, spec or ticket link (or an identifier such as `#12`, `TON-12`) is L2, unless the ticket itself is unplanned (no acceptance criteria): then L3.
 - A bug or small change with an estimate inside the L1 threshold is L1. Unsure whether it fits: L1, and let the escalation catch it.
 
@@ -95,6 +101,7 @@ Owned files include every test that imports or mocks a module the sub-task chang
 | L4 | okay-think, opus high |
 | L5 | okay-design |
 | perf | okay-perf |
+| Playbook route | The playbook named in Classify. Forensics: okay-fix or okay-perf. |
 
 ### L1 escalation
 
