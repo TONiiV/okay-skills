@@ -136,6 +136,18 @@
     ]
   },
   {
+    "id": "lesson-2",
+    "kind": "behavioural",
+    "description": "A research claim that was not fetched cannot close the ticket",
+    "prompt": "/okay-think work the map \"Billing webhooks\": resolve the research ticket \"Which signature scheme do the provider webhooks use?\". The provider docs return 403 from this machine.",
+    "expectations": [
+      "The research sub-agent brief carries the blocked-source rule and the NOT FETCHED marking",
+      "Retries the blocked source through Monid, or reports the exact URL as blocked",
+      "Does not state the signature scheme from memory as a fetched fact",
+      "Does not close the ticket while a claim is marked NOT FETCHED or from memory"
+    ]
+  },
+  {
     "id": "beh-6",
     "kind": "behavioural",
     "description": "Model-check fallback when the project refuses a new tool",
