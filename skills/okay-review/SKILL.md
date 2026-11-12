@@ -93,4 +93,4 @@ Lane <lane>. Depth: <passes run>; skip: <passes not run and why>
 
 ## Return to the caller
 
-Reply with: the verdict word, the reviewed head SHA, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), and the count of non-blocking findings. Nothing else; the caller decides on the fixer, the merge and the escalation.
+Reply with: the verdict word, the reviewed head SHA, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), the count of non-blocking findings, and one line for each severity doubt or rule conflict from step 5. Nothing else; the caller decides on the fixer, the merge and the escalation.
