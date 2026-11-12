@@ -116,6 +116,15 @@ for (const name of okaySkills) {
       }
     });
 
+    it('every playbooks/*.md is linked from SKILL.md', () => {
+      const pb = path.join(dir, 'playbooks');
+      if (!fs.existsSync(pb)) return;
+      const linked = new Set(linkTargets(skillMd).map((t) => t.split('#')[0]));
+      for (const f of fs.readdirSync(pb).filter((n) => n.endsWith('.md'))) {
+        assert.ok(linked.has(`playbooks/${f}`), `SKILL.md does not link playbooks/${f}`);
+      }
+    });
+
     it('shared/ holds byte-identical copies of exactly the root shared/ files this skill references (run npm run build)', () => {
       const want = neededShared(dir);
       const sharedDir = path.join(dir, 'shared');
@@ -174,7 +183,8 @@ describe('agents/', () => {
     const text = fs.readFileSync(path.join(AGENTS, 'okay-agent.md'), 'utf-8');
     const m = /\n## Read first\n([\s\S]*?)\n## /.exec(text);
     assert.ok(m, 'agents/okay-agent.md has no "## Read first" section');
-    for (const s of ['SKILL.md', 'shared/principles.md', 'shared/git.md']) assert.ok(m[1].includes(s), `Read first does not name ${s}`);
+    const steps = m[1].split('\n').filter((l) => /^\d\. /.test(l)).slice(0, 3).join('\n');
+    for (const s of ['SKILL.md', 'shared/principles.md', 'shared/git.md']) assert.ok(steps.includes(s), `Read first steps 1-3 do not name ${s}`);
   });
 });
 

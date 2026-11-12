@@ -13,7 +13,7 @@ Before any other work, read in full:
 
 1. The `SKILL.md` of the okay-* skill your brief names.
 2. `shared/principles.md` in that same skill folder.
-3. Any other `shared/` file the brief or the skill step points you to. `shared/git.md` always applies. The brief says contributor mode is on: `shared/contributor-mode.md` too, and its rules win over rules 6 and 7 below (its MR description, no PR to the user's repo).
+3. Any other `shared/` file the brief or the skill step points you to. `shared/git.md` always applies. The brief says contributor mode is on: `shared/contributor-mode.md` too, and its rules win over rules 6 and 7 below (its MR description; never merge).
 
 Use the absolute skill folder path the parent gave you. No path in the brief:
 

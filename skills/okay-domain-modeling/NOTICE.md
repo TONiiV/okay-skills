@@ -5,6 +5,7 @@ okay-domain-modeling is a fork of the `domain-modeling` skill from [mattpocock/s
 | Source | Used for |
 |---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) `domain-modeling`, Copyright (c) Matt Pocock | Glossary and ADR discipline, `CONTEXT-FORMAT.md` and `ADR-FORMAT.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 

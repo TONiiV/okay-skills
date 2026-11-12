@@ -17,6 +17,7 @@ Fix one small bug end to end. Rules shared with the rest of the pack live in `sh
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
 - Delivery and reflection: [shared/delivery.md](shared/delivery.md)
+- Autonomy grant: [shared/autonomy.md](shared/autonomy.md)
 
 Be scientific: every shipped line traces to runtime evidence. A change that "might help" is a hypothesis, not a fix, and does not ship.
 
@@ -116,7 +117,9 @@ Then:
 
 ## 8. Merge
 
-Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Never merge without the reviewer's approval at the PR head.
+Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Where the CLI cannot run at all, the fallback rule in [shared/git.md](shared/git.md) decides. Never merge without the reviewer's approval at the PR head.
+
+An autonomy grant ([shared/autonomy.md](shared/autonomy.md)) changes two things here: the push in step 6 needs no question, and an escalation in step 5 is reported and parked instead of waiting for an answer. The review, the threshold and the merge conditions stay the same.
 
 ## 9. Deliver
 
