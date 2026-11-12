@@ -62,6 +62,8 @@ Input-driven system (a simulation, a game loop, an event log, a message queue): 
 
 ## 3. Size gate
 
+First name the destination: one `okay-grilling` round on the goal, the scope, and the end-to-end workflow the user wants (who starts it, what comes out at the end). A tool the user names is a candidate, not a constraint, until they say it is fixed. The size gate and step 4 take the destination as input. Why: decisions grilled on component internals are reversed when the goal turns out to be different (lesson: okay-lessons#4).
+
 Decide now whether one session can hold this. It cannot when either of these holds:
 
 - more than 3 spikes would be needed to answer the open questions;

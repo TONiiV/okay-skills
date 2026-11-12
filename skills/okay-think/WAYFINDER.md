@@ -74,7 +74,7 @@ Resolving a ticket clears fog: graduate what is now specifiable into new tickets
 
 ## Chart the map (one session)
 
-1. Name the destination: `okay-grilling` + `okay-domain-modeling`, until the destination and its scope are settled.
+1. Name the destination: start from the one settled in SKILL.md step 3 and refine it with `okay-grilling` + `okay-domain-modeling` until the destination and its scope are settled.
 2. Map the frontier: grill again, breadth-first, to surface the open decisions and the first steps takeable now. If no fog appears (small enough for one session), there is no map: tell the user and continue the normal flow.
 3. Create the map with Destination and Notes filled, Decisions empty, fog sketched.
 4. Create the tickets you can specify now, then wire blocking edges in a second pass (ids first).
