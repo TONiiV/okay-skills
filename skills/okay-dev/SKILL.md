@@ -139,7 +139,11 @@ Per ticket, in its own worktree (folder per [shared/git.md](shared/git.md); `git
 2. **Review round.** Call okay-review with the PR, the contract links (request, spec, ticket), the lane and the round number. It does one round and returns the verdict. Never pass it the implementer's summary.
 3. **Verdict.**
    - `APPROVED`: go to Merge.
-   - `CHANGES REQUESTED`: dispatch a separate fresh fixer agent (sonnet high; never the implementer, never the reviewer) with the PR, the open `[R<n>-<k>]` findings and the contract. It pushes fixes and answers each finding in one PR comment. Then call okay-review again with round + 1.
+   - `CHANGES REQUESTED`: dispatch a separate fresh fixer agent (sonnet high; never the implementer, never the reviewer) with the PR, the open blocking `[R<n>-<k>]` findings, the contract and the rules below. It pushes fixes and answers each finding in one PR comment. Then call okay-review again with round + 1.
+     - Only blocking findings go to the fixer; non-blocking ones go into the delivery as follow-ups. Why: every extra fix can add a new blocker, and the loop has 3 rounds (lesson: okay-lessons#13).
+     - Before it pushes, the fixer runs the type checker or build for the packages it touched and the affected tests, and pastes the output in its reply. Base already red: it compares its error set with the base and reports the difference; a red base is never a reason to skip. Why: a test runner that strips types passes on code that does not compile (lesson: okay-lessons#18).
+     - A proof run never touches the real host. When the code closes processes, installs software, or writes user data, the fixer stubs the lookup and the destructive call and checks that the target is under a scratch directory before it runs (lesson: okay-lessons#10).
+     - After it pushes, the fixer makes the PR body match the new head: it updates Change, and re-runs or removes each Evidence line (lesson: okay-lessons#15).
    - `ESCALATE`, or still not approved after round 3: stop this ticket. Tell the user the open findings and the PR link; the loop does not continue without them.
 4. After each wave of merged tickets on Linear, post the project status update ([shared/tracker.md](shared/tracker.md)).
 
@@ -163,7 +167,7 @@ Follow the merge policy in [shared/git.md](shared/git.md). L1 merges happen insi
 
 ## 6. Deliver
 
-Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state. Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
+Reply in Chinese per [shared/output-style.md](shared/output-style.md): the PR/MR links (or issue link, or numbered next steps) first, one line per sub-task with its lane and state, then the non-blocking review findings left open as follow-ups (read them from the review comments). Then follow [shared/delivery.md](shared/delivery.md): write the marker and run okay-reflect.
 
 ## Contributor mode
 

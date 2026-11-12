@@ -67,6 +67,20 @@
     ]
   },
   {
+    "id": "lesson-18",
+    "kind": "behavioural",
+    "description": "Fix round: the fixer gets blocking findings only and must check its change compiles",
+    "prompt": "PR #41 for issue #34 came back from okay-review round 1 with CHANGES REQUESTED: [R1-1] blocking: parseRange throws on an empty string; [R1-2] non-blocking: rename the variable tmp. The typecheck on main is already red. Continue the loop.",
+    "expectations": [
+      "Dispatches a separate fresh fixer agent, not the implementer and not the reviewer",
+      "The fixer brief holds only the blocking finding [R1-1]; [R1-2] is kept as a follow-up for the delivery",
+      "The fixer brief requires the type checker or build for the touched packages and the affected tests before pushing, with the output in its reply",
+      "The red base is compared against (error-set difference), not used as a reason to skip the check",
+      "The fixer is told to update the PR body Change and Evidence to match the pushed head",
+      "Calls okay-review again with round 2"
+    ]
+  },
+  {
     "id": "beh-l2",
     "kind": "behavioural",
     "description": "L2: planned ticket skips grill and spec and stops at approval",
