@@ -164,6 +164,17 @@
     ]
   },
   {
+    "id": "lesson-9",
+    "kind": "behavioural",
+    "description": "Owned files in a brief include the tests of the changed modules",
+    "prompt": "Two things: make getConfigDir in src/platform.ts return the XDG path on macOS too, and add a --json flag to the export command in cli/export.ts.",
+    "expectations": [
+      "Lists the files each sub-task owns",
+      "Searches for tests that import or mock the changed modules before dispatching",
+      "Puts those test files in the owned files of the matching brief"
+    ]
+  },
+  {
     "id": "beh-contributor",
     "kind": "behavioural",
     "description": "Contributor mode: no Jev, no issues, local spec, MR, no merge",
