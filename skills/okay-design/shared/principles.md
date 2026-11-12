@@ -5,9 +5,9 @@ Adapted from the pstack principle skills (MIT, Lauren Tan). Rewritten in this pa
 Read this file in full before you write, design or review code.
 
 - Each entry has a trigger. Apply an entry only when its trigger fits the work in front of you.
-- In your final report, name each principle that changed a decision and the choice it changed: `Smallest change: reused the existing parser, wrote no new one`.
+- In your final report, name each principle that changed a decision and the choice it changed: `Smallest change: reused the existing parser, wrote no new one`. A report with a fixed shape (a review verdict, an escalation) takes no such list.
 - Name none you did not apply. A name with no decision behind it is noise.
-- Lane rules, the review contract and the merge policy win over any entry here.
+- Lane rules, the review contract, the merge policy, contributor mode, and the rules of the skill or agent you run under win over anything in this file.
 
 ## Core
 
@@ -39,7 +39,7 @@ Read this file in full before you write, design or review code.
 
 ## Verification
 
-**Prove it on the real thing.** When: before you call a task done. Rule: check the real artifact directly: run the flow, read the written record, open the page. "It compiles", a file timestamp or an agent's own report is not proof. Prefer a check a reviewer can rerun, and paste its output. When a check fails, suspect the way you observed before you suspect the system.
+**Prove it on the real thing.** When: before you call a task done. Rule: check the real artifact directly: run the flow, read the written record, open the page. "It compiles", a file timestamp or an agent's own report is not proof. Prefer a check a reviewer can rerun, and paste its output. When a check fails, suspect the way you observed before you suspect the system. A run that closes processes, installs or removes software, or writes or deletes user data never goes against the real host: stub the destructive call and point it at a scratch directory.
 
 **Fix the root cause.** When: debugging. Rule: reproduce first. Ask why at each step until the answer is a wrong decision in the code. Fix it there, and fix every other place with the same fault. A guard is a fix only when the state it handles is legitimate. This: the importer writes a null it should not, so fix the importer. Not that: a null check where the page crashed.
 
@@ -51,7 +51,7 @@ Read this file in full before you write, design or review code.
 
 ## Delegation
 
-**Guard the context.** When: large outputs, long files, repeated reads, or planning a fan-out. Rule: send bulk reading and searching to subagents and keep only their findings in the main thread. Hand a delegate file paths, not pasted contents. Size each piece of work so it fits one agent.
+**Guard the context.** When: large outputs, long files, repeated reads, or planning a fan-out. Rule: send bulk reading and searching to subagents and keep only their findings in the main thread. Hand a delegate file paths, not pasted contents. Size each piece of work so it fits one agent. A delegate does not dispatch agents itself: it asks its parent.
 
 **Do not ask what you can find out.** When: about to ask the user "which approach" or "should I do X". Rule: if a run, a read or a quick sample can answer it, get the answer yourself and show the result. Decisions that are the user's stay the user's: product direction, pushes and merges the merge policy reserves, anything that cannot be undone. This: try both layouts and show two screenshots. Not that: "which layout is faster to render?"
 

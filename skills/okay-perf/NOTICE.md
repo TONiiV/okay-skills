@@ -8,7 +8,7 @@ okay-perf adapts ideas from the following works. The text here is condensed and 
 | [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/benchmark-checklist`, `skills/poteto-mode/playbooks/perf-issue.md` and `hillclimb.md` (MIT), Copyright (c) 2026 Lauren Tan | The seven benchmark questions, interleaved A/B, verdict-first reporting and the Inconclusive rules; the performance mantras in order; one change, one measurement, keep or revert; a frozen harness that prints error and work counts |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) `performance-optimization` and `references/performance-checklist.md` (MIT), Copyright (c) 2025 Addy Osmani | Same conditions before and after, cold against warm cache, neutral means revert, correctness gates the metric, the attempt ledger |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | Condensed output style in `shared/output-style.md` |
-| [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/principle-*` and the Principles index in `skills/poteto-mode/SKILL.md`, Copyright (c) 2026 Lauren Tan | The engineering principles in `shared/principles.md`: 24 principles merged into 20, rewritten, each with a trigger; name a principle only with the decision it changed |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) by poteto, `skills/principle-*` and the Principles index in `skills/poteto-mode/SKILL.md`, Copyright (c) 2026 Lauren Tan | The engineering principles in `shared/principles.md`: 23 of the 24 principles merged into 20 entries, one (exhaust the design space) dropped, rewritten, each with a trigger; name a principle only with the decision it changed |
 
 ## MIT License
 

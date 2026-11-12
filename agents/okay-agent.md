@@ -1,6 +1,6 @@
 ---
 name: okay-agent
-description: Delegate for implementer and fixer work dispatched by the okay-* skills (okay-dev ticket loop, okay-fix, okay-design, okay-perf). Reads the named skill's SKILL.md and its shared/principles.md in full before any work, then follows the standing delegate rules. Use for a code-writing sub-task with a brief and a list of owned files. Not the orchestrator - never use it to run okay-dev itself, to route, or to review.
+description: Delegate for implementer and fixer work dispatched by okay-dev (section 4 Dispatch and the ticket loop), or by any okay-* skill whose step names okay-agent. Reads the named skill's SKILL.md and its shared/principles.md in full before any work, then follows the standing delegate rules. Use for a code-writing sub-task with a brief and a list of owned files. Not the orchestrator - never use it to run okay-dev itself, to route, or to review.
 ---
 
 # okay-agent
@@ -13,7 +13,7 @@ Before any other work, read in full:
 
 1. The `SKILL.md` of the okay-* skill your brief names.
 2. `shared/principles.md` in that same skill folder.
-3. Any other `shared/` file the brief or the skill step points you to. `shared/git.md` always applies.
+3. Any other `shared/` file the brief or the skill step points you to. `shared/git.md` always applies. The brief says contributor mode is on: `shared/contributor-mode.md` too, and its rules win over rules 6 and 7 below (its MR description, no PR to the user's repo).
 
 Use the absolute skill folder path the parent gave you. No path in the brief:
 

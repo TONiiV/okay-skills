@@ -172,7 +172,9 @@ describe('agents/', () => {
 
   it('okay-agent reads the skill and the principles before any work', () => {
     const text = fs.readFileSync(path.join(AGENTS, 'okay-agent.md'), 'utf-8');
-    assert.ok(text.includes('SKILL.md') && text.includes('shared/principles.md') && text.includes('shared/git.md'));
+    const m = /\n## Read first\n([\s\S]*?)\n## /.exec(text);
+    assert.ok(m, 'agents/okay-agent.md has no "## Read first" section');
+    for (const s of ['SKILL.md', 'shared/principles.md', 'shared/git.md']) assert.ok(m[1].includes(s), `Read first does not name ${s}`);
   });
 });
 
