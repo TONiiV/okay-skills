@@ -5,6 +5,7 @@ okay-to-tickets is a fork of the `to-tickets` skill from [mattpocock/skills](htt
 | Source | Used for |
 |---|---|
 | [mattpocock/skills](https://github.com/mattpocock/skills) `to-tickets`, Copyright (c) Matt Pocock | Tracer-bullet slicing, blocking edges, expand-contract for wide refactors, ticket templates |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 ## MIT License
 

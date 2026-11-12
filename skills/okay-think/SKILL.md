@@ -11,12 +11,14 @@ Turn an architecture question into a decision the user has tried, an ADR where o
 - Output and language: [shared/output-style.md](shared/output-style.md)
 - Lanes and prototype-first flow: [shared/lanes.md](shared/lanes.md)
 - Models: [shared/models.md](shared/models.md)
+- Engineering principles (read before designing): [shared/principles.md](shared/principles.md)
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Repo doc layout: [shared/docs-layout.md](shared/docs-layout.md)
 - Commit, PR, merge: [shared/git.md](shared/git.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
 - Research that hits 429/403/paywall: [shared/monid.md](shared/monid.md)
 - Delivery and reflection: [shared/delivery.md](shared/delivery.md)
+- Autonomy grant: [shared/autonomy.md](shared/autonomy.md). Under a grant, decide the reversible questions and record them, but the trial and the merge still need the user: build the spikes, park at the trial, and never merge an L4 PR.
 
 Supporting files: [RATIONALE.md](RATIONALE.md) (template), [RED-FLAGS.md](RED-FLAGS.md), [RUBRIC.md](RUBRIC.md) (judge brief), [WAYFINDER.md](WAYFINDER.md) (oversized efforts), [MODEL-CHECK.md](MODEL-CHECK.md) (state machine and concurrency spikes).
 

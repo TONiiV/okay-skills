@@ -11,6 +11,7 @@ Prove a performance change or a suspected regression with numbers a skeptic woul
 - Output and language: [shared/output-style.md](shared/output-style.md)
 - Models: [shared/models.md](shared/models.md)
 - Review contract: [shared/review.md](shared/review.md)
+- Engineering principles (read before writing or reviewing code): [shared/principles.md](shared/principles.md)
 - Commit, PR, merge: [shared/git.md](shared/git.md)
 - Tracker: [shared/tracker.md](shared/tracker.md)
 - Repo docs layout (`docs/perf/`, `CONSTRAINTS.md`): [shared/docs-layout.md](shared/docs-layout.md)

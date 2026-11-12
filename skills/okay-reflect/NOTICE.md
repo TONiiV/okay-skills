@@ -9,6 +9,7 @@ okay-reflect adapts ideas from the following works. The text here is condensed a
 | [alibaba/skill-up](https://github.com/alibaba/skill-up) | Apache-2.0 | Evidence-backed failure attribution: separate skill defects from wrong expectations and environment failures before changing a skill |
 | Trace2Skill ([arXiv:2603.25158](https://arxiv.org/abs/2603.25158)) | Paper | Turning execution traces into skill updates only for recurring, attributable failures |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd), Copyright (c) 2026 Ayoub Ghriss | MIT | Condensed output style in `shared/output-style.md` |
+| [pstack](https://github.com/cursor/plugins/tree/main/pstack) `skills/poteto-mode` (Autonomy section and the full-autonomy grant), `skills/principle-never-block-on-the-human`, `skills/show-me-your-work` and `docs/guide/07-overnight.md`, Copyright (c) 2026 Lauren Tan | MIT | Autonomy grant, always-pause list, safest default for a user-only call, and the one-line-per-decision trail in `shared/autonomy.md` |
 
 No code or text from skill-up is redistributed; its license is at https://www.apache.org/licenses/LICENSE-2.0.
 

@@ -10,10 +10,12 @@ Review one change in a fresh agent and post the result. You report; you never fi
 
 - Handoff, finding format, approval, rounds: [shared/review.md](shared/review.md) (the contract for this skill; read it first, it is not restated here)
 - Models: [shared/models.md](shared/models.md)
+- Engineering principles (the vocabulary for smell findings): [shared/principles.md](shared/principles.md)
 - Output and language: [shared/output-style.md](shared/output-style.md)
 - Commit, PR, merge: [shared/git.md](shared/git.md)
 - Tracker and code host: [shared/tracker.md](shared/tracker.md)
 - Contributor mode: [shared/contributor-mode.md](shared/contributor-mode.md)
+- Autonomy grant: [shared/autonomy.md](shared/autonomy.md). It changes nothing in a review: same depth, same proof, same verdict words. A caller under a grant merges on your `APPROVED` line alone, so never approve a head you did not read.
 
 Reviewer prompts, the smell baseline and the specialist briefs are in [briefs.md](briefs.md).
 
@@ -36,7 +38,7 @@ If the caller hands you a summary of what the change does, a self-assessment, or
 1. **Pin the artifact.** PR/MR: `gh pr diff <n>` or `glab mr diff <n>`. Range: `git diff <base>...<head>`. Run `git add -N .` first when reviewing a working tree. Confirm the diff is non-empty; stop and tell the caller if it is empty. Measure changed lines (added + removed) and list touched paths. Record the head SHA you review (PR: `gh pr view <n> --json headRefOid --jq .headRefOid`; range: `git rev-parse <head>`). PR/MR: read the checks for that SHA (`gh pr checks <n>`, or `gh api repos/{owner}/{repo}/commits/<sha>/check-runs`; `glab ci status`). Pending: wait for them. Failed: before any reviewer is spawned, record a blocking finding that quotes the failing job; it goes under Standards and is the one finding you add yourself. Why: a round spent on a red head gives an incomplete verdict and can use up the last round (lesson: okay-lessons#17).
 2. **Assemble the contract.** The request text, the fetched spec or issue, and the repo standards files that exist (AGENTS.md, CLAUDE.md, CONSTRAINTS.md). No spec found: the spec axis reports "no spec available" and the comment says so. A contract taken from files in the repo (a spec file, or docs the diff itself edits) is read at one fixed revision in every round: the PR base (`git show <base>:<path>`), or the round 1 head when the file is new in the PR. A later change to those paths is listed in the comment as a contract change for the user to accept; it never resolves a finding. Why: a fixer can otherwise clear a finding by rewriting the promise (lesson: okay-lessons#14).
 3. **Pick the mode and depth** (below).
-4. **Spawn fresh reviewers in parallel**, each with the artifact and the contract only, using the prompts in [briefs.md](briefs.md). Never pass the CLAIM (what the author or you think the change achieves).
+4. **Spawn fresh reviewers in parallel**, each with the artifact and the contract only, using the prompts in [briefs.md](briefs.md). Never pass the CLAIM (what the author or you think the change achieves). The standards reviewer also gets [shared/principles.md](shared/principles.md): a smell finding may cite a principle by name as the standard it rests on, and it stays non-blocking unless a documented repo standard says otherwise.
 5. **Verify.** Rerun every command a finding cites. Keep a finding only when the output shows the failure, or the quoted line contradicts a quoted contract line. Drop the rest and merge findings that share a root cause. Add no finding of your own. A kept finding keeps the reviewer's `blocking|non-blocking` tag: never lower or raise it. You think the severity is wrong: post it as tagged and say so in the return to the caller, who asks the user (lesson: okay-lessons#7).
 6. **Post exactly one comment** (below) and return the verdict.
 

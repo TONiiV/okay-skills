@@ -118,9 +118,11 @@ for (const name of okaySkills) {
 
     it('every playbooks/*.md is linked from SKILL.md', () => {
       const pb = path.join(dir, 'playbooks');
-      const files = fs.existsSync(pb) ? fs.readdirSync(pb).filter((f) => f.endsWith('.md')) : [];
-      const linked = linkTargets(skillMd).map((l) => l.split('#')[0]);
-      for (const f of files) assert.ok(linked.includes(`playbooks/${f}`), `SKILL.md does not link playbooks/${f}`);
+      if (!fs.existsSync(pb)) return;
+      const linked = new Set(linkTargets(skillMd).map((t) => t.split('#')[0]));
+      for (const f of fs.readdirSync(pb).filter((n) => n.endsWith('.md'))) {
+        assert.ok(linked.has(`playbooks/${f}`), `SKILL.md does not link playbooks/${f}`);
+      }
     });
 
     it('shared/ holds byte-identical copies of exactly the root shared/ files this skill references (run npm run build)', () => {
@@ -148,6 +150,43 @@ for (const name of okaySkills) {
     });
   });
 }
+
+describe('shared/principles.md', () => {
+  const users = ['okay-dev', 'okay-fix', 'okay-review', 'okay-think', 'okay-design', 'okay-perf', 'okay-tdd', 'okay-prototype'];
+  for (const name of users) {
+    it(`skills/${name}/SKILL.md links it`, () => {
+      const text = fs.readFileSync(path.join(SKILLS, name, 'SKILL.md'), 'utf-8');
+      assert.ok(linkTargets(text).includes('shared/principles.md'));
+    });
+  }
+});
+
+describe('agents/', () => {
+  const AGENTS = path.join(ROOT, 'agents');
+  const files = fs.readdirSync(AGENTS);
+
+  it('holds only agent files (every .md there is loaded as an agent)', () => {
+    for (const f of files) assert.ok(f.endsWith('.md') && f !== 'NOTICE.md', `agents/${f}`);
+    assert.ok(files.includes('okay-agent.md'));
+  });
+
+  for (const f of files) {
+    it(`${f} has name equal to the file name and a description`, () => {
+      const fm = frontmatter(fs.readFileSync(path.join(AGENTS, f), 'utf-8'));
+      assert.ok(fm, 'needs a --- frontmatter block');
+      assert.equal(fm.name, path.basename(f, '.md'));
+      assert.ok(fm.description, 'description missing');
+    });
+  }
+
+  it('okay-agent reads the skill and the principles before any work', () => {
+    const text = fs.readFileSync(path.join(AGENTS, 'okay-agent.md'), 'utf-8');
+    const m = /\n## Read first\n([\s\S]*?)\n## /.exec(text);
+    assert.ok(m, 'agents/okay-agent.md has no "## Read first" section');
+    const steps = m[1].split('\n').filter((l) => /^\d\. /.test(l)).slice(0, 3).join('\n');
+    for (const s of ['SKILL.md', 'shared/principles.md', 'shared/git.md']) assert.ok(steps.includes(s), `Read first steps 1-3 do not name ${s}`);
+  });
+});
 
 describe('okay-design style-seed.js', () => {
   const { execFileSync } = require('node:child_process');
