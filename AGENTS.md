@@ -44,9 +44,9 @@ A skill references shared rules only as `shared/<file>.md`, relative to its own 
 
 - Stop: blocks once with "run okay-reflect" while `<git dir>/okay-reflect-pending` exists (the marker from `shared/delivery.md`); never when `stop_hook_active` is true.
 - SessionEnd: moves a still-pending marker into `~/.okay/reflect-queue.jsonl` (`OKAY_HOME` overrides `~/.okay`).
-- SessionStart: when the queue is not empty, adds context with the count and offers okay-reflect, which removes the entries it handles.
+- SessionStart: adds one context block with, in order, local memory and the reflect-queue message; either part is left out when empty, and with both empty it prints nothing. The queue part gives the count and offers okay-reflect, which removes the entries it handles. The memory part is a frozen snapshot of `$OKAY_HOME/memory/USER.md` and the current repo's `projects/<slug>.md`, threat-filtered, cut to the caps (1,500 and 2,500 chars) and labelled as possibly stale; outside git only `USER.md`. `OKAY_MEMORY=off` turns it off. Store, caps and CLI: `shared/memory.md`.
 
-Hook scripts are Node with no dependencies, exit 0 and print nothing when there is nothing to do or anything fails, and work outside git repos. If the marker format in `shared/delivery.md` changes, update `hooks/reflect.js` and `tests/hooks.test.js` in the same PR.
+The memory CLI is `skills/okay-reflect/memory.js` (Node, no dependencies, shipped in the skill so it works when uploaded alone). Its threat-scan list is the only one: the hook requires it. Hook scripts are Node with no dependencies, exit 0 and print nothing when there is nothing to do or anything fails, and work outside git repos. If the marker format in `shared/delivery.md` changes, update `hooks/reflect.js` and `tests/hooks.test.js` in the same PR.
 
 ## Commits and PRs
 
