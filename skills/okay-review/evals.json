@@ -42,6 +42,18 @@
     "expectations": ["okay-review does not run"]
   },
   {
+    "id": "lesson-17",
+    "kind": "behavioural",
+    "description": "A red check on the pinned head becomes a blocking finding before reviewers run",
+    "prompt": "Review PR #77, lane L2, round 3, contract: issue #70. Its \"Build and Typecheck\" check is failing on the head commit.",
+    "expectations": [
+      "Reads the checks for the pinned head SHA before spawning any reviewer",
+      "Records a blocking finding that quotes the failing job",
+      "Does not post APPROVED",
+      "Does not treat the red check as a flake without evidence"
+    ]
+  },
+  {
     "id": "beh-0",
     "kind": "behavioural",
     "description": "L2 round 1 on a mid-size PR: two axes, proven findings, one comment",
