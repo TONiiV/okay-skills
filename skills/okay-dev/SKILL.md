@@ -85,6 +85,8 @@ Tell the user the routing in one line per sub-task before dispatching: `1. <sub-
 
 Dispatch sub-tasks with no blocking edge in parallel, in one message. Each agent gets: the sub-task in the user's words, the conversation context it needs, the files it owns (and an instruction not to touch others), the skill to run, and the model and effort from [shared/models.md](shared/models.md), mapped to the vendor and effort knob the current harness offers.
 
+Owned files include every test that imports or mocks a module the sub-task changes. Find them before you dispatch, for example `git grep -l <module basename> -- '*.test.*' '*.spec.*'` (or the repo's test glob), and list them in the brief. Why: "touch no other files" otherwise leaves the agent with a failing test it does not own (lesson: okay-lessons#9).
+
 | Lane | Runs |
 |---|---|
 | L1 | okay-fix. A lone L1 task may run in the main thread; inside a compound prompt, dispatch a sonnet high agent per L1 sub-task. |
