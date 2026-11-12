@@ -34,6 +34,8 @@ If the Linear connector is missing in this session (ToolSearch finds no `save_is
 - The same table serves `Tracker: github`, `gitlab`, and `local`. With no remote, use local files.
 - Unknown host: ask the user once which CLI to use.
 - A local issue file holds a title line, the body, and its blocking edges as text (`Blocked by: 01, 03`).
+- Before you offer a code-host tracker, or create a label or an issue on it, check that it accepts issues: `gh api repos/{owner}/{repo} --jq .has_issues` must print `true` (GitLab: `glab api projects/:id | jq .issues_enabled`). Listing issues and creating labels succeed even when issues are disabled.
+- The chosen tracker refuses (issues disabled, a 4xx on create): use the next one that is reachable (the Linear connector, the code host, local files) and say so in one line. Local files are the last choice in a cloud session, where untracked files are lost when the session ends: there, also paste the full text into the reply (lesson: okay-lessons#1).
 
 ## When `gh` or `glab` fails
 
