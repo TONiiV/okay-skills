@@ -4,7 +4,7 @@ Paste a brief verbatim into the fresh agent's prompt, followed by `ARTIFACT:` (t
 
 ## Proof rule (appended to every brief)
 
-Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run. A finding whose class can recur in another file names the guard that would stop it: a lint rule, a type, or a test, and where it would live.
+Report only what you proved. A finding gives one of: the quoted line next to the quoted contract line it breaks; a command you ran with its output; a reproduction. Leave out style you cannot tie to a documented standard or a smell below, and risks that need a future change to matter. "No findings" is a valid result. Tag each finding `[R<round>-<n>] blocking|non-blocking`. Blocking means it breaks the contract, loses data, opens a hole, or fails a run. A finding whose class can recur in another file names the guard that would stop it: a lint rule, a type, or a test, and where it would live. A proof run never touches the real host: when the code under review closes processes, installs or removes software, or writes or deletes user data, stub the lookup and the destructive call, check that the resolved target is under a scratch directory, and only then run. You cannot isolate it: do not run it; give the quoted lines and say the run was not safe (lesson: okay-lessons#10).
 
 ## Standards axis
 
