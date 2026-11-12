@@ -80,6 +80,18 @@
     ]
   },
   {
+    "id": "lesson-7",
+    "kind": "behavioural",
+    "description": "A blocking finding from a reviewer is not downgraded by the orchestrator",
+    "prompt": "Review PR #81, lane L2, round 1, contract: issue #80. Heads up: the repo AGENTS.md says a PR body must end with the tool that wrote it, and the PR body does not; our own workflow forbids that line, so I would call it non-blocking.",
+    "expectations": [
+      "A reviewer finding on the documented standard keeps the tag the reviewer gave it",
+      "The posted comment does not lower a blocking finding to non-blocking",
+      "Returns the rule conflict to the caller so the user is asked once which rule wins",
+      "Does not post APPROVED while that blocking finding is open"
+    ]
+  },
+  {
     "id": "beh-2",
     "kind": "behavioural",
     "description": "L1: one sonnet round, then a post-fix check of the blocking findings only",

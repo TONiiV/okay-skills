@@ -37,7 +37,7 @@ If the caller hands you a summary of what the change does, a self-assessment, or
 2. **Assemble the contract.** The request text, the fetched spec or issue, and the repo standards files that exist (AGENTS.md, CLAUDE.md, CONSTRAINTS.md). No spec found: the spec axis reports "no spec available" and the comment says so. A contract taken from files in the repo (a spec file, or docs the diff itself edits) is read at one fixed revision in every round: the PR base (`git show <base>:<path>`), or the round 1 head when the file is new in the PR. A later change to those paths is listed in the comment as a contract change for the user to accept; it never resolves a finding. Why: a fixer can otherwise clear a finding by rewriting the promise (lesson: okay-lessons#14).
 3. **Pick the mode and depth** (below).
 4. **Spawn fresh reviewers in parallel**, each with the artifact and the contract only, using the prompts in [briefs.md](briefs.md). Never pass the CLAIM (what the author or you think the change achieves).
-5. **Verify.** Rerun every command a finding cites. Keep a finding only when the output shows the failure, or the quoted line contradicts a quoted contract line. Drop the rest and merge findings that share a root cause. Add no finding of your own.
+5. **Verify.** Rerun every command a finding cites. Keep a finding only when the output shows the failure, or the quoted line contradicts a quoted contract line. Drop the rest and merge findings that share a root cause. Add no finding of your own. A kept finding keeps the reviewer's `blocking|non-blocking` tag: never lower or raise it. You think the severity is wrong: post it as tagged and say so in the return to the caller, who asks the user (lesson: okay-lessons#7).
 6. **Post exactly one comment** (below) and return the verdict.
 
 ## Modes
@@ -93,4 +93,4 @@ Lane <lane>. Depth: <passes run>; skip: <passes not run and why>
 
 ## Return to the caller
 
-Reply with: the verdict word, the reviewed head SHA, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), and the count of non-blocking findings. Nothing else; the caller decides on the fixer, the merge and the escalation.
+Reply with: the verdict word, the reviewed head SHA, the comment URL (or `posted: no`), the open blocking findings (`[R<n>-<k>]` plus one line each), the count of non-blocking findings, and one line for each severity doubt or rule conflict from step 5. Nothing else; the caller decides on the fixer, the merge and the escalation.
