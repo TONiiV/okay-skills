@@ -25,7 +25,7 @@ Always the lowest unmerged PR of the run:
 
 1. Its base must be the repo's base branch. A PR whose base is still its parent's branch would merge into that branch. Retarget first: `gh pr edit <n> --base <base>`, then get a fresh review of the diff against the new base before it lands.
 2. Merge the base into its branch when the head does not contain the base tip. This is always the case after the PR below was squash-merged. Push, wait for CI, get the re-check and the new approval at the new head.
-3. Run the merge gate and the merge command from [../shared/git.md](../shared/git.md), pinned to the approved SHA.
+3. Run the merge gate and the merge command from [../shared/git.md](../shared/git.md), pinned to the approved SHA. Under a grant, every merge condition in [../shared/autonomy.md](../shared/autonomy.md) must hold as well: every check green, required or not, and no L4 PR. One fails: that PR and everything above it stay.
 4. Read the PR back: `gh pr view <n> --json state,mergedAt,baseRefName` (where the CLI cannot run, the REST form in [../shared/git.md](../shared/git.md)). It must read merged, with the base branch as its base. A queued merge or an armed auto-merge is not a merge.
 5. Under a grant, add the trail line with `undo: git revert <merge commit>`.
 

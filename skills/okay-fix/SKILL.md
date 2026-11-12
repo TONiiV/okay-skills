@@ -117,7 +117,7 @@ Then:
 
 ## 8. Merge
 
-Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Never merge without the reviewer's approval at the PR head.
+Follow the merge policy in [shared/git.md](shared/git.md). With the allow rule: auto-merge on `APPROVED` + green CI. Without it: stop at `APPROVED` and hand the PR link to the user to merge. Where the CLI cannot run at all, the fallback rule in [shared/git.md](shared/git.md) decides. Never merge without the reviewer's approval at the PR head.
 
 An autonomy grant ([shared/autonomy.md](shared/autonomy.md)) changes two things here: the push in step 6 needs no question, and an escalation in step 5 is reported and parked instead of waiting for an answer. The review, the threshold and the merge conditions stay the same.
 
